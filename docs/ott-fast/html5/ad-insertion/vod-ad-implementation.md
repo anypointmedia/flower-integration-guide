@@ -8,8 +8,8 @@ This guide walks you through the complete process of inserting ads into VOD cont
 1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
 2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
 3. **Pass the Player:** Implement `MediaPlayerHook` to pass player information so the SDK can recognize content playback status.
-4. **Configure Additional Parameters (****`extraParams`****):** Set up additional information required for ad targeting.
-5. **Request VOD Ads (****`requestVodAd`****):** Request VOD ads by passing information such as ad tag URL and content ID.
+4. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+5. **Request VOD Ads (`requestVodAd`):** Request VOD ads by passing information such as ad tag URL and content ID.
 6. **Control Playback State**: Call SDK's `pause()`, `resume()`, and `stop()` methods according to content playback flow.
 
 ## Step-by-Step Details
@@ -98,7 +98,9 @@ If you are using an unsupported player, please contact [Helpdesk](mailto:dev-su
 
 #### FlowerAdsManager.requestVodAd()
 
-Function used to request ads before entering VOD content. The following describes the parameters:
+Function used to request ads before entering VOD content. 
+
+The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |

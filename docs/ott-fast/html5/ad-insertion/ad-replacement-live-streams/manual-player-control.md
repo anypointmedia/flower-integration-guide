@@ -8,8 +8,8 @@ This guide walks you through the complete process of inserting ads into linear T
 1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
 2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
 3. **Pass the Player:** Implement `MediaPlayerHook` to pass player information so the SDK can recognize content playback status.
-4. **Configure Additional Parameters (****`extraParams`****):** Set up additional information required for ad targeting.
-5. **Change Linear Channel URL (****`changeChannelUrl`****):** Change the stream URL by passing information such as ad tag URL and channel ID.
+4. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+5. **Change Linear Channel URL (`changeChannelUrl`):** Change the stream URL by passing information such as ad tag URL and channel ID.
 6. **Update Parameters During Playback:** Update targeting information through `changeChannelExtraParams()` during stream playback.
 
 ## Step-by-Step Details
@@ -155,4 +155,132 @@ function playLinearTv() {
 function onStreamProgramChanged(targetingInfo) {
     flowerAdView.adsManager.changeChannelExtraParams({ myTargetingKey: targetingInfo });
 }
+```
+
+## Using MediaPlayerAdapter
+
+If you are using a player that is not officially supported by the SDK, you can implement the `MediaPlayerAdapter` interface to directly control the player.
+
+Instead of using `changeChannelUrl()` with `MediaPlayerHook`, you use the `enterChannel()` API with a `MediaPlayerAdapter` implementation.
+
+### FlowerAdsManager.enterChannel(...)
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| adTagUrl | string | Ad tag URL issued by the ad server |
+| channelId | string | Unique channel ID<br/>Must be registered in the Flower backend system |
+| extraParams | map | Additional pre-agreed information for targeting (_null_ if none) |
+| mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns the video player |
+| adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
+| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter interface implementation object |
+
+### MediaPlayerAdapter Interface
+
+The `MediaPlayerAdapter` interface requires the following methods:
+
+| **Method** | **Return Type** | **Description** |
+| ---| ---| --- |
+| getCurrentMedia() | Media | Returns the currently playing media (urlOrId, duration, position) |
+| getVolume() | number | Returns the audio volume level (0.0–1.0) |
+| isPlaying() | boolean | Returns whether the player is currently playing |
+| getHeight() | number | Returns the video height in pixels (0 if unknown) |
+| pause() | void | Pauses the playback |
+| stop() | void | Stops the playback and releases resources |
+| resume() | void | Resumes the playback |
+| enqueuePlayItem(playItem) | void | Queues a new play item |
+| removePlayItem(playItem) | void | Removes a queued play item |
+| playNextItem() | void | Seeks to the next media item in the queue |
+| seekToPosition(...) | void | Seeks to the specified position |
+| getCurrentAbsoluteTime(isPrintDetails) | number \| null | Returns the current absolute playback time in ms |
+| getPlayerType() | string \| null | Returns the player type identifier (for Google PAL SDK) |
+| getPlayerVersion() | string \| null | Returns the player version string (for Google PAL SDK) |
+
+### Example
+
+```javascript
+class MyPlayerAdapter {
+    constructor(player) {
+        this.player = player;
+    }
+
+    getCurrentMedia() {
+        return new Media(
+            this.player.currentSource || '',
+            Math.round(this.player.duration * 1000),
+            Math.round(this.player.currentTime * 1000)
+        );
+    }
+
+    getVolume() {
+        return this.player.volume;
+    }
+
+    isPlaying() {
+        return !this.player.paused;
+    }
+
+    getHeight() {
+        return this.player.videoHeight || 0;
+    }
+
+    pause() {
+        this.player.pause();
+    }
+
+    stop() {
+        this.player.pause();
+        this.player.currentTime = 0;
+    }
+
+    resume() {
+        this.player.play();
+    }
+
+    enqueuePlayItem(playItem) {
+        this.player.enqueue(playItem.url);
+    }
+
+    removePlayItem(playItem) {
+        this.player.removeFromQueue(playItem.url);
+    }
+
+    playNextItem() {
+        this.player.skipToNext();
+    }
+
+    seekToPosition(absoluteStartTimeMs, relativeStartTimeMs, offsetMs, windowDurationMs, periodIndex) {
+        if (offsetMs != null) {
+            this.player.currentTime = offsetMs / 1000;
+        }
+    }
+
+    getCurrentAbsoluteTime(isPrintDetails) {
+        return this.player.currentTime * 1000;
+    }
+
+    getPlayerType() {
+        return 'CustomPlayer';
+    }
+
+    getPlayerVersion() {
+        return '1.0.0';
+    }
+}
+
+// Usage
+const adapter = new MyPlayerAdapter(myCustomPlayer);
+const mediaPlayerHook = {
+    getPlayer() {
+        return myCustomPlayer;
+    }
+};
+
+flowerAdView.adsManager.enterChannel(
+    'https://ad_request',
+    '100',
+    { 'custom-param': 'custom-param-value' },
+    mediaPlayerHook,
+    { 'custom-ad-header': 'custom-ad-header-value' },
+    adapter
+);
 ```

@@ -18,7 +18,6 @@ const config: Config = {
   projectName: 'flower-integration-guide',
 
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
 
   i18n: {
     defaultLocale: 'en',

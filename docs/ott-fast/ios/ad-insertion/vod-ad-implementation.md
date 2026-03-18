@@ -8,8 +8,8 @@ This guide walks you through the complete process of inserting ads into VOD cont
 1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
 2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
 3. **Pass the Player:** Implement `MediaPlayerHook` to pass player information so the SDK can recognize content playback status.
-4. **Configure Additional Parameters (****`extraParams`****):** Set up additional information required for ad targeting.
-5. **Request VOD Ads (****`requestVodAd`****):** Request VOD ads by passing information such as ad tag URL and content ID.
+4. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+5. **Request VOD Ads (`requestVodAd`):** Request VOD ads by passing information such as ad tag URL and content ID.
 6. **Control Playback State**: Call SDK's `pause()`, `resume()`, and `stop()` methods according to content playback flow.
 
 ## Step-by-Step Details
@@ -21,7 +21,6 @@ This guide walks you through the complete process of inserting ads into VOD cont
 ### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To control VOD content playback in response to ad events, implement the `FlowerAdsManagerListener` interface.  
-
 > This allows you to pause or resume the main content during ad playback, and handle playback errors or skip events. This can be implemented as follows:
 
 #### _SwiftUI_
@@ -144,7 +143,6 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 ### 3. Passing the Player – `MediaPlayerHook`
 
 > To enable ad tracking based on playback status, you must provide the current player instance to the SDK.  
-
 > Implement the `MediaPlayerHook` interface to allow Flower SDK to access playback state and timing information.
 
 #### Supported Players
@@ -174,7 +172,9 @@ If you are using an unsupported player, please contact [Helpdesk](mailto:dev-su
 
 #### FlowerAdsManager.requestVodAd()
 
-Function used to request ads before entering VOD content. The following describes the parameters:
+Function used to request ads before entering VOD content. 
+
+The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
@@ -197,7 +197,7 @@ Call this API used when pausing VOD content. No parameters required.
 
 Call this API used when resuming VOD content. No parameters required.
 
-### VOD Ad Request Example
+## VOD Ad Request Example
 
 ```swift
 // TODO GUIDE: request vod ad

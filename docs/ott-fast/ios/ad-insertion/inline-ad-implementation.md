@@ -7,21 +7,21 @@ sidebar_position: 4
 This guide walks you through the complete process of inserting inline ads into content areas within web pages or apps using the Flower SDK. Ad integration follows these steps:
 1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
 2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
-3. **Configure Additional Parameters (****`extraParams`****):** Set up additional information required for ad targeting.
-4. **Request Inline Ads (****`requestAd`****):** Request inline ads by passing information such as the ad tag URL.
+3. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+4. **Request Inline Ads (`requestAd`):** Request inline ads by passing information such as the ad tag URL.
 5. **Perform Cleanup:** Call `stop()` and `removeListener()` after ad completion to clean up resources.
 
 ## Step-by-Step Details
 
-## 1. Declare the Ad UI
+### 1. Declare the Ad UI
 
 > Please refer to the Ad Insertion menu > Declare the Ad UI section for ad UI declaration.
 
-## 2. Receiving Ad Events – `FlowerAdsManagerListener`
+### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To handle inline ad insertion at the appropriate ad start and end points, the SDK provides the ad event reception interface `FlowerAdsManagerListener`. Below is an implementation example.
 
-### _SwiftUI_
+#### _SwiftUI_
 ```swift
 class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
     var inlineAdView: InlineAdView
@@ -55,7 +55,7 @@ let adsManagerListener = FlowerAdsManagerListenerImpl(self)
 flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
 ```
 
-### _UIKit_
+#### _UIKit_
 ```swift
 // TODO GUIDE: Implement FlowerAdsManagerListener
 extension InlineAdViewController: FlowerAdsManagerListener {
@@ -82,11 +82,11 @@ extension InlineAdViewController: FlowerAdsManagerListener {
 flowerAdView.adsManager.addListener(adsManagerListener: self)
 ```
 
-## 3. Additional Parameters for Ad Requests – `extraParams`
+### 3. Additional Parameters for Ad Requests – `extraParams`
 
 > When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile web apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
 
-### Parameter List
+#### Parameter List
 
 | Key<br/>(\* indicates web app required) | Value | Example |
 | ---| ---| --- |
@@ -94,9 +94,9 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 | os\* | OS of the device running the app | "Android" |
 | adId\* | Ad identifier of the device running the app | Android: Google's GAID value |
 
-## 4. Inline Ad API
+### 4. Inline Ad API
 
-### FlowerAdsManager.requestAd()
+#### FlowerAdsManager.requestAd()
 
 Function used to request inline ads. The following describes the parameters:
 
@@ -106,11 +106,11 @@ Function used to request inline ads. The following describes the parameters:
 | extraParams | \[String: String\] | Additional pre-agreed information for targeting (empty dictionary if none) |
 | adTagHeaders | \[String: String\] | (Optional) HTTP header information to add when requesting ads |
 
-### FlowerAdsManager.stop()
+#### FlowerAdsManager.stop()
 
 API used to terminate inline ads. No parameters.
 
-### Inline Ad Request Example
+## Inline Ad Request Example
 
 ```swift
 // TODO GUIDE: request inline ad

@@ -7,8 +7,8 @@ sidebar_position: 4
 This guide walks you through the complete process of inserting inline ads into content areas within web pages using the Flower SDK. Ad integration follows these steps:
 1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
 2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
-3. **Configure Additional Parameters (****`extraParams`****):** Set up additional information required for ad targeting.
-4. **Request Inline Ads (****`requestAd`****):** Request inline ads by passing information such as the ad tag URL.
+3. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+4. **Request Inline Ads (`requestAd`):** Request inline ads by passing information such as the ad tag URL.
 5. **Perform Cleanup:** Call `stop()` and `removeListener()` after ad completion to clean up resources.
 
 ## Step-by-Step Details

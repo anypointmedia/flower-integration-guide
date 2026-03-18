@@ -4,113 +4,23 @@ sidebar_position: 2
 
 # Manual Player Control
 
-This guide provides a streamlined 3-step process for inserting ads into Linear TV channels and FAST streams using the Flower SDK.
-
-Ad integration is simple and follows just three essential steps:
-1. **Declare Ad UI** - Place `FlowerAdView` on the screen to display the ad.
-2. **Change Original Channel URL** - Use changeChannelUrl() to provide the stream and ad tag URLs along with player and targeting info.
-3. **Play the Updated URL** - Start playback using the returned URL so the SDK can detect ad markers and replace content accordingly.
-
-Additional steps:
-1. **To receive ad events** - Implement and set up the AdEventListener to handle ad-related callbacks.
-2. **To stop channel playback** - Call the appropriate method to stop the currently playing channel. _This must be done to release resources properly if the channel is no longer in use._
+This guide walks you through the complete process of inserting ads into linear TV channels and FAST streams using the Flower SDK. Ad integration follows these steps:
+1. **Declare the Ad UI:** Place `FlowerAdView` on the screen to display the ad.
+2. **Implement Ad Event Reception:** Implement `FlowerAdsManagerListener` to handle logic at ad playback and completion points.
+3. **Pass the Player:** Implement `MediaPlayerHook` to pass player information so the SDK can recognize content playback status.
+4. **Configure Additional Parameters (`extraParams`):** Set up additional information required for ad targeting.
+5. **Change Linear Channel URL (`changeChannelUrl`):** Change the stream URL by passing information such as ad tag URL and channel ID.
+6. **Update Parameters During Playback:** Update targeting information through `changeChannelExtraParams()` during stream playback.
 
 ## Step-by-Step Details
 
-## 1. Declare Ad UI
+### 1. Declare the Ad UI
 
-> Please refer to the Ad Insertion menu > Declare the Ad UI menu for ad UI declaration.
+> Please refer to the Ad Insertion menu > Declare the Ad UI section for ad UI declaration.
 
-## 2. Change Original Channel URL - call the Channel Switch API
+### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
-> Since you’re simply replacing the original channel URL, the player can continue using its existing playback logic without any changes. The parameters passed to the SDK include either the player itself or an interface that can communicate with the player for ad tracking purposes, as well as additional information that can be used for ad targeting.
-
-The SDK supports three types of players for ad tracking purposes.
-
-Therefore, if you’re using a supported player, you can simply share its instance using the function below, allowing for easy integration with the SDK.
-
-### FlowerAdsManager.changeChannelUrl(...)
-#### Supported Players
-
-*   ExoPlayer2
-*   Media3 ExoPlayer
-*   Bitmovin Player
-These players pass the current player to the SDK by implementing the `MediaPlayerHook` interface. If you are using a player that is not officially supported, you can either contact the [Helpdesk](mailto:dev-support@anypointmedia.com).
-
-#### Parameter Details
-
-| **Parameter** | **Type** | **Description** |
-| ---| ---| --- |
-| videoUrl | string | Original linear TV stream url. |
-| adTagUrl | string | Ad tag URL issued by Flower backend system.<br/>You must file a request to Anypoint Media to receive a adTagUrl. |
-| channelId | string | Unique channel ID.<br/>Must be registered in Flower backend system. |
-| extraParams | map | (Optional) Additional information pre-agreed for targeting. |
-| mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns video player. |
-| adTagHeaders | map | (Optional) HTTP header information to add for ad requests. |
-| channelStreamHeaders | map | (Optional) HTTP header information to add for original stream requests. |
-| prerollAdTagUrl | string | (Optional) Pre-roll ad tag URL issued by Flower backend system.<br/>You must file a request to Anypoint Media to receive a prerollAdTagUrl. |
-
-If you implement the MediaPlayerAdapter interface to directly control the player, you can use the following overloaded functions instead.
-
-| **Parameter** | **Type** | **Description** |
-| ---| ---| --- |
-| videoUrl | string | Original linear TV stream url. |
-| adTagUrl | string | Ad tag URL issued by Flower backend system.<br/>You must file a request to Anypoint Media to receive a adTagUrl. |
-| channelId | string | Unique channel ID.<br/>Must be registered in Flower backend system. |
-| extraParams | map | (Optional) Additional information pre-agreed for targeting. |
-| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter interface implementation object<br/>For more details, refer to the [In case of direct player control](../implement-interface-video-player/direct-player-control) documentation. |
-| adTagHeaders | map | (Optional) HTTP header information to add for ad requests. |
-| channelStreamHeaders | map | (Optional) HTTP header information to add for original stream requests. |
-| prerollAdTagUrl | string | (Optional) Pre-roll ad tag URL issued by Flower backend system.<br/>You must file a request to Anypoint Media to receive a prerollAdTagUrl. |
-
-### FlowerAdsManager.changeChannelExtraParams()
-Function used to change extraParams, the additional targeting information, during live broadcasts. The following describes the parameter:
-
-#### Parameter Details
-
-| **Parameter** | **Type** | **Description** |
-| ---| ---| --- |
-| extraParams | map | Additional information pre-agreed for targeting. |
-
-## 3. Play with the new stream URL returned by changeChannelUrl()
-
-> This is the final step! You must start playback using the new stream URL returned by changeChannelUrl(), so that the SDK can detect ad markers and perform ad replacement.  
-
-> Please verify that the ads are being properly replaced.
-
-## Example for Steps 2 and 3 (excluding the UI declaration)
-
-```kotlin
-private fun playLinearTv() {
-    // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
-    // arg0: videoUrl, original LinearTV stream url
-    // arg1: adTagUrl, url from flower system
-    //       You must file a request to Anypoint Media to receive a adTagUrl.
-    // arg2: channelId, unique channel id in your service
-    // arg3: extraParams, values you can provide for targeting
-    // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
-    // arg5: adTagHeaders, (Optional) values included in headers for ad request
-    // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
-    // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
-    val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-        "https://XXX",
-        "https://ad_request",
-        "100",
-        mapOf("custom-param" to "custom-param-value"),
-        mediaPlayerHook,
-        mapOf("custom-ad-header" to "custom-ad-header-value"),
-        mapOf("custom-stream-header" to "custom-stream-header-value"),
-        "https://ad_request?target=preroll"
-    )
-    player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
-}
-```
-
-## Additional Step Details
-
-## 1. To receive ad events - implement Ad Event Listener
-
-> **When inserting ads into linear channels**, ads that replace the main stream are played through ad markers (e.g., SCTE-35). **UI control logic may be needed** at ad playback start/end points. For this, Flower SDK provides **a listener interface for receiving ad events**, which can be implemented as follows:
+> **When inserting ads into linear channels**, ads that replace the main stream are played through ad markers (e.g., SCTE-35). **UI control and other logic may be needed** at ad playback start/end points. For this purpose, the Flower SDK provides **a listener interface for receiving ad events**, which can be implemented as follows.
 
 ```kotlin
 val adsManagerListener = object : FlowerAdsManagerListener {
@@ -141,6 +51,219 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 flowerAdView.adsManager.addListener(adsManagerListener)
 ```
 
-## 2. To stop channel playback - call FlowerAdsManager.stop()
+### 3. Passing the Player – `MediaPlayerHook`
 
-API used to stop live broadcast. No parameters.
+> For linear channels, you must pass the player that plays the main content to the SDK.
+
+#### Supported Players
+
+*   ExoPlayer2
+*   Media3 ExoPlayer
+*   Bitmovin Player
+
+These players pass the current player to the SDK by implementing the `MediaPlayerHook` interface.
+
+#### When Using Unsupported Players
+
+If you are using an unsupported player, please contact [Helpdesk](mailto:dev-support@anypointmedia.com).
+
+### 4. Additional Parameters for Ad Requests – `extraParams`
+
+> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
+
+#### Parameter List
+
+| Key<br/>(\* indicates mobile app required) | Value | Example |
+| ---| ---| --- |
+| serviceId\* | App package name | "tv.anypoint.service" |
+| os\* | OS of the device running the app | "Android" |
+| adId\* | Ad identifier of the device running the app | Android: Google's GAID value |
+
+### 5. Linear Channel Ad API Call – `changeChannelUrl(...)`
+
+#### FlowerAdsManager.changeChannelUrl()
+
+Function used to change the stream URL for live broadcasts. The following describes the parameters:
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| videoUrl | string | Original playback URL |
+| adTagUrl | string | Ad tag URL issued by the ad server |
+| channelId | string | Unique channel ID<br/>Must be registered in the Flower backend system |
+| extraParams | map | Additional pre-agreed information for targeting (_null_ if none) |
+| mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns the video player |
+| adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
+| channelStreamHeaders | map | (Optional) HTTP header information to add when requesting the original stream |
+| prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll |
+
+#### FlowerAdsManager.changeChannelExtraParams()
+
+Function used to change extraParams, the additional targeting information, during live broadcasts. The following describes the parameter:
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| extraParams | map | Additional pre-agreed information for targeting |
+
+#### FlowerAdsManager.stop()
+
+API used to stop live broadcasts. No parameters.
+
+## Linear Channel Ad Request Example
+
+```kotlin
+private fun playLinearTv() {
+    // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
+    // arg0: videoUrl, original LinearTV stream url
+    // arg1: adTagUrl, url from flower system
+    //       You must file a request to Anypoint Media to receive a adTagUrl.
+    // arg2: channelId, unique channel id in your service
+    // arg3: extraParams, values you can provide for targeting
+    // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
+    // arg5: adTagHeaders, (Optional) values included in headers for ad request
+    // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
+    // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
+        "https://XXX",
+        "https://ad_request",
+        "100",
+        mapOf("custom-param" to "custom-param-value"),
+        mediaPlayerHook,
+        mapOf("custom-ad-header" to "custom-ad-header-value"),
+        mapOf("custom-stream-header" to "custom-stream-header-value"),
+        "https://ad_request?target=preroll"
+    )
+    player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+}
+
+// TODO GUIDE: change extraParams during stream playback
+fun onStreamProgramChanged(targetingInfo: String) {
+    flowerAdView.adsManager.changeChannelExtraParams(mapOf("myTargetingKey" to targetingInfo))
+}
+```
+
+## Using MediaPlayerAdapter
+
+If you are using a player that is not officially supported by the SDK, you can implement the `MediaPlayerAdapter` interface to directly control the player.
+
+Instead of passing a `MediaPlayerHook`, you pass a `MediaPlayerAdapter` implementation to the `changeChannelUrl()` overload.
+
+### FlowerAdsManager.changeChannelUrl(...) with MediaPlayerAdapter
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| videoUrl | string | Original playback URL |
+| adTagUrl | string | Ad tag URL issued by the ad server |
+| channelId | string | Unique channel ID<br/>Must be registered in the Flower backend system |
+| extraParams | map | Additional pre-agreed information for targeting (_null_ if none) |
+| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter interface implementation object<br/>For more details, refer to the [In case of direct player control](../implement-interface-video-player/direct-player-control) documentation. |
+| adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
+| channelStreamHeaders | map | (Optional) HTTP header information to add when requesting the original stream |
+| prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll |
+
+### MediaPlayerAdapter Interface
+
+The `MediaPlayerAdapter` interface requires the following methods:
+
+| **Method** | **Return Type** | **Description** |
+| ---| ---| --- |
+| getCurrentMedia() | Media | Returns the currently playing media (urlOrId, duration, position) |
+| getVolume() | Float | Returns the audio volume level (0.0–1.0) |
+| isPlaying() | Boolean | Returns whether the player is currently playing |
+| getHeight() | Int | Returns the video height in pixels (0 if unknown) |
+| pause() | Unit | Pauses the playback |
+| stop() | Unit | Stops the playback and releases resources |
+| resume() | Unit | Resumes the playback |
+| enqueuePlayItem(playItem) | Unit | Queues a new play item |
+| removePlayItem(playItem) | Unit | Removes a queued play item |
+| playNextItem() | Unit | Seeks to the next media item in the queue |
+| seekToPosition(...) | Unit | Seeks to the specified position |
+| getCurrentAbsoluteTime(isPrintDetails) | Double | Returns the current absolute playback time in ms |
+| getPlayerType() | String? | Returns the player type identifier (for Google PAL SDK) |
+| getPlayerVersion() | String? | Returns the player version string (for Google PAL SDK) |
+
+### Example
+
+```kotlin
+class MyPlayerAdapter(private val player: MyCustomPlayer) : MediaPlayerAdapter {
+
+    override fun getCurrentMedia(): Media {
+        return Media(
+            urlOrId = player.currentUrl ?: "",
+            duration = (player.duration * 1000).toLong(),
+            position = (player.currentTime * 1000).toLong()
+        )
+    }
+
+    override fun getVolume(): KotlinWrapped<Float> {
+        return KotlinWrapped(player.volume)
+    }
+
+    override fun isPlaying(): KotlinWrapped<Boolean> {
+        return KotlinWrapped(player.isPlaying)
+    }
+
+    override fun getHeight(): KotlinWrapped<Int> {
+        return KotlinWrapped(player.videoHeight)
+    }
+
+    override fun pause() {
+        player.pause()
+    }
+
+    override fun stop() {
+        player.stop()
+    }
+
+    override fun resume() {
+        player.play()
+    }
+
+    override fun enqueuePlayItem(playItem: PlayItem) {
+        player.enqueue(playItem.url)
+    }
+
+    override fun removePlayItem(playItem: PlayItem) {
+        player.removeFromQueue(playItem.url)
+    }
+
+    override fun playNextItem() {
+        player.skipToNext()
+    }
+
+    override fun seekToPosition(
+        absoluteStartTimeMs: Double?,
+        relativeStartTimeMs: Double?,
+        offsetMs: Double?,
+        windowDurationMs: Double?,
+        periodIndex: Int?
+    ) {
+        offsetMs?.let { player.seekTo((it / 1000.0).toLong()) }
+    }
+
+    override fun getCurrentAbsoluteTime(isPrintDetails: Boolean): KotlinWrapped<Double> {
+        return KotlinWrapped(player.currentTime * 1000.0)
+    }
+
+    override fun getPlayerType(): String? {
+        return "CustomPlayer"
+    }
+
+    override fun getPlayerVersion(): String? {
+        return "1.0.0"
+    }
+}
+
+// Usage
+val adapter = MyPlayerAdapter(myCustomPlayer)
+val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
+    "https://XXX",
+    "https://ad_request",
+    "100",
+    null,
+    adapter,
+    null,
+    null,
+    null
+)
+player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+```
