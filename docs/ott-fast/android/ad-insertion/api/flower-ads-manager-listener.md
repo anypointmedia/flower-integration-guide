@@ -11,6 +11,7 @@ This interface provides entrypoint to for receiving ad events during Flower SDK 
 ### onAdBreakPrepare
 
 The event dispatched when ad manifest is loaded for interstitial ads / VOD ads.
+
 The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |

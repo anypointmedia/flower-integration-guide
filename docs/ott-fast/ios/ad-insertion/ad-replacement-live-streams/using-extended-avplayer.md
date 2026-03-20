@@ -37,12 +37,6 @@ Replaces the current player item and sets the ad configuration in a single call.
 | item | AVPlayerItem? | The player item to play |
 | adConfig | FlowerAdConfig | Ad configuration (FlowerLinearTvAdConfig or FlowerVodAdConfig) |
 
-### ~~FlowerAVPlayer.setAdConfig~~ (Deprecated)
-
-:::caution Deprecated
-Use `replaceCurrentItem(with:adConfig:)` instead. `setAdConfig` is deprecated and will be removed in a future version.
-:::
-
 ### FlowerAVPlayer.addAdListener
 
 Adds an ad event listener to the player. If the listener is already registered, nothing happens.
@@ -179,7 +173,7 @@ struct PlaybackView: View {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
             }
             func onAdBreakPrepare(adInfos: NSMutableArray) {
-                // OPTIONAL GUIDE: Implement custom actions for when the ad break is prepared
+                // Not used in live streams. Required for VOD/Interstitial ad breaks only.
             }
         }
         // OPTIONAL GUIDE: Register FlowerAdsManagerListener to receive ad events
@@ -267,7 +261,7 @@ class PlaybackViewController: UIViewController {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
             }
             func onAdBreakPrepare(adInfos: NSMutableArray) {
-                // OPTIONAL GUIDE: Implement custom actions for when the ad break is prepared
+                // Not used in live streams. Required for VOD/Interstitial ad breaks only.
             }
         }
         // OPTIONAL GUIDE: Register FlowerAdsManagerListener to receive ad events

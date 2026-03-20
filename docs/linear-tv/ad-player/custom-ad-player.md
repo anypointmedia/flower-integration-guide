@@ -582,9 +582,12 @@ Below are code examples:
 
 ```java
 class CustomAdPlayer implements AnypointAdPlayer {
+    private float previousVolume = 1f;
+
     @Override
     public void mute() {
-        //TODO: Mute the media player
+        //TODO: Save current volume and mute the media player
+        previousVolume = getVolume();
         player.setVolume(0f);
     }
 ...
@@ -595,8 +598,11 @@ class CustomAdPlayer implements AnypointAdPlayer {
 
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
+    private var previousVolume = 1f
+
     override fun mute() {
-        //TODO: Mute the media player
+        //TODO: Save current volume and mute the media player
+        previousVolume = getVolume()
         player.setVolume(0f)
     }
 ...
@@ -614,8 +620,8 @@ Below are code examples:
 class CustomAdPlayer implements AnypointAdPlayer {
     @Override
     public void unmute() {
-        //TODO: Unmute the media player
-        player.setVolume(1f);
+        //TODO: Restore the media player to previous volume
+        player.setVolume(previousVolume);
     }
 ...
 }
@@ -626,8 +632,8 @@ class CustomAdPlayer implements AnypointAdPlayer {
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
     override fun unmute() {
-        //TODO: Unmute the media player
-        player.setVolume(1f)
+        //TODO: Restore the media player to previous volume
+        player.setVolume(previousVolume)
     }
 ...
 }

@@ -197,7 +197,7 @@ NotificationCenter.default.addObserver(self, selector: #selector(onEnded), name:
 // Handler
 @objc private func onEnded() {
     isContentEnd = true
-    adView.adsManager.notifyContentEnded()
+    flowerAdView.adsManager.notifyContentEnded()
 }
 ```
 ####  FlowerAdsManager.stop()
