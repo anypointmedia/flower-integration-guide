@@ -111,6 +111,17 @@ The following describes the parameters:
 | mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns the video player |
 | adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
 
+#### FlowerAdsManager.notifyContentEnded()
+
+Call this API when the VOD content finishes playing. This triggers post-roll ad loading. No parameters required.
+
+```javascript
+videoElement.addEventListener('ended', () => {
+    isContentEnd = true;
+    flowerAdView.adsManager.notifyContentEnded();
+});
+```
+
 #### FlowerAdsManager.stop()
 
 Call this API when exiting VOD content. No parameters required.

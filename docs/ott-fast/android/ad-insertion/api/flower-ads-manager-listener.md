@@ -11,6 +11,7 @@ This interface provides entrypoint to for receiving ad events during Flower SDK 
 ### onAdBreakPrepare
 
 The event dispatched when ad manifest is loaded for interstitial ads / VOD ads.
+
 The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
@@ -29,11 +30,11 @@ The following describes the parameters:
 
 ### onPlay
 
-The event dispatched when each ad starts playback.
+The event dispatched when ad playback starts.
 
 ### onCompleted
 
-The event dispatched when each ad ends playback.
+The event dispatched when ad playback ends.
 
 ### onError
 

@@ -93,14 +93,14 @@ class CustomAdPlayer implements AnypointAdPlayer {
     private final ArrayList<AnypointAdPlayerCallback> callbacks = new ArrayList<>();
     private final ArrayList<PlaySet> playSets = new ArrayList<>();
     private final ArrayList<String> mediaUrls = new ArrayList<>();
-    private int currentPlayIndex = 0;
+    private int currentMediaUrlIndex = 0;
     private Long adTotalDuration = 0L;
 ...
     @Override
 	public void load(PlaySet playSet) {
 		playSets.clear();
-		mediaUrls.clear();  
-		
+		mediaUrls.clear();
+
 		playSets.add(playSet);
 		mediaUrls = playSet.toMediaUrls();
 		adTotalDuration = playSet.getDuration();
@@ -123,9 +123,9 @@ class CustomAdPlayer : AnypointAdPlayer {
     private val callbacks: MutableList<AnypointAdPlayerCallback> = mutableListOf()
     private val playSets: MutableList<PlaySet> = mutableListOf()
     private val mediaUrls: MutableList<String> = mutableListOf()
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
     private var adTotalDuration: Long = 0L
-    
+
     override fun load(playSet: PlaySet) {
         playSets.clear()
         mediaUrls.clear()
@@ -133,7 +133,7 @@ class CustomAdPlayer : AnypointAdPlayer {
         playSets.add(playSet)
         mediaUrls.addAll(playSet.toMediaUrls())
         adTotalDuration = playSet.duration
-        currentPlayIndex = 0
+        currentMediaUrlIndex = 0
 
 		//TODO: Prepare the media player 
 		
@@ -176,7 +176,7 @@ class CustomAdPlayer implements AnypointAdPlayer {
 class CustomAdPlayer : AnypointAdPlayer {
     private val callbacks: MutableList<AnypointAdPlayerCallback> = mutableListOf()
     private val mediaUrls: MutableList<String> = mutableListOf()
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
 ...
     override fun play() {
 		//TODO: Play the media player
@@ -257,10 +257,10 @@ class CustomAdPlayer implements AnypointAdPlayer {
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
     private val mediaUrls: MutableList<String> = mutableListOf()
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
 ...
     override fun currentMediaUrl(): String {
-        return mediaUrls[currentPlayIndex]
+        return mediaUrls[currentMediaUrlIndex]
     }
 ...
 }
@@ -279,7 +279,7 @@ class CustomAdPlayer implements AnypointAdPlayer {
 ...
     @Override
     public int getCurrentMediaUnitIndex() {
-        return currentPlayIndex;
+        return currentMediaUrlIndex;
     }
 ...
 }
@@ -289,10 +289,10 @@ class CustomAdPlayer implements AnypointAdPlayer {
 
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
 ...
     override fun getCurrentMediaUnitIndex(): Int {
-       return currentPlayIndex
+       return currentMediaUrlIndex
     }
 ...
 }
@@ -367,14 +367,14 @@ Below are code examples:
 class CustomAdPlayer implements AnypointAdPlayer {
     private final ArrayList<AnypointAdPlayerCallback> callbacks = new ArrayList<>();
     private final ArrayList<String> mediaUrls = new ArrayList<>();
-    private int currentPlayIndex = 0;
+    private int currentMediaUrlIndex = 0;
 ...
     @Override
     public void pause() {
         //TODO: Pause the media player
         
         for (AnypointAdPlayerCallback callback : callbacks) {
-            callback.onPause(mediaUrls.get(currentPlayIndex));
+            callback.onPause(mediaUrls.get(currentMediaUrlIndex));
         }
     }
 ...
@@ -387,12 +387,12 @@ class CustomAdPlayer implements AnypointAdPlayer {
 class CustomAdPlayer : AnypointAdPlayer {
     private val callbacks: MutableList<AnypointAdPlayerCallback> = mutableListOf()
     private val mediaUrls: MutableList<String> = mutableListOf()
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
 ...
       override fun pause() {
         //TODO: Pause the media player
         
-        callbacks.forEach { it.onPause(mediaUrls[currentPlayIndex])}
+        callbacks.forEach { it.onPause(mediaUrls[currentMediaUrlIndex])}
     }
 ...
 }
@@ -409,13 +409,13 @@ Below are code examples:
 class CustomAdPlayer implements AnypointAdPlayer {
     private final ArrayList<AnypointAdPlayerCallback> callbacks = new ArrayList<>();
     private final ArrayList<String> mediaUrls = new ArrayList<>();
-    private int currentPlayIndex = 0;
+    private int currentMediaUrlIndex = 0;
 ...
 	public void resume() {
 		//TODO: Resume the media player
 		
 		for (AnypointAdPlayerCallback callback : callbacks) {
-            callback.onResume(mediaUrls.get(currentPlayIndex));
+            callback.onResume(mediaUrls.get(currentMediaUrlIndex));
         }
 	}
 ...
@@ -428,12 +428,12 @@ class CustomAdPlayer implements AnypointAdPlayer {
 class CustomAdPlayer : AnypointAdPlayer {
     private val callbacks: MutableList<AnypointAdPlayerCallback> = mutableListOf()
     private val mediaUrls: MutableList<String> = mutableListOf()
-    private var currentPlayIndex = 0
+    private var currentMediaUrlIndex = 0
 ...
     override fun resume() {
         //TODO: Resume the media player
         
-        callbacks.forEach { it.onResume(mediaUrls[currentPlayIndex]) }
+        callbacks.forEach { it.onResume(mediaUrls[currentMediaUrlIndex]) }
     }
 ...
 }
@@ -542,7 +542,7 @@ class CustomAdPlayer : AnypointAdPlayer {
 ```
 
 ### skipAd
-This function skips the currently playing ad. It returns `true` if another ad starts playing and `false` if there are no more ads to play.
+This function skips the currently playing ad by the specified duration. It returns `true` if another ad starts playing and `false` if there are no more ads to play.
 
 Below are code examples:
 
@@ -551,23 +551,119 @@ Below are code examples:
 ```java
 class CustomAdPlayer implements AnypointAdPlayer {
     @Override
-    public boolean skipAd() {
+    public boolean skipAd(long skipDurationMs) {
         //TODO: Play the next mediaUrls video in the media player
         // If the next ad is played, return true
         // Otherwise, return false
     }
 ...
-}   
+}
 ```
 
 **_Kotlin_**
 
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
-    override fun skipAd(): Boolean {
+    override fun skipAd(skipDurationMs: Long): Boolean {
         //TODO: Play the next mediaUrls video in the media player
         // If the next ad is played, return true
         // Otherwise, return false
+    }
+...
+}
+```
+
+### mute
+This function mutes the ad player audio.
+
+Below are code examples:
+
+**_Java_**
+
+```java
+class CustomAdPlayer implements AnypointAdPlayer {
+    private float previousVolume = 1f;
+
+    @Override
+    public void mute() {
+        //TODO: Save current volume and mute the media player
+        previousVolume = getVolume();
+        player.setVolume(0f);
+    }
+...
+}
+```
+
+**_Kotlin_**
+
+```kotlin
+class CustomAdPlayer : AnypointAdPlayer {
+    private var previousVolume = 1f
+
+    override fun mute() {
+        //TODO: Save current volume and mute the media player
+        previousVolume = getVolume()
+        player.setVolume(0f)
+    }
+...
+}
+```
+
+### unmute
+This function restores the ad player audio to its previous volume.
+
+Below are code examples:
+
+**_Java_**
+
+```java
+class CustomAdPlayer implements AnypointAdPlayer {
+    @Override
+    public void unmute() {
+        //TODO: Restore the media player to previous volume
+        player.setVolume(previousVolume);
+    }
+...
+}
+```
+
+**_Kotlin_**
+
+```kotlin
+class CustomAdPlayer : AnypointAdPlayer {
+    override fun unmute() {
+        //TODO: Restore the media player to previous volume
+        player.setVolume(previousVolume)
+    }
+...
+}
+```
+
+### setVolume
+This function sets the ad player volume. The volume value is between 0.0 and 1.0.
+
+Below are code examples:
+
+**_Java_**
+
+```java
+class CustomAdPlayer implements AnypointAdPlayer {
+    @Override
+    public void setVolume(float volume) {
+        //TODO: Set the media player volume
+        player.setVolume(volume);
+    }
+...
+}
+```
+
+**_Kotlin_**
+
+```kotlin
+class CustomAdPlayer : AnypointAdPlayer {
+    override fun setVolume(volume: Float) {
+        //TODO: Set the media player volume
+        player.setVolume(volume)
     }
 ...
 }

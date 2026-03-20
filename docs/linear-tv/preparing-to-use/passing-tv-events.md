@@ -48,7 +48,7 @@ Predefined TV events include:
 ### _CHANNEL\_CHANGE_
 Indicates that a viewer has switched to another TV channel while watching linear TV.
 
-**The first time it enters a linear TV channel, you must send the current channel ID.**
+**The first time it enters a linear TV channel, you must send the current channel ID.** For IPTV environments, you can optionally pass a multicast URL as an additional argument.
 
 ### _VOD\_START_
 Indicates that VOD viewing has started. If you cannot confirm the VOD title, you can use the `MISC`event instead.
@@ -69,8 +69,8 @@ All other situations where ad creatives should not be played. The `MISC` event *
 **_Java_**
 
 ```java
-import tv.anypoint.sdk.comm.TvEvent
-import tv.anypoint.api.tv.TvEventPublisher
+import tv.anypoint.sdk.comm.TvEvent;
+import tv.anypoint.api.tv.TvEventPublisher;
 
 // Create a TV Event Publisher
 TvEventPublisher tvEventPublisher = AnypointSdk.createTvEventPublisher();

@@ -122,9 +122,9 @@ class PlaybackActivity : Activity() {
         val adConfig = FlowerVodAdConfig(
             adTagUrl = "https://ad_request",
             contentId = "1",
-            contentDuration: 3_600_000L,
-            requestTimeout: 5_000L,
-            minPrepareDuration: 5_000L,
+            contentDuration = 3_600_000L,
+            requestTimeout = 5_000L,
+            minPrepareDuration = 5_000L,
             extraParams = mapOf(
                 "title" to "My Summer Vacation",
                 "genre" to "horror",

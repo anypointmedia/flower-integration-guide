@@ -10,7 +10,7 @@ Ad metadata interface responded on Flower events.
 | ---| ---| --- |
 | id | String? | Ad id specified in VAST response. |
 | duration | Int | Ad duration in milliseconds. |
-| extraParams | `Map<String, String>` | Whether the ad is skippable or not. |
+| isSkippable | Boolean | Whether the ad is skippable or not. |
 | mediaUrl | String | Ad creative url to be played. |
 | extensions | `Map<String, String>` | Parsed VAST extensions of each original {`<Ad />`} element. |
 

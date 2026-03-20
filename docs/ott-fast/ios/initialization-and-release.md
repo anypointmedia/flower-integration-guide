@@ -9,9 +9,11 @@ Before using any features of the SDK, you must initialize it in your OTT app's s
 *   **_dev_:** This mode can be used in a development environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level is _Info_.
 *   **_prod_:** This mode can be used in a commercial environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level _Warn_.
 
-To ensure proper resource management and avoid potential memory leaks, always call the SDK release function when your OTT app terminates.
+When using SwiftUI, we recommend initializing the SDK using AppDelegate via `UIApplicationDelegateAdaptor`.
 
-When using SwiftUI, we recommend releasing the SDK using AppDelegate via `UIApplicationDelegateAdaptor`.
+:::note
+The iOS SDK does not require an explicit release/destroy call. Resources are managed internally.
+:::
 
 **_SwiftUI_**
 
@@ -22,23 +24,16 @@ import FlowerSdk
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // TODO GUIDE: initialize SDK
         FlowerSdk.setEnv(env: "local")
         FlowerSdk.doInit()
-
         return true
-    }
-    
-    func applicationWillTerminate(_ application: UIApplication) {
-        // TODO GUIDE: release SDK
-        FlowerSdk.destroy()
     }
 }
 
 @main
 struct YourApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     var body: some Scene {
         ...
     }
@@ -56,16 +51,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // TODO GUIDE: initialize SDK
         FlowerSdk.setEnv(env: "local")
         FlowerSdk.doInit()
-
         return true
-    }
-    
-    func applicationWillTerminate(_ application: UIApplication) {
-        // TODO GUIDE: release SDK
-        FlowerSdk.destroy()
     }
 }
 ```

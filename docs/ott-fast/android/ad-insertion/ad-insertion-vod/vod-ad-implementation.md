@@ -119,6 +119,22 @@ The following describes the parameters:
 | mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns video player. |
 | adTagHeaders | map | (Optional) HTTP header information to add for ad requests. |
 
+#### FlowerAdsManager.notifyContentEnded()
+
+Call this API when the VOD content finishes playing (e.g., `Player.STATE_ENDED`). This triggers post-roll ad loading. No parameters required.
+
+```kotlin
+// Detect content end
+player.addListener(object : Player.Listener {
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        if (playbackState == Player.STATE_ENDED) {
+            isContentEnd = true
+            flowerAdView.adsManager.notifyContentEnded()
+        }
+    }
+})
+```
+
 #### FlowerAdsManager.stop()
 
 Call this API when exiting VOD content. No parameters required.
