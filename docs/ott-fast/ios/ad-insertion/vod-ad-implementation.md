@@ -185,6 +185,21 @@ The following describes the parameters:
 | mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns the video player |
 | adTagHeaders | \[String: String\] | (Optional) HTTP header information to add when requesting ads |
 
+
+#### FlowerAdsManager.notifyContentEnded()
+
+Call this API when the VOD content finishes playing (e.g., `AVPlayerItemDidPlayToEndTime`). This triggers post-roll ad loading. No parameters required.
+
+```swift
+// Register observer (target-action pattern)
+NotificationCenter.default.addObserver(self, selector: #selector(onEnded), name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+
+// Handler
+@objc private func onEnded() {
+    isContentEnd = true
+    adView.adsManager.notifyContentEnded()
+}
+```
 ####  FlowerAdsManager.stop()
 
 Call this API when exiting VOD content. No parameters required.

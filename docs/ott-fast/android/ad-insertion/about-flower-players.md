@@ -32,7 +32,7 @@ The following is a basic usage of Flower Player.
 
 The following is an example of setting up a Linear TV Ad configuration and playing content based on ExoPlayer.
 
-```java
+```kotlin
 val exoPlayer = ExoPlayer.Builder(context).build()
 val player = FlowerExoPlayer2(exoPlayer, context)
 

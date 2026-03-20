@@ -15,7 +15,7 @@ Using these wrapper players is more convenient than manually controlling ad inse
 1. Replace the player type and constructor from AVPlayer to FlowerAVPlayer in existing code using AVPlayer.
 2. Create an ad configuration object with appropriate values such as the pre-issued Tag URL. The classes used are:
     1. For linear channels / FAST: FlowerLinearTvAdConfig
-3. Before playing the main content, pass the ad configuration object to the player using the `setAdConfig()` API.
+3. Before playing the main content, pass the ad configuration object to the player using `replaceCurrentItem(with:adConfig:)`.
 
     Note: This step is mandatory to enable ads.
 
@@ -28,15 +28,20 @@ Below are the Flower SDK APIs used in the example code.
 
 A player class that extends the existing AVFoundation's AVPlayer class to enable ad integration through connection with the Flower backend system.
 
-### FlowerAVPlayer.setAdConfig
+### FlowerAVPlayer.replaceCurrentItem(with:adConfig:)
 
-Sets ad configuration for the player. To apply ads, this method must be called to set the ad configuration before the player starts playback. If the player plays without ad configuration set, an Info level log message "FlowerAVPlayer started playing without FlowerAdConfig." will be displayed.
-
-The following describes the parameters:
+Replaces the current player item and sets the ad configuration in a single call. This is the recommended way to start playback with ads.
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| adConfig | FlowerLinearTvAdConfig | Information required for ad insertion |
+| item | AVPlayerItem? | The player item to play |
+| adConfig | FlowerAdConfig | Ad configuration (FlowerLinearTvAdConfig or FlowerVodAdConfig) |
+
+### ~~FlowerAVPlayer.setAdConfig~~ (Deprecated)
+
+:::caution Deprecated
+Use `replaceCurrentItem(with:adConfig:)` instead. `setAdConfig` is deprecated and will be removed in a future version.
+:::
 
 ### FlowerAVPlayer.addAdListener
 
@@ -135,18 +140,8 @@ struct PlaybackView: View {
 
     private func playLinearTv() {
         let videoUrl = "https://video_url"
-        let playerItem = AVPlayerItem(url: URL(string: videoUrl)!)
-        player.replaceCurrentItem(with: playerItem)
 
         // TODO GUIDE: Configure linear tv ad
-        // arg0: adTagUrl, url from flower system
-        //       You must file a request to Anypoint Media to receive a adTagUrl.
-        // arg1: prerollAdTagUrl, (Optional) url for linear tv preroll ads from flower system
-        //       You must file a request to Anypoint Media to receive a prerollAdTagUrl.
-        // arg2: channelId, unique channel id in your service
-        // arg3: extraParams, (Optional) values you can provide for targeting
-        // arg4: adTagHeaders, (Optional) values included in headers for ad request
-        // arg5: channelStreamHeaders, (Optional) values included in headers for channel stream request
         let adConfig = FlowerLinearTvAdConfig(
             adTagUrl: "https://ad_request",
             prerollAdTagUrl: "https://preroll_ad_request",
@@ -161,10 +156,10 @@ struct PlaybackView: View {
             ],
             channelStreamHeaders: [
                 "custom-stream-header": "custom-stream-header-value"
-            ],
+            ]
         )
-        // TODO GUIDE: FlowerAdConfig should be delivered before calling play()
-        player.setAdConfig(adConfig: adConfig)
+        // TODO GUIDE: Pass ad config together with the player item
+        player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: videoUrl)!), adConfig: adConfig)
 
         // OPTIONAL GUIDE: Implement FlowerAdsManagerListener to receive ad events
         class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
@@ -182,6 +177,9 @@ struct PlaybackView: View {
             }
             func onAdSkipped(reason: Int32) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
+            }
+            func onAdBreakPrepare(adInfos: NSMutableArray) {
+                // OPTIONAL GUIDE: Implement custom actions for when the ad break is prepared
             }
         }
         // OPTIONAL GUIDE: Register FlowerAdsManagerListener to receive ad events
@@ -223,25 +221,15 @@ class PlaybackViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        player.removeAdListener(listener: flowerListener)
         player.pause()
         player.replaceCurrentItem(with: nil)
-        player.removeAdListener(listener: flowerListener)
     }
 
     private func playLinearTv() {
         let videoUrl = "https://video_url"
-        let playerItem = AVPlayerItem(url: URL(string: videoUrl)!)
-        player.replaceCurrentItem(with: playerItem)
 
         // TODO GUIDE: Configure linear tv ad
-        // arg0: adTagUrl, url from flower system
-        //       You must file a request to Anypoint Media to receive a adTagUrl.
-        // arg1: prerollAdTagUrl, (Optional) url for linear tv preroll ads from flower system
-        //       You must file a request to Anypoint Media to receive a prerollAdTagUrl.
-        // arg2: channelId, unique channel id in your service
-        // arg3: extraParams, (Optional) values you can provide for targeting
-        // arg4: adTagHeaders, (Optional) values included in headers for ad request
-        // arg5: channelStreamHeaders, (Optional) values included in headers for channel stream request
         let adConfig = FlowerLinearTvAdConfig(
             adTagUrl: "https://ad_request",
             prerollAdTagUrl: "https://preroll_ad_request",
@@ -256,10 +244,10 @@ class PlaybackViewController: UIViewController {
             ],
             channelStreamHeaders: [
                 "custom-stream-header": "custom-stream-header-value"
-            ],
+            ]
         )
-        // TODO GUIDE: FlowerAdConfig should be delivered before calling play()
-        player.setAdConfig(adConfig: adConfig)
+        // TODO GUIDE: Pass ad config together with the player item
+        player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: videoUrl)!), adConfig: adConfig)
 
         // OPTIONAL GUIDE: Implement FlowerAdsManagerListener to receive ad events
         class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
@@ -277,6 +265,9 @@ class PlaybackViewController: UIViewController {
             }
             func onAdSkipped(reason: Int32) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
+            }
+            func onAdBreakPrepare(adInfos: NSMutableArray) {
+                // OPTIONAL GUIDE: Implement custom actions for when the ad break is prepared
             }
         }
         // OPTIONAL GUIDE: Register FlowerAdsManagerListener to receive ad events

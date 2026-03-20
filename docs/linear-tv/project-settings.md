@@ -11,7 +11,7 @@ repositories {
 		url "https://maven.anypoint.tv/repository/public-release/"
 	}
 }
-def sdkVersion = "1.0.0"
+def sdkVersion = "X.X.X" // Replace with the SDK version provided to your project
 dependencies {
     // Set if using Google Ads
 	implementation "tv.anypoint:sdk-multicast-ima:$sdkVersion"

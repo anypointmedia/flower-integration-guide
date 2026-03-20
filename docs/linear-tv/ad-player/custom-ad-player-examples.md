@@ -138,7 +138,7 @@ class CustomAdPlayer implements AnypointAdPlayer {
             // Current PlaySet's playtime, total duration of PlaySet, current playback position within the playing media 
             long currentMediaPlayTime = mediaPlayer.getCurrentPosition();
             long totalPlayTime = playSets.stream()
-                    .flatMap(playSet -> playSet.mediaUnits.stream())
+                    .flatMap(playSet -> playSet.getMediaUnits().stream())
                     .limit(currentPlayIndex + 1)
                     .mapToLong(unit -> unit.getDuration())
                     .sum() + currentMediaPlayTime;

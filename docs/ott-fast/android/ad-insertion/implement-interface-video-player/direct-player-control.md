@@ -247,6 +247,109 @@ override fun playNextItem() {
 }
 ```
 
+### stop()
+
+Stops the playback and releases resources. No return value.
+
+Example implementation using ExoPlayer:
+
+```kotlin
+private val player: ExoPlayer
+
+override fun stop() {
+    CoroutineScope(Dispatchers.Main).launch {
+        player.stop()
+        player.clearMediaItems()
+    }
+}
+```
+
+### seekToPosition(absoluteStartTimeMs, relativeStartTimeMs, offsetMs, windowDurationMs, periodIndex)
+
+Seeks to the specified position using available time values. The SDK provides multiple time references — use whichever is available for your player.
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| absoluteStartTimeMs | Double? | Absolute time in milliseconds |
+| relativeStartTimeMs | Double? | Relative time from the first window in milliseconds |
+| offsetMs | Double? | Offset within the current window in milliseconds |
+| windowDurationMs | Double? | Total length of the current window in milliseconds |
+| periodIndex | Int? | Period index for DASH MPD live streams |
+
+Example implementation using ExoPlayer:
+
+```kotlin
+private val player: ExoPlayer
+
+override fun seekToPosition(
+    absoluteStartTimeMs: KotlinWrapped<Double>?,
+    relativeStartTimeMs: KotlinWrapped<Double>?,
+    offsetMs: KotlinWrapped<Double>?,
+    windowDurationMs: KotlinWrapped<Double>?,
+    periodIndex: Int?
+) {
+    CoroutineScope(Dispatchers.Main).launch {
+        val targetMs = relativeStartTimeMs?.value?.toLong()
+            ?: offsetMs?.value?.toLong()
+            ?: absoluteStartTimeMs?.value?.toLong()
+            ?: return@launch
+
+        player.seekTo(player.currentMediaItemIndex, targetMs)
+    }
+}
+```
+
+### getCurrentAbsoluteTime(isPrintDetails): Double
+
+Returns the current absolute playback time in epoch milliseconds. Returns -1 if unavailable.
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| isPrintDetails | Boolean | Whether to print debug details |
+
+Example implementation using ExoPlayer:
+
+```kotlin
+private val player: ExoPlayer
+
+override fun getCurrentAbsoluteTime(isPrintDetails: Boolean): KotlinWrapped<Double> =
+    runBlocking(Dispatchers.Main) {
+        val window = Timeline.Window()
+        player.currentTimeline.getWindow(player.currentMediaItemIndex, window)
+
+        val windowStartTimeMs = window.windowStartTimeMs
+        val currentPositionMs = player.currentPosition
+
+        KotlinWrapped(
+            if (windowStartTimeMs != C.TIME_UNSET) {
+                (windowStartTimeMs + currentPositionMs).toDouble()
+            } else {
+                -1.0
+            }
+        )
+    }
+```
+
+### getPlayerType(): String?
+
+Returns a string identifying the player type. Used for SDK internal analytics. Return `null` if not applicable.
+
+```kotlin
+override fun getPlayerType(): String? {
+    return "ExoPlayer"
+}
+```
+
+### getPlayerVersion(): String?
+
+Returns a string identifying the player version. Used for SDK internal analytics. Return `null` if not applicable.
+
+```kotlin
+override fun getPlayerVersion(): String? {
+    return null
+}
+```
+
 ## Supporting Models
 
 The following models are required when implementing MediaPlayerAdapter.
@@ -257,9 +360,9 @@ Represents media information returned by the getCurrentMedia() method.
 
 | **Field** | **Type** | **Description** |
 | ---| ---| --- |
-| url | String | URL of the currently playing stream. |
-| duration | Int | Total duration of the currently playing stream.<br/>Returns -1 if unknown or if the stream is Linear TV.<br/>Unit: milliseconds. |
-| position | Int | Elapsed playback time calculated from the beginning of the initially loaded playlist.<br/>Returns -1 if unknown.<br/>Unit: milliseconds. |
+| urlOrId | String | URL or identifier of the currently playing stream. |
+| duration | Long | Total duration of the currently playing stream.<br/>Returns -1 if unknown or if the stream is Linear TV.<br/>Unit: milliseconds. |
+| position | Long | Elapsed playback time calculated from the beginning of the initially loaded playlist.<br/>Returns -1 if unknown.<br/>Unit: milliseconds. |
 
 ### PlayItem Interface Description
 
@@ -268,4 +371,3 @@ Represents a play item passed to enqueuePlayItem(playItem: PlayItem) and removeP
 | **Field** | **Type** | **Description** |
 | ---| ---| --- |
 | url | String | URL of the next play item. |
-| isAd | Boolean | Indicates whether the next play item is an ad asset URL. |
