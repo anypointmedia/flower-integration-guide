@@ -1,0 +1,179 @@
+.paramButton {
+  cursor: pointer;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .modal {
+  background: #1e1e1e;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.counter {
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--ifm-font-family-monospace);
+  color: var(--ifm-color-primary);
+}
+
+.input {
+  padding: 8px 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--ifm-color-primary);
+}
+
+.input::placeholder {
+  color: var(--ifm-color-emphasis-400);
+  font-style: italic;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.copyBtn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  outline: none;
+  box-shadow: none;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.copyBtn:hover,
+.copyBtn:focus,
+.copyBtn:focus-visible {
+  background: var(--ifm-color-primary-dark);
+  outline: none;
+  box-shadow: none;
+}
+
+.copyBtn:active {
+  transform: scale(0.98);
+}
+
+.copied {
+  background: #00d600;
+}
+
+.copied:hover {
+  background: #00b300;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.radioLabel:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.radioLabel:has(.radioInput:checked) {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary-lightest);
+}
+
+[data-theme='dark'] .radioLabel:has(.radioInput:checked) {
+  background: rgba(86, 161, 226, 0.15);
+}
+
+.radioInput {
+  accent-color: var(--ifm-color-primary);
+  margin: 0;
+}
+
+.radioText {
+  font-size: 0.85rem;
+  font-family: var(--ifm-font-family-monospace);
+}
