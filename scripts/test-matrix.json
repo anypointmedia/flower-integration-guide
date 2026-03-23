@@ -1,0 +1,476 @@
+{
+  "$description": "Parameter combinations and expected/forbidden patterns for branch testing",
+
+  "linear-tv": {
+    "template": "docs/linear-tv/prompts/integrated-prompt.md",
+    "defaults": {
+      "SDK_VERSION": "2.0.7",
+      "INITIAL_SERVICE_ID": "101"
+    },
+    "combinations": [
+      {
+        "name": "built-in + dual-player",
+        "params": { "PLAYER_TYPE": "built-in", "PLAYBACK_MODE": "dual-player" },
+        "expect": [
+          "sdk-multicast-exoplayer",
+          "AnypointSdk.initialize",
+          "AnypointAdView",
+          "setVolume(0",
+          "setVolume(1",
+          "AdsManagerListener",
+          "CHANNEL_CHANGE"
+        ],
+        "forbid": [
+          "implements AnypointAdPlayer",
+          "setAdPlayer(",
+          "channelPlayer.pause()",
+          "channelPlayer.start()"
+        ]
+      },
+      {
+        "name": "built-in + single-player",
+        "params": { "PLAYER_TYPE": "built-in", "PLAYBACK_MODE": "single-player" },
+        "expect": [
+          "sdk-multicast-exoplayer",
+          "channelPlayer.pause()",
+          "AdsManagerListener"
+        ],
+        "forbid": [
+          "implements AnypointAdPlayer",
+          "setAdPlayer(",
+          "channelPlayer.setVolume(0"
+        ]
+      },
+      {
+        "name": "custom + dual-player",
+        "params": { "PLAYER_TYPE": "custom", "PLAYBACK_MODE": "dual-player" },
+        "expect": [
+          "sdk-multicast",
+          "AnypointAdPlayer",
+          "setAdPlayer",
+          "addCallback",
+          "onLoaded",
+          "onPlay",
+          "onStopped",
+          "setVolume(0",
+          "release()"
+        ],
+        "forbid": [
+          "sdk-multicast-exoplayer",
+          "channelPlayer.pause()",
+          "channelPlayer.start()"
+        ]
+      },
+      {
+        "name": "custom + single-player",
+        "params": { "PLAYER_TYPE": "custom", "PLAYBACK_MODE": "single-player" },
+        "expect": [
+          "sdk-multicast",
+          "AnypointAdPlayer",
+          "setAdPlayer",
+          "channelPlayer.pause()",
+          "release()"
+        ],
+        "forbid": [
+          "sdk-multicast-exoplayer",
+          "channelPlayer.setVolume(0"
+        ]
+      }
+    ]
+  },
+
+  "ott-android": {
+    "template": "docs/ott-fast/prompts/android/integrated-prompt.md",
+    "defaults": {
+      "SDK_VERSION": "2.8.0",
+      "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",
+      "PREROLL_AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?preroll=1",
+      "CHANNEL_ID_OR_CONTENT_ID": "1",
+      "CONTENT_DURATION_MS": "3403000"
+    },
+    "combinations": [
+      {
+        "name": "linear-tv + flower-player",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "flower-player" },
+        "expect": [
+          "FlowerExoPlayer2",
+          "FlowerLinearTvAdConfig",
+          "setMediaItem",
+          "addAdListener",
+          "FlowerAdsManagerListener",
+          "FlowerSdk.init"
+        ],
+        "forbid": [
+          "FlowerVodAdConfig",
+          "requestVodAd",
+          "changeChannelUrl",
+          "requestAd("
+        ]
+      },
+      {
+        "name": "linear-tv + media-player-hook",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "media-player-hook" },
+        "expect": [
+          "changeChannelUrl",
+          "FlowerAdView",
+          "FlowerAdsManagerListener",
+          "addListener"
+        ],
+        "forbid": [
+          "FlowerExoPlayer2",
+          "FlowerVodAdConfig",
+          "requestVodAd",
+          "requestAd("
+        ]
+      },
+      {
+        "name": "vod + flower-player",
+        "params": { "AD_TYPE": "vod", "APPROACH": "flower-player" },
+        "expect": [
+          "FlowerExoPlayer2",
+          "FlowerVodAdConfig",
+          "contentDuration",
+          "setMediaItem",
+          "addAdListener"
+        ],
+        "forbid": [
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl",
+          "channelId"
+        ]
+      },
+      {
+        "name": "vod + media-player-hook",
+        "params": { "AD_TYPE": "vod", "APPROACH": "media-player-hook" },
+        "expect": [
+          "FlowerAdView",
+          "requestVodAd"
+        ],
+        "forbid": [
+          "FlowerExoPlayer2",
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl"
+        ]
+      },
+      {
+        "name": "interstitial",
+        "params": { "AD_TYPE": "interstitial" },
+        "expect": [
+          "FlowerAdView",
+          "requestAd",
+          "FlowerAdsManagerListener"
+        ],
+        "forbid": [
+          "FlowerExoPlayer2",
+          "FlowerLinearTvAdConfig",
+          "FlowerVodAdConfig",
+          "changeChannelUrl"
+        ]
+      }
+    ]
+  },
+
+  "ott-ios": {
+    "template": "docs/ott-fast/prompts/ios/integrated-prompt.md",
+    "defaults": {
+      "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",
+      "PREROLL_AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?preroll=1",
+      "CHANNEL_ID_OR_CONTENT_ID": "1",
+      "CONTENT_DURATION_MS": "3403000"
+    },
+    "combinations": [
+      {
+        "name": "linear-tv + flower-player + swiftui",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "flower-player", "UI_FRAMEWORK": "swiftui" },
+        "expect": [
+          "FlowerAVPlayer",
+          "FlowerVideoPlayer",
+          "FlowerLinearTvAdConfig",
+          "FlowerSdk.doInit",
+          "replaceCurrentItem",
+          "FlowerAdsManagerListener",
+          "import FlowerSdk"
+        ],
+        "forbid": [
+          "FlowerAdView.HostingController",
+          "AVQueuePlayer()",
+          "FlowerVodAdConfig",
+          "changeChannelUrl",
+          "requestVodAd",
+          "requestAd",
+          "UIViewController"
+        ]
+      },
+      {
+        "name": "linear-tv + flower-player + uikit",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "flower-player", "UI_FRAMEWORK": "uikit" },
+        "expect": [
+          "FlowerAVPlayer",
+          "FlowerAVPlayerViewController",
+          "FlowerLinearTvAdConfig",
+          "FlowerSdk.doInit",
+          "replaceCurrentItem",
+          "UIViewController"
+        ],
+        "forbid": [
+          "FlowerVideoPlayer",
+          "AVQueuePlayer()",
+          "FlowerVodAdConfig",
+          "changeChannelUrl",
+          "requestVodAd",
+          "@main\nstruct"
+        ]
+      },
+      {
+        "name": "linear-tv + media-player-hook + swiftui",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "media-player-hook", "UI_FRAMEWORK": "swiftui" },
+        "expect": [
+          "AVQueuePlayer",
+          "FlowerAdView",
+          "changeChannelUrl",
+          "FlowerAdsManagerListener",
+          "flowerAdView.body"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerVideoPlayer",
+          "FlowerAVPlayerViewController",
+          "FlowerVodAdConfig",
+          "requestVodAd"
+        ]
+      },
+      {
+        "name": "linear-tv + media-player-hook + uikit",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "media-player-hook", "UI_FRAMEWORK": "uikit" },
+        "expect": [
+          "AVQueuePlayer",
+          "FlowerAdView.HostingController",
+          "changeChannelUrl",
+          "UIViewController"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerVideoPlayer",
+          "FlowerVodAdConfig",
+          "requestVodAd",
+          "flowerAdView.body"
+        ]
+      },
+      {
+        "name": "vod + flower-player + swiftui",
+        "params": { "AD_TYPE": "vod", "APPROACH": "flower-player", "UI_FRAMEWORK": "swiftui" },
+        "expect": [
+          "FlowerAVPlayer",
+          "FlowerVideoPlayer",
+          "FlowerVodAdConfig",
+          "contentDuration",
+          "replaceCurrentItem"
+        ],
+        "forbid": [
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl",
+          "channelId",
+          "AVQueuePlayer()",
+          "FlowerAdView.HostingController"
+        ]
+      },
+      {
+        "name": "vod + flower-player + uikit",
+        "params": { "AD_TYPE": "vod", "APPROACH": "flower-player", "UI_FRAMEWORK": "uikit" },
+        "expect": [
+          "FlowerAVPlayer",
+          "FlowerAVPlayerViewController",
+          "FlowerVodAdConfig",
+          "contentDuration",
+          "replaceCurrentItem",
+          "UIViewController"
+        ],
+        "forbid": [
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl",
+          "FlowerVideoPlayer",
+          "AVQueuePlayer()"
+        ]
+      },
+      {
+        "name": "vod + media-player-hook + swiftui",
+        "params": { "AD_TYPE": "vod", "APPROACH": "media-player-hook", "UI_FRAMEWORK": "swiftui" },
+        "expect": [
+          "AVQueuePlayer",
+          "FlowerAdView",
+          "requestVodAd",
+          "notifyContentEnded",
+          "AVPlayerItemDidPlayToEndTime"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl",
+          "FlowerAdView.HostingController"
+        ]
+      },
+      {
+        "name": "vod + media-player-hook + uikit",
+        "params": { "AD_TYPE": "vod", "APPROACH": "media-player-hook", "UI_FRAMEWORK": "uikit" },
+        "expect": [
+          "AVQueuePlayer",
+          "FlowerAdView.HostingController",
+          "requestVodAd",
+          "notifyContentEnded",
+          "UIViewController"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerLinearTvAdConfig",
+          "changeChannelUrl",
+          "FlowerVideoPlayer"
+        ]
+      },
+      {
+        "name": "interstitial + swiftui",
+        "params": { "AD_TYPE": "interstitial", "UI_FRAMEWORK": "swiftui" },
+        "expect": [
+          "FlowerAdView",
+          "requestAd",
+          "FlowerAdsManagerListener",
+          "flowerAdView.body"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerVideoPlayer",
+          "FlowerLinearTvAdConfig",
+          "FlowerVodAdConfig",
+          "changeChannelUrl",
+          "MediaPlayerHook",
+          "FlowerAdView.HostingController"
+        ]
+      },
+      {
+        "name": "interstitial + uikit",
+        "params": { "AD_TYPE": "interstitial", "UI_FRAMEWORK": "uikit" },
+        "expect": [
+          "FlowerAdView.HostingController",
+          "requestAd",
+          "FlowerAdsManagerListener",
+          "UIViewController"
+        ],
+        "forbid": [
+          "FlowerAVPlayer()",
+          "FlowerVideoPlayer",
+          "FlowerLinearTvAdConfig",
+          "FlowerVodAdConfig",
+          "changeChannelUrl",
+          "MediaPlayerHook",
+          "flowerAdView.body"
+        ]
+      }
+    ]
+  },
+
+  "ott-html5": {
+    "template": "docs/ott-fast/prompts/html5/integrated-prompt.md",
+    "defaults": {
+      "SDK_VERSION": "2.8.0",
+      "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",
+      "PREROLL_AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?preroll=1",
+      "CHANNEL_ID_OR_CONTENT_ID": "1",
+      "CONTENT_DURATION_MS": "3403000"
+    },
+    "combinations": [
+      {
+        "name": "linear-tv + flower-hls",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "flower-hls", "PLAYER_TYPE": "hls.js" },
+        "expect": [
+          "FlowerHls",
+          "attachContainer",
+          "setAdConfig",
+          "addAdListener",
+          "loadSource",
+          "FlowerSdk.init",
+          "onPrepare",
+          "onCompleted"
+        ],
+        "forbid": [
+          "new FlowerAdView(",
+          "enterChannel(",
+          "requestVodAd(",
+          "requestAd("
+        ]
+      },
+      {
+        "name": "linear-tv + media-player-hook + hls.js",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "media-player-hook", "PLAYER_TYPE": "hls.js" },
+        "expect": [
+          "FlowerAdView",
+          "changeChannelUrl",
+          "new Hls(",
+          "addListener",
+          "video-element",
+          "ad-container"
+        ],
+        "forbid": [
+          "FlowerHls",
+          "setAdConfig",
+          "addAdListener",
+          "requestVodAd",
+          "requestAd",
+          "enterChannel"
+        ]
+      },
+      {
+        "name": "linear-tv + media-player-hook + bitmovin",
+        "params": { "AD_TYPE": "linear-tv", "APPROACH": "media-player-hook", "PLAYER_TYPE": "bitmovin" },
+        "expect": [
+          "FlowerAdView",
+          "changeChannelUrl",
+          "bitmovin",
+          "addListener"
+        ],
+        "forbid": [
+          "FlowerHls",
+          "setAdConfig",
+          "addAdListener",
+          "requestVodAd"
+        ]
+      },
+      {
+        "name": "vod + media-player-hook + hls.js",
+        "params": { "AD_TYPE": "vod", "APPROACH": "media-player-hook", "PLAYER_TYPE": "hls.js" },
+        "expect": [
+          "FlowerAdView",
+          "requestVodAd",
+          "new Hls(",
+          "notifyContentEnded",
+          "addListener"
+        ],
+        "forbid": [
+          "FlowerHls",
+          "setAdConfig",
+          "changeChannelUrl",
+          "requestAd",
+          "enterChannel"
+        ]
+      },
+      {
+        "name": "interstitial",
+        "params": { "AD_TYPE": "interstitial", "PLAYER_TYPE": "none" },
+        "expect": [
+          "FlowerAdView",
+          "requestAd",
+          "addListener",
+          "onPrepare",
+          "ad-container"
+        ],
+        "forbid": [
+          "FlowerHls",
+          "changeChannelUrl",
+          "requestVodAd",
+          "MediaPlayerHook",
+          "video-element",
+          "new Hls(",
+          "enterChannel"
+        ]
+      }
+    ]
+  }
+}
