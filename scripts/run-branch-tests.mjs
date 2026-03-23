@@ -26,7 +26,15 @@ const matrix = JSON.parse(readFileSync(join(import.meta.dirname, 'test-matrix.js
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const platformFilter = args.includes('--platform') ? args[args.indexOf('--platform') + 1] : null;
+const platformIdx = args.indexOf('--platform');
+const platformFilter = platformIdx !== -1 && args[platformIdx + 1] && !args[platformIdx + 1].startsWith('--')
+  ? args[platformIdx + 1]
+  : null;
+
+if (platformIdx !== -1 && !platformFilter) {
+  console.error('Error: --platform requires a value');
+  process.exit(1);
+}
 
 // ─── Helpers ───
 

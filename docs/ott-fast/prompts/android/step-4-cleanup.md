@@ -111,7 +111,6 @@ Available in Flower Android SDK version 2.8.0+.
       android:supportsPictureInPicture="true"
       android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
   />
-  />
 
 ========================================
 PART 4 — VOD Playback State Control (MediaPlayerHook only)

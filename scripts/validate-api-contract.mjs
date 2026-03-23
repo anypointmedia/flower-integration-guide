@@ -230,7 +230,10 @@ for (const [platformKey, promptFiles] of Object.entries(platformPrompts)) {
 // Helper: check if import path is compatible
 function importedPath(actual, expected) {
   // Handle nested class imports (e.g., AnypointAdsManager.AdsManagerListener)
-  return actual.includes(expected) || expected.includes(actual);
+  // Only match if one is a prefix of the other (with dot separator)
+  return actual === expected || 
+         actual.startsWith(expected + '.') || 
+         expected.startsWith(actual + '.');
 }
 
 // ─── Summary ───

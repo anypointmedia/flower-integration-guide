@@ -32,6 +32,7 @@ CONTENT_DURATION_MS: {{CONTENT_DURATION_MS}} (For VOD only, in milliseconds)
 
 FlowerAdsManagerListener and FlowerError are in the sdk-core package:
   import tv.anypoint.flower.sdk.core.api.FlowerAdsManagerListener
+  import tv.anypoint.flower.sdk.core.api.FlowerAdInfo
   import tv.anypoint.flower.sdk.core.api.FlowerError
 
 FlowerPlayer wrappers, ad configs, and SDK utilities are in the android-sdk package:
@@ -401,6 +402,7 @@ For MediaPlayerHook:
           }
       }
       override fun onAdSkipped(reason: Int) {}
+      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {}
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -445,6 +447,7 @@ If AD_TYPE is "interstitial":
               flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
           }
       }
+      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {}
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -659,7 +662,6 @@ For media playback Activities, stop or pause the player in onPause:
       android:name=".PlaybackActivity"
       android:supportsPictureInPicture="true"
       android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-  />
   />
 
 ========================================

@@ -32,7 +32,8 @@ For FlowerHls:
       onPlay() {},
       onCompleted() {},
       onError(error) { console.error(error); },
-      onAdSkipped(reason) {}
+      onAdSkipped(reason) {},
+      onAdBreakPrepare(adInfos) {}
   };
   hls.addAdListener(adsManagerListener);
 
@@ -47,7 +48,8 @@ For MediaPlayerHook:
           player.destroy();
           playLinearTv();  // restart
       },
-      onAdSkipped(reason) {}
+      onAdSkipped(reason) {},
+      onAdBreakPrepare(adInfos) {}
   };
   flowerAdView.adsManager.addListener(adsManagerListener);
 
@@ -74,7 +76,8 @@ If AD_TYPE is "vod" (media-player-hook only):
       onError(error) {
           if (!isContentEnd) { videoElement.play(); }
       },
-      onAdSkipped(reason) {}
+      onAdSkipped(reason) {},
+      onAdBreakPrepare(adInfos) {}
   };
   flowerAdView.adsManager.addListener(adsManagerListener);
 
@@ -100,7 +103,8 @@ If AD_TYPE is "interstitial":
           flowerAdView.adsManager.removeListener(adsManagerListener);
           flowerAdView.adsManager.stop();
       },
-      onAdSkipped(reason) {}
+      onAdSkipped(reason) {},
+      onAdBreakPrepare(adInfos) {}
   };
   flowerAdView.adsManager.addListener(adsManagerListener);
 

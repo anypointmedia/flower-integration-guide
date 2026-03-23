@@ -27,6 +27,7 @@ IMPORTS — Required packages
 FlowerAdsManagerListener and FlowerError are in the sdk-core package:
 
   import tv.anypoint.flower.sdk.core.api.FlowerAdsManagerListener
+  import tv.anypoint.flower.sdk.core.api.FlowerAdInfo
   import tv.anypoint.flower.sdk.core.api.FlowerError
 
 FlowerLinearTvAdConfig, FlowerVodAdConfig, FlowerAdView, FlowerSdk are in the android-sdk package:
@@ -151,6 +152,7 @@ For MediaPlayerHook:
           }
       }
       override fun onAdSkipped(reason: Int) {}
+      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {} // called after ads loaded with ad info list
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -195,6 +197,7 @@ If AD_TYPE is "interstitial":
               flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
           }
       }
+      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {} // called after ads loaded with ad info list
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
