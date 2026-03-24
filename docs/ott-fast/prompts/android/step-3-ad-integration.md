@@ -79,7 +79,7 @@ For FlowerPlayer:
 For MediaPlayerHook:
   Same listener logic, but register on flowerAdView.adsManager:
 
-  flowerAdView.adsManager.addListener(adsManagerListener)
+  flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
 --------------------------------------------------
 If AD_TYPE is "vod":
@@ -302,17 +302,18 @@ MEDIA PLAYER ADAPTER (Advanced — Linear TV only)
 ========================================
 
 If using an unsupported player, implement MediaPlayerAdapter instead of MediaPlayerHook.
-Pass the adapter to changeChannelUrl() overload:
+Pass the adapter to changeChannelUrl() overload.
+Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-      "https://original_stream_url",
-      "https://ad_request",
-      "1",
-      mapOf("custom-param" to "value"),
-      myMediaPlayerAdapter,              // MediaPlayerAdapter instead of MediaPlayerHook
-      mapOf("ad-header" to "value"),
-      mapOf("stream-header" to "value"),
-      "https://preroll_ad_request"
+      config.contentUrl,                  // videoUrl
+      config.adTagUrl,                    // adTagUrl
+      config.channelId,                   // channelId
+      config.extraParams,                 // extraParams
+      myMediaPlayerAdapter,               // MediaPlayerAdapter instead of MediaPlayerHook
+      null,                               // adTagHeaders (Optional)
+      null,                               // channelStreamHeaders (Optional)
+      config.prerollAdTagUrl              // prerollAdTagUrl (Optional)
   )
 
 MediaPlayerAdapter must implement these methods:

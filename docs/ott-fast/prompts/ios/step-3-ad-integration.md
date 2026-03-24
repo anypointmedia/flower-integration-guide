@@ -78,7 +78,12 @@ For FlowerPlayer (FlowerAVPlayer):
 
 For MediaPlayerHook:
   Same listener but register on flowerAdView.adsManager:
+
+  SwiftUI:
   flowerAdView.adsManager.addListener(adsManagerListener: listener)
+
+  UIKit (ViewController conforms to protocol, so pass self):
+  flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 --------------------------------------------------
 If AD_TYPE is "vod":
@@ -127,8 +132,8 @@ For MediaPlayerHook:
       func onAdBreakPrepare(adInfos: NSMutableArray) {}
   }
 
-  Detect content end:
-  NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerItem, queue: .main) { _ in
+  Detect content end (store the observer token as a property for cleanup):
+  contentEndObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: playerItem, queue: .main) { _ in
       isContentEnd = true
       flowerAdView.adsManager.notifyContentEnded()
   }
@@ -197,7 +202,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
   }
 
   let hook = MediaPlayerHookImpl { self.player }
-  let changedUrl = adView.adsManager.changeChannelUrl(
+  let changedUrl = flowerAdView.adsManager.changeChannelUrl(
       videoUrl: config.contentUrl,                         // Required
       adTagUrl: config.adTagUrl,                           // Required
       channelId: config.channelId,                         // Required
@@ -231,7 +236,15 @@ If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
 
-  adView.adsManager.requestVodAd(
+  Create MediaPlayerHook:
+  class MediaPlayerHookImpl: MediaPlayerHook {
+      private let fn: () -> Any
+      init(_ fn: @escaping () -> Any) { self.fn = fn }
+      func getPlayer() -> Any? { fn() }
+  }
+
+  let hook = MediaPlayerHookImpl { self.player }
+  flowerAdView.adsManager.requestVodAd(
       adTagUrl: config.adTagUrl,                           // Required
       contentId: config.contentId,                         // Required
       durationMs: config.contentDuration,                  // Required (ms)

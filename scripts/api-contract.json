@@ -189,11 +189,24 @@
     },
     "FlowerMedia3ExoPlayer": {
       "package": "tv.anypoint.flower.android.sdk.api",
-      "type": "class"
+      "type": "class",
+      "constructor": "FlowerMedia3ExoPlayer(ExoPlayer, Context)",
+      "methods": [
+        "setAdConfig(FlowerLinearTvAdConfig)",
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)",
+        "setMediaItem(MediaItem, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Boolean, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Long, FlowerAdConfig)"
+      ]
     },
     "FlowerBitmovinPlayer": {
       "package": "tv.anypoint.flower.android.sdk.api",
-      "type": "class"
+      "type": "class",
+      "methods": [
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)"
+      ]
     }
   },
 
@@ -203,8 +216,6 @@
       "type": "class",
       "methods": [
         "doInit()",
-        "init()",
-        "destroy()",
         "setEnv(env:)",
         "setLogLevel(level:)",
         "setDeviceId(deviceId:)",
@@ -213,7 +224,7 @@
         "ignoreSkip()",
         "notifyPictureInPictureModeChanged(Bool)"
       ],
-      "note": "iOS uses doInit() not init() due to Swift keyword conflict. init() listed for prompt compatibility."
+      "note": "iOS uses doInit() not init(). iOS SDK does NOT require destroy()."
     },
     "FlowerAVPlayer": {
       "package": "FlowerSdk",
@@ -235,20 +246,34 @@
       "package": "FlowerSdk",
       "type": "class",
       "properties": ["adsManager", "body"],
-      "methods": ["HostingController(adView:)"],
+      "methods": ["HostingController()", "HostingController(adView:)"],
       "note": "HostingController is a nested UIHostingController subclass for UIKit integration"
     },
     "FlowerAVPlayerViewController": {
       "package": "FlowerSdk",
       "type": "class",
       "note": "UIKit wrapper"
+    },
+    "FlowerAdsManagerListener": {
+      "package": "FlowerSdk",
+      "type": "protocol",
+      "methods": [
+        "onAdBreakPrepare(adInfos:)",
+        "onPrepare(adDurationMs:)",
+        "onPlay()",
+        "onCompleted()",
+        "onError(error:)",
+        "onAdSkipped(reason:)"
+      ],
+      "note": "All methods required. Imported from sdk-core via FlowerSdk module."
     }
   },
 
   "ott-html5": {
     "FlowerSdk": {
       "type": "global",
-      "methods": ["init()", "destroy()", "setEnv(String)", "setLogLevel(String)"]
+      "methods": ["init()", "setEnv(String)", "setLogLevel(String)"],
+      "note": "HTML5 SDK does NOT require destroy() — no explicit SDK release needed."
     },
     "FlowerHls": {
       "type": "class",
@@ -272,7 +297,14 @@
         "addListener(FlowerAdsManagerListener)",
         "removeListener(FlowerAdsManagerListener)",
         "changeChannelUrl(String, String, String, Map, MediaPlayerHook, Map, Map, String)",
-        "enterChannel(String, String, Map, MediaPlayerHook, MediaPlayerAdapter, Map)"
+        "enterChannel(String, String, Map, MediaPlayerHook, Map, MediaPlayerAdapter)",
+        "requestAd(String, Map, Map)",
+        "requestVodAd(String, String, Number, Map, MediaPlayerHook)",
+        "play()",
+        "pause()",
+        "resume()",
+        "stop()",
+        "notifyContentEnded()"
       ]
     }
   }

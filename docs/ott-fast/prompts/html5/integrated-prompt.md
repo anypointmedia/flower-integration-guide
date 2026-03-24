@@ -16,10 +16,6 @@ APPROACH: {{APPROACH}} (flower-hls | media-player-hook)
 Note: For interstitial AD_TYPE, no APPROACH selection is needed.
 SDK_VERSION: {{SDK_VERSION}}
 PLAYER_TYPE: {{PLAYER_TYPE}} (hls.js | bitmovin | dash.js | none)
-AD_TAG_URL: {{AD_TAG_URL}}
-PREROLL_AD_TAG_URL: {{PREROLL_AD_TAG_URL}}
-CHANNEL_ID/CONTENT_ID: {{CHANNEL_ID_OR_CONTENT_ID}}
-CONTENT_DURATION_MS: {{CONTENT_DURATION_MS}}
 
 ################################################################
 STEP 1 — PROJECT SETUP & SDK INITIALIZATION
@@ -272,34 +268,38 @@ STEP 3-2 — Request Ads / Start Playback
 If AD_TYPE is "linear-tv" AND APPROACH is "flower-hls":
 ⚠ Do NOT use changeChannelUrl() here — it is for media-player-hook only.
 
+  Use values from your config data — do NOT hardcode URLs or parameters.
+
   hls.setAdConfig({
-      adTagUrl: 'https://ad_request',
-      prerollAdTagUrl: 'https://preroll_ad_request',
-      channelId: '1',
-      extraParams: { title: '...', genre: '...' }
+      adTagUrl: config.adTagUrl,
+      prerollAdTagUrl: config.prerollAdTagUrl,   // Optional
+      channelId: config.channelId,
+      extraParams: config.extraParams || {}
   });
-  hls.loadSource('https://original_stream.m3u8');
+  hls.loadSource(config.contentUrl);
 
 --------------------------------------------------
 If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 ⚠ Do NOT use setAdConfig() here — it is for flower-hls only.
 
+  Use values from your config data — do NOT hardcode URLs or parameters.
+
   const mediaPlayerHook = { getPlayer() { return player; } };
 
   const changedUrl = flowerAdView.adsManager.changeChannelUrl(
-      'https://original_stream.m3u8',
-      'https://ad_request',
-      '1',
-      new Map([['custom-param', 'value']]),
-      mediaPlayerHook,
-      new Map([['ad-header', 'value']]),
-      new Map([['stream-header', 'value']]),
-      'https://preroll_ad_request'
+      config.contentUrl,                                       // Required
+      config.adTagUrl,                                         // Required
+      config.channelId,                                        // Required
+      new Map(Object.entries(config.extraParams || {})),        // Required (Map)
+      mediaPlayerHook,                                         // Required
+      new Map(),                                               // adTagHeaders (Optional)
+      new Map(),                                               // channelStreamHeaders (Optional)
+      config.prerollAdTagUrl                                   // Optional
   );
 
   // HLS.js:
   player.loadSource(changedUrl);
-  player.on(Hls.Events.MANIFEST_PARSED, () => { videoElement.play(); });
+  player.once(Hls.Events.MANIFEST_PARSED, () => { videoElement.play(); });
 
   // Bitmovin:
   player.load({ hls: changedUrl }).then(() => { player.play(); });
@@ -307,43 +307,47 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 --------------------------------------------------
 If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
 
+  Use values from your config data — do NOT hardcode URLs or parameters.
+
   const mediaPlayerHook = { getPlayer() { return player; } };
 
   flowerAdView.adsManager.requestVodAd(
-      'https://ad_request',
-      '100',
-      3600000,
-      new Map([['custom-param', 'value']]),
-      mediaPlayerHook,
-      new Map([['ad-header', 'value']])
+      config.adTagUrl,                                         // Required
+      config.contentId,                                        // Required
+      config.contentDuration,                                  // Required (ms)
+      new Map(Object.entries(config.extraParams || {})),        // Required (Map)
+      mediaPlayerHook                                          // Required
   );
 
   // HLS.js:
-  player.loadSource('https://vod_content_url');
-  player.on(Hls.Events.MANIFEST_PARSED, () => { videoElement.play(); });
+  player.loadSource(config.contentUrl);
+  player.once(Hls.Events.MANIFEST_PARSED, () => { videoElement.play(); });
 
 --------------------------------------------------
 If AD_TYPE is "interstitial":
 
+  Use values from your config data — do NOT hardcode URLs or parameters.
+
   flowerAdView.adsManager.requestAd(
-      'https://ad_request',
-      new Map(),
-      new Map()
+      config.adTagUrl,                                         // Required
+      new Map(Object.entries(config.extraParams || {})),        // Optional
+      new Map()                                                // adTagHeaders (Optional)
   );
 
 ========================================
 MEDIA PLAYER ADAPTER (Advanced — Linear TV only)
 ========================================
 
-For unsupported players, use enterChannel() with MediaPlayerAdapter:
+For unsupported players, use enterChannel() with MediaPlayerAdapter.
+Use values from your config data — do NOT hardcode URLs or parameters.
 
   flowerAdView.adsManager.enterChannel(
-      'https://ad_request',
-      '1',
-      new Map([['custom-param', 'value']]),
-      mediaPlayerHook,
-      new Map([['ad-header', 'value']]),
-      mediaPlayerAdapter
+      config.adTagUrl,                                         // Required
+      config.channelId,                                        // Required
+      new Map(Object.entries(config.extraParams || {})),        // Required (Map)
+      mediaPlayerHook,                                         // Required
+      new Map(),                                               // adTagHeaders (Optional)
+      mediaPlayerAdapter                                       // Required
   );
 
 MediaPlayerAdapter must implement:
@@ -425,14 +429,26 @@ STEP 4-2 — Page Unload (Optional)
 
 Clean up on page navigation:
 
+If AD_TYPE is "linear-tv" or "vod":
+
   window.addEventListener('beforeunload', () => {
       stopPlayback();
   });
 
-React useEffect cleanup:
-
+  React useEffect cleanup:
   useEffect(() => {
       return () => { stopPlayback(); };
+  }, []);
+
+If AD_TYPE is "interstitial":
+
+  window.addEventListener('beforeunload', () => {
+      stopAd();
+  });
+
+  React useEffect cleanup:
+  useEffect(() => {
+      return () => { stopAd(); };
   }, []);
 
 ========================================

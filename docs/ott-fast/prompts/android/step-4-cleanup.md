@@ -36,7 +36,7 @@ If APPROACH is "media-player-hook":
 
   override fun onDestroy() {
       super.onDestroy()
-      flowerAdView.adsManager.removeListener(adsManagerListener)
+      flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
       flowerAdView.adsManager.stop()
       player.release()
   }
@@ -45,7 +45,7 @@ If AD_TYPE is "interstitial":
 
   override fun onDestroy() {
       super.onDestroy()
-      flowerAdView.adsManager.removeListener(adsManagerListener)
+      flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
       flowerAdView.adsManager.stop()
   }
 

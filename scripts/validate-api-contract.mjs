@@ -60,6 +60,7 @@ function extractClassRefs(content) {
   // Match known SDK class names
   const allClasses = new Set();
   for (const platformKey of Object.keys(contract)) {
+    if (META_KEYS.has(platformKey)) continue;
     for (const cls of Object.keys(contract[platformKey])) {
       allClasses.add(cls);
     }
@@ -67,10 +68,16 @@ function extractClassRefs(content) {
 
   const found = new Set();
   for (const cls of allClasses) {
-    // Match class name as a word boundary
     const pattern = new RegExp(`\\b${cls}\\b`, 'g');
-    if (pattern.test(content)) {
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      // Skip negation context
+      const lineStart = content.lastIndexOf('\n', match.index) + 1;
+      const lineEnd = content.indexOf('\n', match.index);
+      const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+      if (/\b(not|NOT|does NOT|Do NOT|never|NEVER)\b/.test(line)) continue;
       found.add(cls);
+      break;
     }
   }
   return found;
@@ -88,14 +95,18 @@ function extractImportPaths(content) {
 }
 
 function extractMethodCalls(content, className) {
-  // Match patterns like ClassName.methodName( or object.methodName(
-  // Also match interface method definitions like: fun methodName( or void methodName(
   const methods = new Set();
 
   // Direct class calls: ClassName.method(
+  // Skip negation context: lines containing "not ClassName.method" or "NOT require ClassName.method"
   const staticPattern = new RegExp(`${className}\\.(\\w+)\\(`, 'g');
   let match;
   while ((match = staticPattern.exec(content)) !== null) {
+    // Check if match is in a negation context
+    const lineStart = content.lastIndexOf('\n', match.index) + 1;
+    const lineEnd = content.indexOf('\n', match.index);
+    const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+    if (/\b(not|NOT|does NOT|Do NOT|never|NEVER)\b/.test(line)) continue;
     methods.add(match[1]);
   }
 
@@ -103,6 +114,9 @@ function extractMethodCalls(content, className) {
 }
 
 // ─── Validate each platform ───
+
+// Skip metadata keys in contract JSON
+const META_KEYS = new Set(['$schema', '_description', '_lastVerified']);
 
 const platformPrompts = {
   'linear-tv': [
@@ -135,6 +149,9 @@ const platformPrompts = {
   ],
 };
 
+// Filter contract to only platform keys
+const platformKeys = Object.keys(contract).filter(k => !META_KEYS.has(k));
+
 for (const [platformKey, promptFiles] of Object.entries(platformPrompts)) {
   console.log(`\n=== ${platformKey} ===\n`);
 
@@ -147,6 +164,8 @@ for (const [platformKey, promptFiles] of Object.entries(platformPrompts)) {
   for (const f of promptFiles) {
     if (existsSync(f)) {
       allContent += readFileSync(f, 'utf-8') + '\n';
+    } else {
+      error(`Expected prompt file not found: ${f}`);
     }
   }
 
@@ -173,15 +192,17 @@ for (const [platformKey, promptFiles] of Object.entries(platformPrompts)) {
   const referencedClasses = extractClassRefs(allContent);
   for (const cls of referencedClasses) {
     if (!contractClasses.has(cls)) {
-      // Could be from another platform's contract - just warn
-      let foundElsewhere = false;
+      let leakedFrom = null;
       for (const otherPlatform of Object.keys(contract)) {
+        if (META_KEYS.has(otherPlatform)) continue;
         if (otherPlatform !== platformKey && contract[otherPlatform][cls]) {
-          foundElsewhere = true;
+          leakedFrom = otherPlatform;
           break;
         }
       }
-      if (!foundElsewhere) {
+      if (leakedFrom) {
+        error(`Class "${cls}" referenced in ${platformKey} prompts but belongs to ${leakedFrom} contract (cross-platform leakage)`);
+      } else {
         warn(`Class "${cls}" referenced in ${platformKey} prompts but not in any API contract`);
       }
     } else {

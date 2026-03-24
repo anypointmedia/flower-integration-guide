@@ -48,6 +48,9 @@ If APPROACH is "media-player-hook":
       if let listener = adsManagerListener {
           flowerAdView.adsManager.removeListener(adsManagerListener: listener)
       }
+      if let observer = contentEndObserver {
+          NotificationCenter.default.removeObserver(observer)
+      }
       flowerAdView.adsManager.stop()
       player.pause()
       player.removeAllItems()
@@ -57,6 +60,9 @@ If APPROACH is "media-player-hook":
   override func viewWillDisappear(_ animated: Bool) {
       super.viewWillDisappear(animated)
       flowerAdView.adsManager.removeListener(adsManagerListener: self)
+      if let observer = contentEndObserver {
+          NotificationCenter.default.removeObserver(observer)
+      }
       flowerAdView.adsManager.stop()
       player.pause()
       player.removeAllItems()

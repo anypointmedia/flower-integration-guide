@@ -21,11 +21,6 @@ Note: For interstitial AD_TYPE, no APPROACH selection is needed.
 
 SDK_VERSION: {{SDK_VERSION}}
 
-AD_TAG_URL: {{AD_TAG_URL}}
-PREROLL_AD_TAG_URL: {{PREROLL_AD_TAG_URL}} (Optional, for linear-tv only)
-CHANNEL_ID or CONTENT_ID: {{CHANNEL_ID_OR_CONTENT_ID}}
-CONTENT_DURATION_MS: {{CONTENT_DURATION_MS}} (For VOD only, in milliseconds)
-
 ################################################################
 # IMPORTS — Required packages
 ################################################################
@@ -329,7 +324,7 @@ For FlowerPlayer:
 For MediaPlayerHook:
   Same listener logic, but register on flowerAdView.adsManager:
 
-  flowerAdView.adsManager.addListener(adsManagerListener)
+  flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
 --------------------------------------------------
 If AD_TYPE is "vod":
@@ -478,70 +473,73 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
 --------------------------------------------------
 If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 
-  Call changeChannelUrl() to get a modified URL, then play it:
+  Call changeChannelUrl() to get a modified URL, then play it.
+  Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-      "https://original_stream_url",    // videoUrl
-      "{{AD_TAG_URL}}",                 // adTagUrl
-      "{{CHANNEL_ID_OR_CONTENT_ID}}",                         // channelId
-      mapOf("custom-param" to "value"), // extraParams
-      { player },                       // mediaPlayerHook (lambda returning player)
-      mapOf("ad-header" to "value"),    // adTagHeaders (Optional)
-      mapOf("stream-header" to "value"),// channelStreamHeaders (Optional)
-      "{{PREROLL_AD_TAG_URL}}"          // prerollAdTagUrl (Optional)
+      videoUrl = config.contentUrl,                   // Required
+      adTagUrl = config.adTagUrl,                     // Required
+      channelId = config.channelId,                   // Required
+      extraParams = config.extraParams,               // Required
+      mediaPlayerHook = { player },                   // Required (lambda returning player)
+      adTagHeaders = null,                            // Optional
+      channelStreamHeaders = null,                    // Optional
+      prerollAdTagUrl = config.prerollAdTagUrl,       // Optional
   )
 
-  player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+  player.setMediaItem(MediaItem.fromUri(Uri.parse(changedChannelUrl)))
   player.prepare()
   player.playWhenReady = true
 
 --------------------------------------------------
 If AD_TYPE is "vod" AND APPROACH is "flower-player":
 
-  Create FlowerVodAdConfig and pass it to setMediaItem():
+  Create FlowerVodAdConfig and pass it to setMediaItem().
+  Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   val adConfig = FlowerVodAdConfig(
-      adTagUrl = "{{AD_TAG_URL}}",
-      contentId = "{{CHANNEL_ID_OR_CONTENT_ID}}",
-      contentDuration = {{CONTENT_DURATION_MS}},     // Duration in ms
-      requestTimeout = 5_000L,            // Optional, default 5000
-      minPrepareDuration = 5_000L,        // Optional, default 5000
-      extraParams = mapOf("title" to "...", "genre" to "..."),
-      adTagHeaders = mapOf("custom-ad-header" to "value"),
+      adTagUrl = config.adTagUrl,                     // Required
+      contentId = config.contentId,                   // Required
+      contentDuration = config.contentDuration,       // Required (ms)
+      extraParams = config.extraParams,               // Required (targeting info)
+      // requestTimeout = 5_000L,                     // Optional, default 5000
+      // minPrepareDuration = 5_000L,                 // Optional, default 5000
+      // adTagHeaders = mapOf(...),                   // Optional — omit if not needed
   )
 
-  val mediaItem = MediaItem.fromUri(videoUrl)
-  player.setMediaItem(mediaItem, adConfig)
+  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)), adConfig)
   player.prepare()
-  player.play()
+  player.playWhenReady = true
 
 --------------------------------------------------
 If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
 
-  Call requestVodAd() then start content playback:
+  Call requestVodAd() then start content playback.
+  Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   flowerAdView.adsManager.requestVodAd(
-      adTagUrl = "{{AD_TAG_URL}}",
-      contentId = "{{CHANNEL_ID_OR_CONTENT_ID}}",
-      durationMs = {{CONTENT_DURATION_MS}},
-      extraParams = mapOf("custom-param" to "value"),
-      mediaPlayerHook = { player },
-      adTagHeaders = mapOf("ad-header" to "value"),
+      adTagUrl = config.adTagUrl,                     // Required
+      contentId = config.contentId,                   // Required
+      durationMs = config.contentDuration,            // Required (ms)
+      extraParams = config.extraParams,               // Required
+      mediaPlayerHook = { player },                   // Required
+      // adTagHeaders = mapOf(...),                   // Optional — omit if not needed
   )
 
-  player.setMediaItem(MediaItem.fromUri(videoUrl))
+  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)))
   player.prepare()
   player.playWhenReady = true
 
 --------------------------------------------------
 If AD_TYPE is "interstitial":
 
-  Call requestAd() — no player needed:
+  Call requestAd() — no player needed.
+  Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   flowerAdView.adsManager.requestAd(
-      "{{AD_TAG_URL}}",
-      mapOf("custom-param" to "value"),
-      mapOf("ad-header" to "value")
+      config.adTagUrl,                                // Required
+      config.extraParams,                             // Required (or emptyMap())
+      config.adTagHeaders ?: emptyMap(),              // Optional
   )
 
 ========================================
@@ -549,17 +547,18 @@ If AD_TYPE is "interstitial":
 ========================================
 
 If using an unsupported player, implement MediaPlayerAdapter instead of MediaPlayerHook.
-Pass the adapter to changeChannelUrl() overload:
+Pass the adapter to changeChannelUrl() overload.
+Use values from your config/intent data — do NOT hardcode URLs or parameters.
 
   val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-      "https://original_stream_url",
-      "{{AD_TAG_URL}}",
-      "{{CHANNEL_ID_OR_CONTENT_ID}}",
-      mapOf("custom-param" to "value"),
-      myMediaPlayerAdapter,              // MediaPlayerAdapter instead of MediaPlayerHook
-      mapOf("ad-header" to "value"),
-      mapOf("stream-header" to "value"),
-      "{{PREROLL_AD_TAG_URL}}"
+      config.contentUrl,                  // videoUrl
+      config.adTagUrl,                    // adTagUrl
+      config.channelId,                   // channelId
+      config.extraParams,                 // extraParams
+      myMediaPlayerAdapter,               // MediaPlayerAdapter instead of MediaPlayerHook
+      null,                               // adTagHeaders (Optional)
+      null,                               // channelStreamHeaders (Optional)
+      config.prerollAdTagUrl              // prerollAdTagUrl (Optional)
   )
 
 MediaPlayerAdapter must implement these methods:
@@ -599,7 +598,7 @@ If APPROACH is "media-player-hook":
 
   override fun onDestroy() {
       super.onDestroy()
-      flowerAdView.adsManager.removeListener(adsManagerListener)
+      flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
       flowerAdView.adsManager.stop()
       player.release()
   }
@@ -608,7 +607,7 @@ If AD_TYPE is "interstitial":
 
   override fun onDestroy() {
       super.onDestroy()
-      flowerAdView.adsManager.removeListener(adsManagerListener)
+      flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
       flowerAdView.adsManager.stop()
   }
 

@@ -84,14 +84,26 @@ PART 2 — Page Unload (Optional)
 
 Clean up on page navigation:
 
+If AD_TYPE is "linear-tv" or "vod":
+
   window.addEventListener('beforeunload', () => {
       stopPlayback();
   });
 
-React useEffect cleanup:
-
+  React useEffect cleanup:
   useEffect(() => {
       return () => { stopPlayback(); };
+  }, []);
+
+If AD_TYPE is "interstitial":
+
+  window.addEventListener('beforeunload', () => {
+      stopAd();
+  });
+
+  React useEffect cleanup:
+  useEffect(() => {
+      return () => { stopAd(); };
   }, []);
 
 ========================================

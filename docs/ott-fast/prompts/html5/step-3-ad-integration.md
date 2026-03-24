@@ -186,15 +186,16 @@ If AD_TYPE is "interstitial":
 MEDIA PLAYER ADAPTER (Advanced — Linear TV only)
 ========================================
 
-For unsupported players, use enterChannel() with MediaPlayerAdapter:
+For unsupported players, use enterChannel() with MediaPlayerAdapter.
+Use values from your config data — do NOT hardcode URLs or parameters.
 
   flowerAdView.adsManager.enterChannel(
-      'https://ad_request',
-      '1',
-      new Map([['custom-param', 'value']]),
-      mediaPlayerHook,
-      new Map([['ad-header', 'value']]),
-      mediaPlayerAdapter
+      config.adTagUrl,                                         // Required
+      config.channelId,                                        // Required
+      new Map(Object.entries(config.extraParams || {})),        // Required (Map)
+      mediaPlayerHook,                                         // Required
+      new Map(),                                               // adTagHeaders (Optional)
+      mediaPlayerAdapter                                       // Required
   );
 
 MediaPlayerAdapter must implement:

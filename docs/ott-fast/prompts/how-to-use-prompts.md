@@ -47,10 +47,6 @@ Before using any prompt, replace the `{{...}}` placeholders:
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | Type of ad content |
 | `APPROACH` | `flower-player` \| `media-player-hook` | Integration approach (see below) |
 | `SDK_VERSION` | e.g., `2.8.0` | Flower SDK version provided to your project |
-| `AD_TAG_URL` | URL string | Ad tag URL provided by your ad operations team |
-| `PREROLL_AD_TAG_URL` | URL string (optional) | Pre-roll ad tag URL (linear-tv only) |
-| `CHANNEL_ID_OR_CONTENT_ID` | e.g., `1` | Channel ID (linear-tv) or content ID (vod/interstitial) |
-| `CONTENT_DURATION_MS` | e.g., `3403000` | Content duration in milliseconds (VOD only) |
 
 ### iOS Additional Parameters
 

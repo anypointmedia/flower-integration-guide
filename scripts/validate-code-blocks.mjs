@@ -32,53 +32,82 @@ function warn(file, block, msg) {
 
 function extractCodeBlocks(content) {
   const blocks = [];
-  // Match fenced code blocks inside ```plain ... ``` prompt sections
-  // We need code blocks INSIDE the plain block
-  // Strategy: find all code blocks that look like actual code (Java/Kotlin/Swift/JS)
-  // not the outer ```plain wrapper
 
-  // First, extract the prompt content (inside ```plain ... ```)
+  // Extract the prompt content (inside ```plain ... ```)
   const plainMatch = content.match(/```plain\n([\s\S]*?)```/);
   if (!plainMatch) return blocks;
 
   const promptContent = plainMatch[1];
 
-  // Find code-like sections: Java/Kotlin class definitions, method implementations
-  // These are identified by patterns like:
-  // - class/interface definitions
-  // - override fun/void patterns
-  // - import statements followed by code
+  // Match snippet headings used in the actual prompts:
+  //   Kotlin:, Kotlin (FlowerPlayer):, Kotlin (MediaPlayerHook):,
+  //   Java:, Swift:, SwiftUI:, SwiftUI (.onDisappear):,
+  //   SwiftUI — implement as class holding view reference:,
+  //   UIKit:, UIKit (viewWillDisappear):, UIKit — conform on ViewController:,
+  //   JavaScript:, JS:, XML:, HLS.js:, Bitmovin:, Dash.js:,
+  //   Single HTML File:, React ...:, FlowerHls ...:
+  //
+  // Headings may be indented with 2 spaces.
+  const labelKeywords = [
+    'Kotlin', 'Java', 'Swift', 'SwiftUI', 'UIKit',
+    'JavaScript', 'JS', 'XML',
+    'HLS\\.js', 'Bitmovin', 'Dash\\.js',
+    'Single HTML File', 'React', 'FlowerHls',
+  ];
+  const labelPrefix = labelKeywords.join('|');
 
-  // Extract labeled code sections
-  // Matches: "Java:", "Kotlin:", "Swift:", "JavaScript:", "JS:", "XML:",
-  // and HTML5-style: "Single HTML File:", "React (...):", "FlowerHls approach:"
-  const labelPattern = /(?:^|\n)(Java|Kotlin|Swift|JavaScript|JS|XML|Single HTML File|React[^:\n]*|FlowerHls[^:\n]*|If[^:\n]*):\s*\n([\s\S]*?)(?=\n(?:Java|Kotlin|Swift|JavaScript|JS|XML|Single HTML File|React|FlowerHls|If |========|---------|################################################################|\n---)|\n*$)/g;
+  // Capture: optional indent, keyword + optional parenthetical/dash suffix, colon, newline, then body
+  // Body ends at the next heading, section separator, or end of content
+  const labelPattern = new RegExp(
+    `(?:^|\\n)[ \\t]*((?:${labelPrefix})[^:\\n]*):\\s*\\n([\\s\\S]*?)` +
+    `(?=\\n[ \\t]*(?:${labelPrefix})[^:\\n]*:\\s*\\n|\\n(?:========|---------|################################################################)|$)`,
+    'g'
+  );
+
   let match;
   let idx = 0;
 
   while ((match = labelPattern.exec(promptContent)) !== null) {
+    const label = match[1].trim();
+    const code = match[2].trim();
+    if (code.length < 10) continue; // skip empty/trivial blocks
+
     blocks.push({
-      language: match[1].toLowerCase(),
-      code: match[2].trim(),
+      language: inferLanguage(label),
+      code,
       index: idx++,
     });
   }
 
-  // Also find standalone code patterns (class definitions without labels)
-  const classPattern = /\n((?:public |private |open )?(?:class|interface|object|struct|enum) \w+[\s\S]*?\n\})\s*\n/g;
+  // Fallback: find standalone code patterns (class definitions without labels)
+  // Allow leading indentation (2-4 spaces)
+  const classPattern = /\n([ \t]*(?:public |private |open )?(?:class|interface|object|struct|enum) \w+[\s\S]*?\n[ \t]*\})\s*\n/g;
   while ((match = classPattern.exec(promptContent)) !== null) {
-    // Skip if already captured in labeled blocks
-    const alreadyCaptured = blocks.some(b => b.code.includes(match[1].trim().substring(0, 50)));
+    const code = match[1].trim();
+    const alreadyCaptured = blocks.some(b => b.code.includes(code.substring(0, 50)));
     if (!alreadyCaptured) {
       blocks.push({
-        language: detectLanguage(match[1]),
-        code: match[1].trim(),
+        language: detectLanguage(code),
+        code,
         index: idx++,
       });
     }
   }
 
   return blocks;
+}
+
+function inferLanguage(label) {
+  const l = label.toLowerCase();
+  if (l.startsWith('kotlin')) return 'kotlin';
+  if (l.startsWith('java')) return 'java';
+  if (l.startsWith('swift') || l.startsWith('uikit')) return 'swift';
+  if (l.startsWith('javascript') || l.startsWith('js') || l.startsWith('hls.js')
+      || l.startsWith('bitmovin') || l.startsWith('dash.js')
+      || l.startsWith('react') || l.startsWith('single html')) return 'javascript';
+  if (l.startsWith('xml')) return 'xml';
+  if (l.startsWith('flowerhls')) return 'javascript';
+  return 'unknown';
 }
 
 function detectLanguage(code) {
@@ -176,11 +205,16 @@ function validateImportUsage(file, block) {
 
   const code = block.code;
 
-  // Skip import-only blocks (e.g., IMPORTS sections that list imports separately)
+  // Strip imports and comments to get "real code"
   const codeWithoutImports = code.replace(/import\s+[\w.;]+\s*\n?/g, '')
-    .replace(/\/\/.*\n?/g, '') // strip comments
+    .replace(/\/\/.*\n?/g, '')
     .trim();
-  if (codeWithoutImports.length < 30) return; // Block is mostly imports
+
+  // Skip blocks that are primarily import listings (IMPORTS reference sections).
+  // If imports make up most of the block, there's no code to check usage against.
+  const importLines = (code.match(/^\s*import\s+/gm) || []).length;
+  const totalLines = code.split('\n').filter(l => l.trim()).length;
+  if (totalLines > 0 && importLines / totalLines > 0.5) return;
 
   const imports = [];
   const importPattern = /import\s+([\w.]+\.(\w+));?\s*$/gm;
@@ -198,41 +232,129 @@ function validateImportUsage(file, block) {
   }
 }
 
-function validateMethodSignatures(file, block) {
-  // Build a map of all known SDK methods across all platforms
-  const allMethods = {};
-  for (const [, platform] of Object.entries(contract)) {
-    for (const [className, info] of Object.entries(platform)) {
-      if (!allMethods[className]) allMethods[className] = new Set();
-      for (const m of (info.methods || [])) {
-        allMethods[className].add(m.replace(/\(.*\)/, ''));
+function validateMethodSignatures(file, block, platformKey) {
+  // Build method map for this platform only, preserving arity
+  const platformContract = contract[platformKey];
+  if (!platformContract) return;
+
+  // methodNames: className -> Set of bare method names (for existence check)
+  // methodArities: className -> { methodName: Set of valid arities }
+  const methodNames = {};
+  const methodArities = {};
+  for (const [className, info] of Object.entries(platformContract)) {
+    methodNames[className] = new Set();
+    methodArities[className] = {};
+    for (const m of (info.methods || [])) {
+      const nameMatch = m.match(/^(\w+)\((.*)\)$/);
+      if (!nameMatch) continue;
+      const name = nameMatch[1];
+      const params = nameMatch[2].trim();
+      const arity = params === '' ? 0 : params.split(',').length;
+      methodNames[className].add(name);
+      if (!methodArities[className][name]) methodArities[className][name] = new Set();
+      methodArities[className][name].add(arity);
+    }
+  }
+
+  // Build a map of property types (e.g., adsManager -> FlowerAdsManager)
+  const propertyTypes = {};
+  for (const [className, info] of Object.entries(platformContract)) {
+    if (info.properties) {
+      for (const prop of info.properties) {
+        for (const candidateClass of Object.keys(platformContract)) {
+          if (candidateClass.toLowerCase().endsWith(prop.toLowerCase())) {
+            propertyTypes[prop] = candidateClass;
+            break;
+          }
+        }
       }
     }
   }
 
-  // Find ClassName.method() calls in code
-  const callPattern = /(\w+)\.([\w]+)\s*\(/g;
-  let match;
   const code = block.code;
+  const skipMethods = new Set([
+    'toString', 'hashCode', 'equals', 'Builder', 'build', 'log',
+    'e', 'setVolume', 'pause', 'start', 'prepare', 'size',
+    'fromUri', 'getMediaUnits', 'getDuration',
+  ]);
 
-  while ((match = callPattern.exec(code)) !== null) {
-    const className = match[1];
-    const methodName = match[2];
+  function checkCall(className, methodName, callStartIdx, via) {
+    if (skipMethods.has(methodName)) return;
+    if (!methodNames[className]) return;
 
-    // Only check known SDK classes
-    if (allMethods[className]) {
-      if (!allMethods[className].has(methodName)) {
-        // Skip common methods
-        if (['toString', 'hashCode', 'equals', 'Builder', 'build', 'log',
-          'e', 'setVolume', 'pause', 'start', 'prepare', 'size',
-          'fromUri', 'getMediaUnits', 'getDuration'].includes(methodName)) continue;
-        // Skip variable names that happen to match class names
-        if (className[0] === className[0].toLowerCase()) continue;
+    const label = via ? `${className}.${methodName}() (via .${via})` : `${className}.${methodName}()`;
 
-        error(file, block, `${className}.${methodName}() — method not found in API contract`);
-      }
+    if (!methodNames[className].has(methodName)) {
+      error(file, block, `${label} — method not found in ${platformKey} API contract`);
+      return;
+    }
+
+    // Count arguments at call site
+    const argCount = countArgs(code, callStartIdx);
+    if (argCount === null) return; // couldn't parse, skip arity check
+
+    const validArities = methodArities[className][methodName];
+    if (validArities && validArities.size > 0 && !validArities.has(argCount)) {
+      warn(file, block, `${label} — called with ${argCount} arg(s), contract expects ${[...validArities].join(' or ')}`);
     }
   }
+
+  // 1. Direct class calls: ClassName.method(
+  const staticPattern = /(\w+)\.([\w]+)\s*\(/g;
+  let match;
+  while ((match = staticPattern.exec(code)) !== null) {
+    const lhs = match[1];
+    if (lhs[0] === lhs[0].toLowerCase()) continue; // skip instance vars
+    checkCall(lhs, match[2], match.index + match[0].length - 1, null);
+  }
+
+  // 2. Instance chain calls: something.property.method(
+  const chainPattern = /\.(\w+)\.([\w]+)\s*\(/g;
+  while ((match = chainPattern.exec(code)) !== null) {
+    const resolvedClass = propertyTypes[match[1]];
+    if (resolvedClass) {
+      checkCall(resolvedClass, match[2], match.index + match[0].length - 1, match[1]);
+    }
+  }
+}
+
+// Count comma-separated arguments starting at the opening '(' index.
+// Returns null if the closing ')' cannot be found (multi-line truncation etc.).
+function countArgs(code, openIdx) {
+  if (code[openIdx] !== '(') return null;
+
+  let depth = 1;
+  let argCount = 0;
+  let hasContent = false;
+  let inString = false;
+  let stringChar = null;
+
+  for (let i = openIdx + 1; i < code.length && depth > 0; i++) {
+    const ch = code[i];
+
+    // String handling
+    if (!inString && (ch === '"' || ch === '\'')) {
+      inString = true;
+      stringChar = ch;
+      hasContent = true;
+      continue;
+    }
+    if (inString) {
+      if (ch === stringChar && code[i - 1] !== '\\') inString = false;
+      continue;
+    }
+
+    if (ch === '(' || ch === '[' || ch === '{') { depth++; hasContent = true; continue; }
+    if (ch === ')' || ch === ']' || ch === '}') {
+      depth--;
+      if (depth === 0) return hasContent ? argCount + 1 : 0;
+      continue;
+    }
+    if (ch === ',' && depth === 1) { argCount++; continue; }
+    if (ch !== ' ' && ch !== '\n' && ch !== '\r' && ch !== '\t') hasContent = true;
+  }
+
+  return null; // unbalanced — snippet may be truncated
 }
 
 // ─── Main ───
@@ -271,7 +393,7 @@ for (const { name, dir } of promptDirs) {
     for (const block of blocks) {
       validateBraces(relPath, block);
       validateImportUsage(relPath, block);
-      validateMethodSignatures(relPath, block);
+      validateMethodSignatures(relPath, block, name);
     }
   }
 

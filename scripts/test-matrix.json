@@ -154,7 +154,7 @@
       },
       {
         "name": "interstitial",
-        "params": { "AD_TYPE": "interstitial" },
+        "params": { "AD_TYPE": "interstitial", "APPROACH": "N/A" },
         "expect": [
           "FlowerAdView",
           "requestAd",
@@ -328,7 +328,7 @@
       },
       {
         "name": "interstitial + swiftui",
-        "params": { "AD_TYPE": "interstitial", "UI_FRAMEWORK": "swiftui" },
+        "params": { "AD_TYPE": "interstitial", "APPROACH": "N/A", "UI_FRAMEWORK": "swiftui" },
         "expect": [
           "FlowerAdView",
           "requestAd",
@@ -347,7 +347,7 @@
       },
       {
         "name": "interstitial + uikit",
-        "params": { "AD_TYPE": "interstitial", "UI_FRAMEWORK": "uikit" },
+        "params": { "AD_TYPE": "interstitial", "APPROACH": "N/A", "UI_FRAMEWORK": "uikit" },
         "expect": [
           "FlowerAdView.HostingController",
           "requestAd",
@@ -453,7 +453,7 @@
       },
       {
         "name": "interstitial",
-        "params": { "AD_TYPE": "interstitial", "PLAYER_TYPE": "none" },
+        "params": { "AD_TYPE": "interstitial", "APPROACH": "N/A", "PLAYER_TYPE": "none" },
         "expect": [
           "FlowerAdView",
           "requestAd",
