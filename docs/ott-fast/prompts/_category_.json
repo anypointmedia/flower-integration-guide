@@ -1,5 +1,6 @@
 {
   "label": "Prompts for LLM",
+  "key": "ott-fast-prompts",
   "position": 99,
   "collapsed": true
 }

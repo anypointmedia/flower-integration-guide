@@ -21,7 +21,6 @@ sidebar_position: 1
 | 2.5.1 | Oct 14, 2025 | **BugFix** <ol><li>Fixed an error that spare ad for skippable ad is actually inserted in the stream.</li></ol> |
 | 2.5.0 | Oct 2, 2025 | **Feature** <ol><li>Added Flower player support for ad insertion on VOD content.</li><li>Added FlowerBitmovinPlayer, Flower player class that wraps bitmovin player.</li></ol> **BugFix** <ol><li>Fixed an error that VOD ad not showing in PIP mode. This fix requires Flower player.</li></ol> |
 | 2.4.2 | Oct 2, 2025 | **BugFix** <ol><li>Rolled back Kotlin version from 2.2.0 to 2.0.21, which was upgraded in 2.3.3</li></ol> |
-| 2.3.4 | Oct 2, 2025 | **BugFix** <ol><li>Rolled back Kotlin version from 2.2.0 to 2.0.21, which was upgraded in 2.3.3</li></ol> |
 | 2.4.1 | Sep 22, 2025 | **Improvement** <ol><li>Improved ad load speed when using requestChannelAd().</li></ol> **BugFix** <ol><li>Fixed overflow when calculating free storage for cache files.</li></ol> |
 | 2.4.0 | Sep 19, 2025 | **Feature** <ol><li>Added FlowerSdk.ignoreSkip() API to allow users to opt out of ad skipping when using their own ad serving system.</li></ol> |
 | 2.3.3 | Sep 9, 2025 | **Improvement** <ol><li>Improved ad load speed.</li></ol> |

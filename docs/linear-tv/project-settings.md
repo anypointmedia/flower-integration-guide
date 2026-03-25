@@ -36,6 +36,7 @@ dependencies {
 
 ## AndroidManifest.xml
 Versions lower than `2.0.7` need to add the settings below, higher or equal versions, skip them.
+
 Query settings
 
 ```xml

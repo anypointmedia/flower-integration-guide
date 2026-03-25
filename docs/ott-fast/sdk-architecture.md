@@ -51,5 +51,6 @@ This SDK enables you to seamlessly integrate full-screen interstitial ads into y
 
 ## View Layer Arrangement
 The _AdView_ must be the same size as the view in which the main player is placed and overlap that view completely.
+
 _AdView_ is displayed transparently by default, and “Show more” or “Skip” buttons or overlay advertisements can be displayed on it if needed.
 ![](/img/docs/32f9fd50-3022-4d1c-90af-cab02c1713e2.png)

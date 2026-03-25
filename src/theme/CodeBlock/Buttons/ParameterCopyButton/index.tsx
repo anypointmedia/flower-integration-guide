@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import {createPortal} from 'react-dom';
 import clsx from 'clsx';
+import {translate} from '@docusaurus/Translate';
 import {useCodeBlockContext} from '@docusaurus/theme-common/internal';
 import Button from '@theme/CodeBlock/Buttons/Button';
 
@@ -250,7 +251,7 @@ function ParameterModal({
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h3 className={styles.title}>Fill Parameters</h3>
+          <h3 className={styles.title}>{translate({id: 'theme.CodeBlock.parameterModal.title', message: 'Fill Parameters', description: 'Title of the parameter fill modal for code blocks'})}</h3>
           <span className={styles.counter}>
             {filledCount} / {visibleParams.length}
           </span>
@@ -283,7 +284,7 @@ function ParameterModal({
                   ref={i === 0 ? firstInputRef : undefined}
                   data-param-index={i}
                   className={styles.input}
-                  placeholder={param.hint || `Enter ${param.name}`}
+                  placeholder={param.hint || translate({id: 'theme.CodeBlock.parameterModal.inputPlaceholder', message: 'Enter {paramName}', description: 'Placeholder for parameter input field'}).replace('{paramName}', param.name)}
                   value={values[param.name] || ''}
                   onChange={(e) =>
                     setValues((prev) => ({
@@ -303,10 +304,12 @@ function ParameterModal({
             type="button"
             className={clsx(styles.copyBtn, isCopied && styles.copied)}
             onClick={handleCopy}>
-            {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+            {isCopied
+              ? translate({id: 'theme.CodeBlock.parameterModal.copied', message: 'Copied!', description: 'Text shown after successful copy'})
+              : translate({id: 'theme.CodeBlock.parameterModal.copyButton', message: 'Copy to Clipboard', description: 'Copy button text in parameter modal'})}
           </button>
           <span className={styles.hint}>
-            Empty fields keep {'{{placeholder}}'} as-is
+            {translate({id: 'theme.CodeBlock.parameterModal.hint', message: 'Empty fields keep {{placeholder}} as-is', description: 'Hint text explaining empty parameter fields'})}
           </span>
         </div>
       </div>
@@ -345,8 +348,8 @@ export default function ParameterCopyButton({
   return (
     <>
       <Button
-        aria-label="Copy with parameters"
-        title="Copy with parameters"
+        aria-label={translate({id: 'theme.CodeBlock.parameterCopyButton.ariaLabel', message: 'Copy with parameters', description: 'Aria label for parameter copy button'})}
+        title={translate({id: 'theme.CodeBlock.parameterCopyButton.title', message: 'Copy with parameters', description: 'Title for parameter copy button'})}
         className={clsx(className, styles.paramButton)}
         onClick={() => setIsOpen(true)}>
         <ParameterIcon />

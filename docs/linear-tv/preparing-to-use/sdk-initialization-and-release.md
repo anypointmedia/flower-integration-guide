@@ -4,7 +4,9 @@ sidebar_position: 1
 
 # SDK Initialization and Release
 
-To use the SDK, you must call the SDK initialization function at the same time the TV app starts. The code example is as follows:
+To use the SDK, you must call the SDK initialization function at the same time the TV app starts. 
+
+The code example is as follows:
 
 **_Java_**
 
