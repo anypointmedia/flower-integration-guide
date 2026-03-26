@@ -67,7 +67,7 @@ React:
     useEffect(() => {
         if (!adContainerRef.current) return;
         flowerAdViewRef.current = new window.FlowerAdView(adContainerRef.current);
-    }, [adContainerRef]);
+    }, []);
 
 ========================================
 PART 3 — Create Video Player

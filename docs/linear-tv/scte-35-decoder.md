@@ -40,7 +40,7 @@ if (streamType == 0x86) {
     long currentPts = 0; // current PTS
     
     // When sending TS packets
-    byte[] tsPackets = byte[188]; 
+    byte[] tsPackets = new byte[188]; 
     scte35Decoder.decode(scte35Packets, currentPts);
     
     // When sending a hexadecimal string

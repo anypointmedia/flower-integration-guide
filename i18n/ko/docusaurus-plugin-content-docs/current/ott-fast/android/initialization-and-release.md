@@ -71,7 +71,7 @@ public class YourApplication extends Application {
         // ...
 
         // TODO GUIDE: Disable ad skip function
-        FlowerSdk.ignoreSkip()
+        FlowerSdk.ignoreSkip();
     }
 }
 ```

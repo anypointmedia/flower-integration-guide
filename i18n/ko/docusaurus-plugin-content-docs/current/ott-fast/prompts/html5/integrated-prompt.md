@@ -129,7 +129,7 @@ React:
     useEffect(() => {
         if (!adContainerRef.current) return;
         flowerAdViewRef.current = new window.FlowerAdView(adContainerRef.current);
-    }, [adContainerRef]);
+    }, []);
 
 ========================================
 STEP 2-3 — Create Video Player
@@ -421,6 +421,8 @@ If AD_TYPE is "interstitial":
           flowerAdView.adsManager.removeListener(adsManagerListener);
           flowerAdView.adsManager.stop();
       }
+      flowerAdView = null;
+      adsManagerListener = null;
   }
 
 ========================================

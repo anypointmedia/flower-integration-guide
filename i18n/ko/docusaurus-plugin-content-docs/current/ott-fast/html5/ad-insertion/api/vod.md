@@ -17,7 +17,7 @@ VOD 컨텐츠 진입 전 사용하는 함수입니다.
 | ---| ---| --- |
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
 | contentId | string | 컨텐츠의 고유 아이디<br/>Flower 백엔드 시스템에 등록되어야 함 |
-| durationMs | Long | VOD 컨텐츠의 전체 재생 시간(밀리세컨즈) |
+| durationMs | number | VOD 컨텐츠의 전체 재생 시간(밀리세컨즈) |
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 _null_) |
 | mediaPlayerHook | MediaPlayerHook | 비디오 플레이어를 반환하는 인터페이스 구현 객체 |
 | adTagHeaders | map | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |

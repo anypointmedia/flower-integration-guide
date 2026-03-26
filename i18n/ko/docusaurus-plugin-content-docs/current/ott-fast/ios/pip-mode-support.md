@@ -17,12 +17,12 @@ FlowerSdk.notifyPictureInPictureModeChanged(_ isInPictureInPictureMode: Bool)
 **_UIKit_**
 
 ```swift
-extension YourViewController: AVPlayerViewControllerDelegate {
-    func pictureInPictureControllerWillStartPictureInPicture(_ playerViewController: AVPlayerViewController) {
+extension YourViewController: AVPictureInPictureControllerDelegate {
+    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         FlowerSdk.notifyPictureInPictureModeChanged(true)
     }
 
-    func pictureInPictureControllerDidStopPictureInPicture(_ playerViewController: AVPlayerViewController) {
+    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         FlowerSdk.notifyPictureInPictureModeChanged(false)
     }
 }

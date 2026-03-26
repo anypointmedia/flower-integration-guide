@@ -102,7 +102,7 @@ class CustomAdPlayer implements AnypointAdPlayer {
 		mediaUrls.clear();
 
 		playSets.add(playSet);
-		mediaUrls = playSet.toMediaUrls();
+		mediaUrls.addAll(playSet.toMediaUrls());
 		adTotalDuration = playSet.getDuration();
 		currentMediaUrlIndex = 0;
 
@@ -516,14 +516,13 @@ class CustomAdPlayer implements AnypointAdPlayer {
 	public AdProgress getProgress() {
 		if (isAdPlaying()) {
 			// Current PlaySet's playtime, total duration of PlaySet, current playback position within the playing media
-			return AdProgress(adPlayTime, adTotalDuration, currentAdPlayTime);
+			return new AdProgress(adPlayTime, adTotalDuration, currentAdPlayTime);
 		} else {
 			return AdProgress.NOT_READY;
 		}
 	}
 ...
 }
-```
 
 **_Kotlin_**
 

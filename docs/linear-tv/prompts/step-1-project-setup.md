@@ -75,7 +75,7 @@ Kotlin:
 class YourApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        AnypointSdk.setDebugMode(false)
+        AnypointSdk.setDebugMode(false) // Optional: enable debug logging
         AnypointSdk.initialize(applicationContext)
     }
 
@@ -94,6 +94,10 @@ After SDK initialization, publish the initial channel event:
 Java:
 TvEventPublisher tvEventPublisher = AnypointSdk.createTvEventPublisher();
 tvEventPublisher.publish(TvEvent.CHANNEL_CHANGE, initialServiceId);
+
+Kotlin:
+val tvEventPublisher = AnypointSdk.createTvEventPublisher()
+tvEventPublisher.publish(TvEvent.CHANNEL_CHANGE, initialServiceId)
 
 This tells the SDK which channel the viewer is watching so it can serve appropriate ads.
 
