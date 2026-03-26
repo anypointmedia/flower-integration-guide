@@ -1,4 +1,61 @@
 {
+  "homepage.title": {
+    "message": "FLOWER 정합 가이드",
+    "description": "The homepage title"
+  },
+  "homepage.tagline": {
+    "message": "Linear TV 및 OTT/FAST 플랫폼을 위한 광고 정합 SDK 문서",
+    "description": "The homepage tagline"
+  },
+  "homepage.getStarted": {
+    "message": "시작하기",
+    "description": "The homepage get started button label"
+  },
+  "homepage.platforms.heading": {
+    "message": "플랫폼 선택"
+  },
+  "homepage.platform.linearTv.title": {
+    "message": "Linear TV"
+  },
+  "homepage.platform.linearTv.description": {
+    "message": "기존 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입"
+  },
+  "homepage.platform.android.title": {
+    "message": "Android"
+  },
+  "homepage.platform.android.description": {
+    "message": "Android OTT/FAST 광고 삽입을 위한 ExoPlayer 및 Media3 연동"
+  },
+  "homepage.platform.ios.title": {
+    "message": "iOS"
+  },
+  "homepage.platform.ios.description": {
+    "message": "iOS 및 tvOS OTT/FAST를 위한 AVPlayer 기반 광고 삽입"
+  },
+  "homepage.platform.html5.title": {
+    "message": "HTML5"
+  },
+  "homepage.platform.html5.description": {
+    "message": "웹 기반 OTT/FAST 플레이어를 위한 HLS.js 기반 광고 삽입"
+  },
+  "homepage.feature.cspm.title": {
+    "message": "클라이언트 사이드 플레이리스트 조작"
+  },
+  "homepage.feature.cspm.description": {
+    "message": "FLOWER 광고 서버와 연동하여 시청자 단말에서 직접 플레이리스트를 조작합니다. SSAI 인프라 비용 없이 스킵, 오버레이, 인터랙티브 광고를 지원합니다."
+  },
+  "homepage.feature.multiPlatform.title": {
+    "message": "멀티 플랫폼 지원"
+  },
+  "homepage.feature.multiPlatform.description": {
+    "message": "Android, iOS, HTML5, Linear TV 전반에 걸친 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 지원합니다."
+  },
+  "homepage.feature.prompts.title": {
+    "message": "AI 기반 정합 지원"
+  },
+  "homepage.feature.prompts.description": {
+    "message": "AI 코딩 어시스턴트를 활용한 FLOWER SDK 정합을 위한 단계별 프롬프트 가이드를 제공합니다."
+  },
   "theme.ErrorPageContent.title": {
     "message": "페이지에 오류가 발생하였습니다.",
     "description": "The title of the fallback page when the page crashed"

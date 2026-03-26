@@ -21,3 +21,82 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Platform Cards Section */
+.platforms {
+  padding: 3rem 0;
+}
+
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.platformGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media screen and (max-width: 996px) {
+  .platformGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .platformGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.platformCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  transition: box-shadow 0.2s, transform 0.2s;
+  color: inherit;
+  text-decoration: none;
+}
+
+.platformCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.platformIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.platformCard h3 {
+  margin-bottom: 0.5rem;
+}
+
+.platformCard p {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* Features Section */
+.features {
+  padding: 3rem 0;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.featureItem {
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.featureItem p {
+  color: var(--ifm-color-emphasis-700);
+}
