@@ -6,12 +6,24 @@ sidebar_position: 1
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.0 | 2026.02.25 | **BugFix** <ol><li>광고 마커가 있는 라이브 채널 진입 시 시간 불일치 수정</li><li>장시간 재생 시 발생하는 시간 불일치 수정</li></ol> **Feature** <ol><li>긴 윈도우의 플레이리스트 처리 시 성능 개선</li><li>인터랙티브 광고 UI 개선</li><li>TV 환경에서 광고의 "자세히 보기" 선택 시 QR 코드 표시 기능 추가</li></ol> |
+| 2.8.3 | 2026.01.09 | **BugFix** <ol><li>트래킹 시간 불일치 문제 수정</li></ol> **Feature** <ol><li>광고 트래킹 로직 개선</li><li>현재 시간 및 타임존 URL 매크로 추가</li><li>XML 콘텐츠 파싱 로직 개선</li><li>VOD 광고 요청 타임아웃을 3초에서 5초로 변경</li></ol> |
+| 2.8.2 | 2025.12.15 | **BugFix** <ol><li>타임아웃 발생 시 `requestChannelAd()` API가 빈 광고 목록과 성공 응답을 반환하는 문제 수정</li></ol> |
+| 2.8.1 | 2025.12.12 | **BugFix** <ol><li>WebView가 없는 기기에서 발생하는 크래시 수정</li><li>DASH 스트림 재생 시 ExoPlayer에서 발생하는 광고 트래킹 문제 수정</li></ol> |
+| 2.8.0 | 2025.12.02 | **Feature** <ol><li>Flower Player를 사용하지 않는 경우에도 앱이 PiP 모드 상태를 SDK에 전달할 수 있도록 `FlowerSdk.notifyPictureInPictureModeChanged()` API 추가</li></ol> **BugFix** <ol><li>광고 재생 중 또는 직전에 스트림이 끊기는 문제 수정</li><li>VOD 광고 재생 중 발생할 수 있는 데드락 문제 수정</li><li>특정 스트림과 광고 간 전환 시 검은 화면이 나타나는 문제 수정</li></ol> |
+| 2.7.3 | 2025.11.14 | **BugFix** <ol><li>프리롤 광고 재생 전 리니어 TV 콘텐츠가 표시되는 문제 수정. 이 수정은 Flower 플레이어를 요구함.</li><li>광고 재생 중 또는 직전에 발생하는 영상 끊김 문제 개선</li></ol> |
+| 2.7.2 | 2025.11.13 | **BugFix** <ol><li>`requestChannelAd()` API에서 콜백 오류 발생 시 `onPrepare()` 콜백이 두 번 호출되는 문제 수정</li></ol> |
+| 2.7.1 | 2025.11.11 | **Feature** <ol><li>`requestChannelAd()`의 transactionId 파라미터 타입을 Int에서 Long으로 변경</li></ol> |
+| 2.7.0 | 2025.11.10 | **Feature** <ol><li>`requestChannelAd()` API 인터페이스에 트랜잭션 ID 및 응답 상태 포함하도록 변경</li></ol> **BugFix** <ol><li>커스텀 MediaPlayerAdapter 구현체와 함께 `enterChannel()` 사용 시 발생하는 크래시 수정</li></ol> |
+| 2.6.2 | 2025.10.30 | **BugFix** <ol><li>리니어 TV에서 광고 스킵 시 발생할 수 있는 조작 오류 수정</li></ol> |
+| 2.6.1 | 2025.10.29 | **BugFix** <ol><li>ExoPlayer에서 TextureView 사용 시 광고 뷰가 표시되지 않는 문제 수정</li></ol> |
+| 2.6.0 | 2025.10.17 | **Feature** <ol><li>구글 광고를 가능한 경우 인코딩 없이 즉시 재생하도록 개선</li></ol> |
 | 2.5.1 | 2025.10.14 | **BugFix** <ol><li>스킵 가능한 광고가 스킵되지 않았는데도 예비 광고가 삽입되는 문제 수정</li></ol> |
 | 2.5.0 | 2025.10.02 | **Feature** <ol><li>VOD 컨텐츠를 재생할 때 Flower Player 지원 추가</li><li>Bitmovin 플레이어를 감싸는 FlowerBitmovinPlayer 추가</li></ol> **BugFix** <ol><li>VOD 광고가 PIP 모드에서 재생되지 않는 문제 수정. 이 수정은 Flower 플레이어를 요구함.</li></ol> |
 | 2.4.2 | 2025.10.02 | **BugFix** <ol><li>2.3.3에서 업그레이드된 코틀린 버전을 2.2.0에서 2.0.21로 롤백</li></ol> |
-| 2.4.1 | 2025.09.22 | **Improvement** <ol><li>`requestChannelAd()` API를 사용할 때 광고 로드 속도 개선</li></ol> **BugFix** <ol><li>캐시 파일을 위해 가용 스토리지 용량을 계산할 때 발생하는 오버플로우 수정</li></ol> |
+| 2.4.1 | 2025.09.22 | **Feature** <ol><li>`requestChannelAd()` API를 사용할 때 광고 로드 속도 개선</li></ol> **BugFix** <ol><li>캐시 파일을 위해 가용 스토리지 용량을 계산할 때 발생하는 오버플로우 수정</li></ol> |
 | 2.4.0 | 2025.09.19 | **Feature** <ol><li>자체 광고 서빙 시스템을 사용할 때 광고 스킵 기능을 옵트아웃할 수 있는 `FlowerSdk.ignoreSkip()` API 추가</li></ol> |
-| 2.3.3 | 2025.09.09 | **Improvement** <ol><li>광고 로드 속도 개선</li></ol> |
+| 2.3.3 | 2025.09.09 | **Feature** <ol><li>광고 로드 속도 개선</li></ol> |
 | 2.3.2 | 2025.08.26 | **BugFix** <ol><li>플레이어 오류 시점에 발생하는 크래시 수정</li><li>오디오 전용 미디어가 포함된 HLS 플레이리스트에서 광고 삽입 오류 수정</li></ol> |
 | 2.3.1 | 2025.08.19 | **BugFix** <ol><li>Linear TV midroll에서 구글 광고 재생 시 발생하는 크래시 수정</li></ol> |
 | 2.3.0 | 2025.08.13 | **Feature** <ol><li>플레이리스트 조작 없이 광고를 요청하는 경우 지원</li></ol> |
@@ -35,24 +47,24 @@ sidebar_position: 1
 | 1.0.21 | 2024.08.09 | **Feature** <ol><li>DRM이 적용된 DASH 스트림 광고 삽입 지원</li><li>`changeChannelUrl()` API에 광고 요청 시 사용자 정의 HTTP 헤더를 추가할 수 있는 `adTagHeaders` 파라미터 추가</li><li>`changeChannelUrl()` API에 스트림 요청 시 사용자 정의 HTTP 헤더를 포함할 수 있는 `channelStreamHeaders` 파라미터 추가</li><li>스트림 재생 중 타겟팅 정보를 교체할 수 있는 `changeChannelExtraParams` API 추가</li></ol> |
 | 1.0.20 | 2024.07.18 | **Feature** <ol><li>커스텀 플레이어 지원을 위해 `MediaPlayerHook`에서 `MediaPlayerAdapter`을 반환하는 기능 추가</li><li>`FlowerAdsManagerListener`에 `onAdSkipped` 함수 추가</li></ol> |
 | 1.0.19 | 2024.04.12 | **BugFix** <ol><li>Linear TV 플레이어 오류에 대한 방어 로직 추가</li><li>Linear TV 플레이어에서 오류 발생 시 SDK 리셋 처리</li></ol> |
-| 1.0.18<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 33에서 32로 변경</li></ol> |
-| 1.0.17<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 34에서 33으로 변경</li></ol> |
-| 1.0.16<br/>Deprecated | 2024.03.26 | **BugFix** <ol><li>연이어진 광고 큐에서 필러 광고를 잘못 트래킹하는 오류 수정</li></ol> |
-| 1.0.15<br/>Deprecated | 2024.03.15 | **BugFix** <ol><li>긴 쿼리 파라미터가 포함된 스트림 URL을 재생할 수 없는 오류 수정</li></ol> |
-| 1.0.14<br/>Deprecated | 2024.03.14 | **BugFix** <ol><li>구글 광고를 재생할 때 뷰어빌리티 오류 해결</li></ol> |
-| 1.0.13<br/>Deprecated | 2024.02.07 | **BugFix** <ol><li>특정 광고 소재의 응답을 파싱하지 못하는 오류 수정</li></ol> |
-| 1.0.12<br/>Deprecated | 2024.01.19 | **BugFix** <ol><li>래퍼 광고의 응답이 두 개 이상일 때 발생하는 트래킹 오류 수정</li></ol> |
-| 1.0.11<br/>Deprecated | 2023.12.12 | **BugFix** <ol><li>완료 비콘 로그가 간헐적으로 호출되지 않는 문제 수정</li></ol> |
-| 1.0.10<br/>Deprecated | 2023.11.27 | **BugFix** <ol><li>간헐적으로 발생하는 앱 크래시 문제 수정</li></ol> |
-| 1.0.9<br/>Deprecated | 2023.11.15 | **Feature** <ol><li>광고 요청 시 플레이어 객체 수신 처리 기능 개선</li><li>안드로이드 4.2 지원 및 4.1 이하 무시하도록 변경</li><li>XML 의존성 제거</li></ol> **BugFix** <ol><li>광고 처리 시 오류 처리 로직 개선(리포트 방지)</li></ol> |
-| 1.0.7<br/>Deprecated | 2023.11.06 | **Feature** <ol><li>광고 스트림의 비트레이트 처리 기능 개선</li></ol> |
-| 1.0.6<br/>Deprecated | 2023.10.31 | **Feature** <ol><li>필러 광고의 캐시 처리 기능 개선</li></ol> |
-| 1.0.5<br/>Deprecated | 2023.10.25 | **BugFix** <ol><li>광고 응답 순서와 재생 순서 불일치 문제 수정</li><li>간헐적으로 발생하던 앱 크래시 문제 수정</li></ol> |
-| 1.0.4<br/>Deprecated | 2023.10.13 | **BugFix** <ol><li>광고 요청 비동기 처리 시, 병렬 처리 문제로 간헐적으로 오류 발생하는 문제 수정</li></ol> |
-| 1.0.3<br/>Deprecated | 2023.10.12 | **Feature** <ol><li>VAST Parser 기능 개선(빈 문자열 예외 처리)</li></ol> **BugFix** <ol><li>완료 보고가 되지 않는 문제 수정</li></ol> |
-| 1.0.2<br/>Deprecated | 2023.09.19 | **New** <ol><li>커스텀 CUE TAG 지원</li></ol> |
-| 1.0.1<br/>Deprecated | 2023.08.21 | **New** <ol><li>DRM이 적용된 HLS 스트림 지원</li><li>MPEG-DASH 스트림 지원</li></ol> |
-| 1.0.0<br/>Deprecated | 2022.03.22 | **New** <ol><li>Flower Solution 연동 지원</li><li>프로그래매틱 광고 지원</li><li>Direct I/O 광고 지원</li><li>HLS 스트림 지원</li><li>SCTE35 CUE TAG 지원</li><li>구글 광고 지원</li></ol> |
+| ~~1.0.18~~<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 33에서 32로 변경</li></ol> |
+| ~~1.0.17~~<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 34에서 33으로 변경</li></ol> |
+| ~~1.0.16~~<br/>Deprecated | 2024.03.26 | **BugFix** <ol><li>연이어진 광고 큐에서 필러 광고를 잘못 트래킹하는 오류 수정</li></ol> |
+| ~~1.0.15~~<br/>Deprecated | 2024.03.15 | **BugFix** <ol><li>긴 쿼리 파라미터가 포함된 스트림 URL을 재생할 수 없는 오류 수정</li></ol> |
+| ~~1.0.14~~<br/>Deprecated | 2024.03.14 | **BugFix** <ol><li>구글 광고를 재생할 때 뷰어빌리티 문제 수정</li></ol> |
+| ~~1.0.13~~<br/>Deprecated | 2024.02.07 | **BugFix** <ol><li>특정 광고 소재의 응답을 파싱하지 못하는 오류 수정</li></ol> |
+| ~~1.0.12~~<br/>Deprecated | 2024.01.19 | **BugFix** <ol><li>래퍼 광고의 응답이 두 개 이상일 때 발생하는 트래킹 오류 수정</li></ol> |
+| ~~1.0.11~~<br/>Deprecated | 2023.12.12 | **BugFix** <ol><li>완료 비콘 로그가 간헐적으로 호출되지 않는 문제 수정</li></ol> |
+| ~~1.0.10~~<br/>Deprecated | 2023.11.27 | **BugFix** <ol><li>간헐적으로 발생하는 앱 크래시 문제 수정</li></ol> |
+| ~~1.0.9~~<br/>Deprecated | 2023.11.15 | **Feature** <ol><li>광고 요청 시 플레이어 객체 수신 처리 기능 개선</li><li>안드로이드 4.2 지원 및 4.1 이하 무시하도록 변경</li><li>XML 의존성 제거</li></ol> **BugFix** <ol><li>광고 처리 시 오류 처리 로직 개선(리포트 방지)</li></ol> |
+| ~~1.0.7~~<br/>Deprecated | 2023.11.06 | **Feature** <ol><li>광고 스트림의 비트레이트 처리 기능 개선</li></ol> |
+| ~~1.0.6~~<br/>Deprecated | 2023.10.31 | **Feature** <ol><li>필러 광고의 캐시 처리 기능 개선</li></ol> |
+| ~~1.0.5~~<br/>Deprecated | 2023.10.25 | **BugFix** <ol><li>광고 응답 순서와 재생 순서 불일치 문제 수정</li><li>간헐적으로 발생하던 앱 크래시 문제 수정</li></ol> |
+| ~~1.0.4~~<br/>Deprecated | 2023.10.13 | **BugFix** <ol><li>광고 요청 비동기 처리 시, 병렬 처리 문제로 간헐적으로 오류 발생하는 문제 수정</li></ol> |
+| ~~1.0.3~~<br/>Deprecated | 2023.10.12 | **Feature** <ol><li>VAST Parser 기능 개선(빈 문자열 예외 처리)</li></ol> **BugFix** <ol><li>완료 보고가 되지 않는 문제 수정</li></ol> |
+| ~~1.0.2~~<br/>Deprecated | 2023.09.19 | **New** <ol><li>커스텀 CUE TAG 지원</li></ol> |
+| ~~1.0.1~~<br/>Deprecated | 2023.08.21 | **New** <ol><li>DRM이 적용된 HLS 스트림 지원</li><li>MPEG-DASH 스트림 지원</li></ol> |
+| ~~1.0.0~~<br/>Deprecated | 2022.03.22 | **New** <ol><li>Flower Solution 연동 지원</li><li>프로그래매틱 광고 지원</li><li>Direct I/O 광고 지원</li><li>HLS 스트림 지원</li><li>SCTE-35 CUE TAG 지원</li><li>구글 광고 지원</li></ol> |
 
 *   **New** : 신규 기능
 *   **Feature** : 기존 기능 수정
