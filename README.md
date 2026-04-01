@@ -2,6 +2,8 @@
 
 FLOWER SDK integration documentation for Linear TV and OTT/FAST platforms, built with [Docusaurus](https://docusaurus.io/).
 
+**Live site:** https://flower-docs.anypoint.tv
+
 ## Prerequisites
 
 - Node.js >= 24.0
@@ -13,7 +15,7 @@ npm install
 npm start
 ```
 
-Opens a local dev server at `http://localhost:3000/flower-integration-guide/`. Changes are reflected live.
+Opens a local dev server at `http://localhost:3000/`. Changes are reflected live.
 
 ## Build
 
@@ -30,6 +32,27 @@ npm run serve
 ```
 
 Serves the production build locally for testing.
+
+## Deployment
+
+Automated via GitHub Actions. Pushing to `main` triggers the deploy workflow (`.github/workflows/deploy.yml`):
+
+1. Installs dependencies and builds the site
+2. Deploys to GitHub Pages
+3. Served at https://flower-docs.anypoint.tv (custom domain via `static/CNAME`)
+
+## Internationalization (i18n)
+
+Korean translation is available under `i18n/ko/`. To start the dev server in Korean:
+
+```bash
+npm start -- --locale ko
+```
+
+Translation files:
+- `i18n/ko/docusaurus-plugin-content-docs/` — translated docs
+- `i18n/ko/docusaurus-theme-classic/` — UI strings (navbar, footer)
+- `i18n/ko/code.json` — custom component strings
 
 ## Validation & Testing
 
@@ -96,6 +119,11 @@ docs/
             ├── integrated-prompt.md
             └── step-{1..4}-*.md
 
+i18n/ko/                         # Korean translation
+├── code.json
+├── docusaurus-plugin-content-docs/
+└── docusaurus-theme-classic/
+
 scripts/
 ├── api-contract.json            # SDK public API contract (source of truth)
 ├── test-matrix.json             # Parameter combinations for branch testing
@@ -103,4 +131,12 @@ scripts/
 ├── validate-api-contract.mjs    # API contract conformance checks
 ├── validate-code-blocks.mjs     # Code block syntax & method signature checks
 └── run-branch-tests.mjs         # LLM branch testing runner
+
+src/theme/                       # Custom theme components
+└── CodeBlock/Buttons/
+    └── ParameterCopyButton/     # Copy button with parameter substitution
+
+static/
+├── CNAME                        # Custom domain config
+└── img/                         # Static assets
 ```
