@@ -1,0 +1,311 @@
+{
+  "$schema": "./api-contract-schema.json",
+  "_description": "SDK public API contract. Source of truth for prompt validation. Update when SDK changes.",
+  "_lastVerified": "2026-03-23",
+
+  "linear-tv": {
+    "AnypointSdk": {
+      "package": "tv.anypoint.api",
+      "type": "class",
+      "methods": [
+        "initialize(Context)",
+        "initialize(Context, Map)",
+        "destroy()",
+        "setDebugMode(boolean)",
+        "isDebugMode()",
+        "isInitialized()",
+        "createTvEventPublisher()",
+        "addModuleLifecycleListener(SdkModuleLifecycleListener)",
+        "updateDevice1stPartyData(Map, boolean)"
+      ]
+    },
+    "AnypointAdView": {
+      "package": "tv.anypoint.api.ads",
+      "type": "class",
+      "methods": [
+        "getAnypointAdsManager()",
+        "setAdPlayer(AnypointAdPlayer)",
+        "getAdPlayer()",
+        "useScte35Decoder()"
+      ]
+    },
+    "AnypointAdsManager": {
+      "package": "tv.anypoint.api.ads",
+      "type": "interface",
+      "methods": [
+        "request(AnypointAdRequest)",
+        "play()",
+        "pause()",
+        "resume()",
+        "stop()",
+        "addListener(AdsManagerListener)",
+        "removeListener(AdsManagerListener)",
+        "skipAd(String)"
+      ]
+    },
+    "AdsManagerListener": {
+      "package": "tv.anypoint.api.ads.AnypointAdsManager",
+      "type": "interface",
+      "methods": [
+        "onPrepare(int, boolean)",
+        "onPlay(boolean)",
+        "onPause()",
+        "onResume()",
+        "prepareStop(boolean)",
+        "onStopped(boolean)",
+        "onError(Throwable, boolean)"
+      ]
+    },
+    "AnypointAdPlayer": {
+      "package": "tv.anypoint.api.ads",
+      "type": "interface",
+      "methods": [
+        "load(PlaySet)",
+        "append(PlaySet)",
+        "play()",
+        "pause()",
+        "resume()",
+        "stop()",
+        "release()",
+        "addCallback(AnypointAdPlayerCallback)",
+        "removeCallback(AnypointAdPlayerCallback)",
+        "getProgress()",
+        "getVolume()",
+        "currentMediaUrl()",
+        "isAdPlaying()",
+        "getCurrentMediaUnitIndex()",
+        "skipAd(long)",
+        "mute()",
+        "unmute()",
+        "setVolume(float)"
+      ]
+    },
+    "AnypointAdPlayerCallback": {
+      "package": "tv.anypoint.api.ads.AnypointAdPlayer",
+      "type": "interface",
+      "methods": [
+        "onPlay(String)",
+        "onPause(String)",
+        "onLoaded(String)",
+        "onResume(String)",
+        "onStopped()",
+        "onError(String, Throwable)"
+      ]
+    },
+    "AdProgress": {
+      "package": "tv.anypoint.api.ads.AnypointAdPlayer",
+      "type": "class",
+      "constructor": "AdProgress(long currentPlaytime, long duration, long currentAdPlaytime)",
+      "fields": ["NOT_READY"],
+      "methods": [
+        "getCurrentPlaytime()",
+        "getDuration()",
+        "getCurrentAdPlaytime()"
+      ]
+    },
+    "AnypointAdRequest": {
+      "package": "tv.anypoint.api.ads",
+      "type": "class",
+      "constructors": [
+        "AnypointAdRequest(long, long, long, int, Map)",
+        "AnypointAdRequest(long, long, long, int, Map, String)"
+      ]
+    },
+    "Scte35Decoder": {
+      "package": "tv.anypoint.api.scte35",
+      "type": "interface",
+      "methods": [
+        "decode(byte[], long)",
+        "decodeHex(String, long)",
+        "decodeBase64(String, long)",
+        "decode(byte[], long, long)",
+        "decodeHex(String, long, long)",
+        "decodeBase64(String, long, long)",
+        "decode(long, long, int, boolean, long, long, boolean, boolean)",
+        "decode(long, long, int, boolean, long, long, boolean, boolean, long)"
+      ]
+    },
+    "TvEvent": {
+      "package": "tv.anypoint.sdk.comm",
+      "type": "enum",
+      "values": ["CHANNEL_CHANGE", "VOD_START", "APP_START", "SLEEP_MODE_START", "MISC"]
+    },
+    "TvEventPublisher": {
+      "package": "tv.anypoint.api.tv",
+      "type": "class",
+      "methods": [
+        "publish(TvEvent, Object...)"
+      ]
+    }
+  },
+
+  "ott-android": {
+    "FlowerSdk": {
+      "package": "tv.anypoint.flower.android.sdk.api",
+      "type": "object",
+      "methods": [
+        "init(Context)",
+        "destroy()",
+        "setEnv(String)",
+        "getEnv()",
+        "setDeviceId(String)",
+        "getDeviceId()",
+        "setLogLevel(String)",
+        "ignoreSkip()",
+        "notifyPictureInPictureModeChanged(Boolean)"
+      ]
+    },
+    "FlowerAdView": {
+      "package": "tv.anypoint.flower.android.sdk.api",
+      "type": "class",
+      "properties": ["adsManager"],
+      "methods": ["hide()", "show()", "isShow()"]
+    },
+    "FlowerAdsManagerListener": {
+      "package": "tv.anypoint.flower.sdk.core.api",
+      "type": "interface",
+      "methods": [
+        "onAdBreakPrepare(PlatformList)",
+        "onPrepare(Int)",
+        "onPlay()",
+        "onCompleted()",
+        "onError(FlowerError?)",
+        "onAdSkipped(Int)"
+      ],
+      "note": "All methods have default implementations (= Unit)"
+    },
+    "FlowerExoPlayer2": {
+      "package": "tv.anypoint.flower.android.sdk.api",
+      "type": "class",
+      "constructor": "FlowerExoPlayer2(ExoPlayer, Context)",
+      "methods": [
+        "setAdConfig(FlowerLinearTvAdConfig)",
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)",
+        "setMediaItem(MediaItem, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Boolean, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Long, FlowerAdConfig)"
+      ]
+    },
+    "FlowerMedia3ExoPlayer": {
+      "package": "tv.anypoint.flower.android.sdk.api",
+      "type": "class",
+      "constructor": "FlowerMedia3ExoPlayer(ExoPlayer, Context)",
+      "methods": [
+        "setAdConfig(FlowerLinearTvAdConfig)",
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)",
+        "setMediaItem(MediaItem, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Boolean, FlowerAdConfig)",
+        "setMediaItem(MediaItem, Long, FlowerAdConfig)"
+      ]
+    },
+    "FlowerBitmovinPlayer": {
+      "package": "tv.anypoint.flower.android.sdk.api",
+      "type": "class",
+      "methods": [
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)"
+      ]
+    }
+  },
+
+  "ott-ios": {
+    "FlowerSdk": {
+      "package": "FlowerSdk",
+      "type": "class",
+      "methods": [
+        "doInit()",
+        "setEnv(env:)",
+        "setLogLevel(level:)",
+        "setDeviceId(deviceId:)",
+        "getDeviceId()",
+        "getEnv()",
+        "ignoreSkip()",
+        "notifyPictureInPictureModeChanged(Bool)"
+      ],
+      "note": "iOS uses doInit() not init(). iOS SDK does NOT require destroy()."
+    },
+    "FlowerAVPlayer": {
+      "package": "FlowerSdk",
+      "type": "class",
+      "methods": [
+        "setAdConfig(adConfig:)",
+        "addAdListener(listener:)",
+        "removeAdListener(listener:)",
+        "replaceCurrentItem(with:adConfig:)"
+      ]
+    },
+    "FlowerVideoPlayer": {
+      "package": "FlowerSdk",
+      "type": "struct",
+      "constructor": "FlowerVideoPlayer(player: FlowerAVPlayer)",
+      "note": "SwiftUI View"
+    },
+    "FlowerAdView": {
+      "package": "FlowerSdk",
+      "type": "class",
+      "properties": ["adsManager", "body"],
+      "methods": ["HostingController()", "HostingController(adView:)"],
+      "note": "HostingController is a nested UIHostingController subclass for UIKit integration"
+    },
+    "FlowerAVPlayerViewController": {
+      "package": "FlowerSdk",
+      "type": "class",
+      "note": "UIKit wrapper"
+    },
+    "FlowerAdsManagerListener": {
+      "package": "FlowerSdk",
+      "type": "protocol",
+      "methods": [
+        "onAdBreakPrepare(adInfos:)",
+        "onPrepare(adDurationMs:)",
+        "onPlay()",
+        "onCompleted()",
+        "onError(error:)",
+        "onAdSkipped(reason:)"
+      ],
+      "note": "All methods required. Imported from sdk-core via FlowerSdk module."
+    }
+  },
+
+  "ott-html5": {
+    "FlowerSdk": {
+      "type": "global",
+      "methods": ["init()", "setEnv(String)", "setLogLevel(String)"],
+      "note": "HTML5 SDK does NOT require destroy() — no explicit SDK release needed."
+    },
+    "FlowerHls": {
+      "type": "class",
+      "methods": [
+        "attachContainer(HTMLElement)",
+        "attachMedia(HTMLVideoElement)",
+        "setAdConfig(FlowerLinearTvAdConfig)",
+        "addAdListener(FlowerAdsManagerListener)",
+        "removeAdListener(FlowerAdsManagerListener)",
+        "loadSource(String)"
+      ],
+      "note": "Wraps Hls.js, supports Linear TV only"
+    },
+    "FlowerAdView": {
+      "type": "class",
+      "properties": ["adsManager"]
+    },
+    "FlowerAdsManager": {
+      "type": "interface",
+      "methods": [
+        "addListener(FlowerAdsManagerListener)",
+        "removeListener(FlowerAdsManagerListener)",
+        "changeChannelUrl(String, String, String, Map, MediaPlayerHook, Map, Map, String)",
+        "enterChannel(String, String, Map, MediaPlayerHook, Map, MediaPlayerAdapter)",
+        "requestAd(String, Map, Map)",
+        "requestVodAd(String, String, Number, Map, MediaPlayerHook)",
+        "play()",
+        "pause()",
+        "resume()",
+        "stop()",
+        "notifyContentEnded()"
+      ]
+    }
+  }
+}
