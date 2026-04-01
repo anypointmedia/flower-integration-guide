@@ -92,7 +92,7 @@ Same as media-player-hook but you implement the full `MediaPlayerAdapter` interf
 |---------|-------------|---------------------|
 | `linear-tv` | Live streaming with mid-roll ads | flower-player, media-player-hook, media-player-adapter |
 | `vod` | Video-on-demand with pre/mid/post-roll | flower-player, media-player-hook |
-| `interstitial` | Standalone fullscreen ad (no video player) | interstitial only |
+| `interstitial` | Standalone fullscreen ad (no video player) | dedicated (no player needed) |
 
 ## Tips
 

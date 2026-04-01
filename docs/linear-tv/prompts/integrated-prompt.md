@@ -107,7 +107,7 @@ Kotlin:
 class YourApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        AnypointSdk.setDebugMode(false)
+        AnypointSdk.setDebugMode(false) // Optional: enable debug logging
         AnypointSdk.initialize(applicationContext)
     }
 

@@ -59,6 +59,7 @@ The advertising agent employs two configurations to ensure optimal set-top box (
 **Advertisement Available Storage Calculation**
 
 Based on the two configurations above, the calculation for the available advertisement caching storage is as follows:
+
 Available Advertisement Storage = min((Remaining Storage - Minimum Guaranteed Free Space), Maximum Advertisement Storage Capacity)
 
 > **Example 1**  

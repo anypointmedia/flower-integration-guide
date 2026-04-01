@@ -21,7 +21,11 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'ko'],
+    localeConfigs: {
+      en: { label: 'English' },
+      ko: { label: '한국어' },
+    },
   },
 
   markdown: {
@@ -59,6 +63,10 @@ const config: Config = {
           to: '/docs',
           position: 'left',
           label: 'Integration Guide',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
         },
       ],
     },

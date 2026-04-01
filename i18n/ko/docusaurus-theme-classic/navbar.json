@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "FLOWER",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "AnypointMedia 로고",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Integration Guide": {
+    "message": "정합 가이드",
+    "description": "Navbar item with label Integration Guide"
+  }
+}

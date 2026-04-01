@@ -14,7 +14,7 @@ The function above is used before you enter VOD content. The parameters are desc
 | ---| ---| --- |
 | adTagUrl | string | Ad tag URL issued by an ad server |
 | contentId | string | Content’s ID<br/>Must be registered in the FLOWER backend system |
-| durationMs | Long | Total playback time of VOD content (milliseconds) |
+| durationMs | Int32 | Total playback time of VOD content (milliseconds) |
 | extraParams | map | Extra information which is agreed upon for targeting (null for no extra information) |
 | mediaPlayerHook | MediaPlayerHook | An object implementing an interface that returns a video player |
 | adTagHeaders | map | (Optional) HTTP header information to be added when requesting an ad |
