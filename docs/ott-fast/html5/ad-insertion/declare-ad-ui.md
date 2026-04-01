@@ -24,6 +24,7 @@ Before you can display ads, you need to add the `AdView` to your app's layout ac
 ```javascript
 const adContainerRef = useRef(null);
 const flowerAdViewRef = useRef(null);
+const playerContainerRef = useRef(null);
 
 useEffect(() => {
     if (!adContainerRef.current) return;

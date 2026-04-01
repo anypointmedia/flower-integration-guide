@@ -41,7 +41,7 @@ if (streamType == 0x86) {
 
     // TS 패킷을 보내는 경우
     byte[] tsPackets = new byte[188];
-    scte35Decoder.decode(scte35Packets, currentPts);
+    scte35Decoder.decode(tsPackets, currentPts);
 
     // Hexadecimal 문자열로 변환해서 보내는 경우
     String hexText = "0x0834ab84…..";

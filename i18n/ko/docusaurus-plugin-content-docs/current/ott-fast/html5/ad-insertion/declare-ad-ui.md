@@ -25,6 +25,7 @@ sidebar_label: 광고 UI 선언
 ```javascript
 const adContainerRef = useRef(null);
 const flowerAdViewRef = useRef(null);
+const playerContainerRef = useRef(null);
 
 useEffect(() => {
     if (!adContainerRef.current) return;

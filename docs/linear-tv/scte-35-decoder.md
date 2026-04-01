@@ -41,7 +41,7 @@ if (streamType == 0x86) {
     
     // When sending TS packets
     byte[] tsPackets = new byte[188]; 
-    scte35Decoder.decode(scte35Packets, currentPts);
+    scte35Decoder.decode(tsPackets, currentPts);
     
     // When sending a hexadecimal string
     String hexText = “0x0834ab84…..”;
