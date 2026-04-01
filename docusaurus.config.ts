@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://anypointmedia.github.io',
-  baseUrl: '/flower-integration-guide/',
+  url: 'https://flower-docs.anypoint.tv',
+  baseUrl: '/',
 
   organizationName: 'anypointmedia',
   projectName: 'flower-integration-guide',
