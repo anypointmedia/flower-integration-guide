@@ -1,0 +1,9 @@
+{
+  "label": "Web / Smart TV",
+  "position": 2,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "description": "Integrate FLOWER SDK into browser-based players and Smart TV platforms (Tizen, webOS, etc.) using HLS.js."
+  }
+}

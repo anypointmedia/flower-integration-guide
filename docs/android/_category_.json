@@ -1,0 +1,9 @@
+{
+  "label": "Android",
+  "position": 1,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "description": "Integrate FLOWER SDK into Android applications. Supports DTH/Multicast and Unicast (HLS/DASH) delivery for Linear TV & FAST, VOD, and advanced ad formats."
+  }
+}

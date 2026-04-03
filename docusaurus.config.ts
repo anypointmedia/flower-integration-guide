@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'FLOWER Integration Guide',
-  tagline: 'Ad integration SDK documentation for Linear TV and OTT/FAST platforms',
+  tagline: 'Ad integration SDK documentation for Android, Web/Smart TV, and iOS platforms',
   favicon: 'img/favicon.png',
 
   future: {
@@ -17,7 +17,7 @@ const config: Config = {
   organizationName: 'anypointmedia',
   projectName: 'flower-integration-guide',
 
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'throw',
 
   i18n: {
     defaultLocale: 'en',

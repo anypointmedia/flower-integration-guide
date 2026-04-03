@@ -3,116 +3,152 @@
     "message": "Next",
     "description": "The label for version current"
   },
-  "sidebar.tutorialSidebar.category.For Linear TV (Multicast, DTH)": {
-    "message": "실시간 방송 (Multicast, DTH)",
-    "description": "The label for category 'For Linear TV (Multicast, DTH)' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.For Linear TV (Multicast, DTH).link.generated-index.description": {
-    "message": "FLOWER SDK for TV(이하 SDK)는 실시간 방송 화면, VOD 재생 화면 등 TV 앱에서 광고 송출이 가능한 모든 공간에 개인화 광고를 쉽게 통합할 수 있게 해줍니다.\n\nSDK는 필요에 따라 광고 서버와 통신하면서 사용자에게 적합한 광고를 다운로드하여 로컬 스토리지에 저장하고, TV 앱의 미디어 파일 재생 모듈과 상호작용하면서 가장 원활한 미디어 시청 경험을 제공합니다.\n\n이 가이드 문서는 SDK를 사용하여 TV 앱에 광고 운영 기능을 통합하고 광고 영상 파일을 재생하는 방법에 대해 설명합니다.",
-    "description": "The generated-index page description for category 'For Linear TV (Multicast, DTH)' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.Preparing to Use the SDK": {
-    "message": "SDK 사용 준비",
-    "description": "The label for category 'Preparing to Use the SDK' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.Inserting Ads into Linear Channels": {
-    "message": "실시간 채널에 광고 삽입",
-    "description": "The label for category 'Inserting Ads into Linear Channels' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.Ad Player": {
-    "message": "광고 플레이어",
-    "description": "The label for category 'Ad Player' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.linear-tv-release-notes": {
-    "message": "릴리즈 노트",
-    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.linear-tv-prompts": {
-    "message": "LLM 프롬프트",
-    "description": "The label for category 'Prompts for LLM' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.For OTT/FAST": {
-    "message": "OTT/FAST",
-    "description": "The label for category 'For OTT/FAST' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.For OTT/FAST.link.generated-index.description": {
-    "message": "FLOWER OTT/FAST용 SDK를 사용하면 라이브 스트림, VOD 콘텐츠, 웹/앱 환경에 광고를 삽입할 수 있습니다.",
-    "description": "The generated-index page description for category 'For OTT/FAST' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-android": {
+  "sidebar.tutorialSidebar.category.Android": {
     "message": "Android",
     "description": "The label for category 'Android' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-android-ad-insertion": {
-    "message": "광고 삽입",
-    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.Android.link.generated-index.description": {
+    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 FLOWER SDK를 연동합니다. Linear TV & FAST, VOD, Advanced Ad Formats을 지원합니다.",
+    "description": "The generated-index page description for category 'Android' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-android-ad-replacement-live": {
-    "message": "라이브 스트림 광고 대체",
-    "description": "The label for category 'Ad Replacement in Live Streams' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.Web / Smart TV": {
+    "message": "Web / Smart TV",
+    "description": "The label for category 'Web / Smart TV' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.Ad Insertion in VOD Content": {
-    "message": "VOD 콘텐츠 광고 삽입",
-    "description": "The label for category 'Ad Insertion in VOD Content' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.Web / Smart TV.link.generated-index.description": {
+    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 환경에 FLOWER SDK를 연동합니다.",
+    "description": "The generated-index page description for category 'Web / Smart TV' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.Implement an Interface for Passing Video Player": {
+  "sidebar.tutorialSidebar.category.iOS": {
+    "message": "iOS",
+    "description": "The label for category 'iOS' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.iOS.link.generated-index.description": {
+    "message": "AVPlayer 기반 iOS 및 tvOS 앱에 FLOWER SDK를 연동합니다.",
+    "description": "The generated-index page description for category 'iOS' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-getting-started": {
+    "message": "시작하기",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-linear-tv-fast": {
+    "message": "Linear TV & FAST",
+    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-linear-tv-fast.link.generated-index.description": {
+    "message": "Android에서 실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
+    "description": "The generated-index page description for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-dth-multicast": {
+    "message": "DTH / Multicast",
+    "description": "The label for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-dth-multicast.link.generated-index.description": {
+    "message": "DTH(위성) 및 Multicast(IPTV) 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입. FLOWER Ad Agent를 사용합니다.",
+    "description": "The generated-index page description for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-unicast": {
+    "message": "Unicast (HLS / DASH)",
+    "description": "The label for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-unicast.link.generated-index.description": {
+    "message": "유니캐스트(OTT) 환경에서 HLS/DASH 라이브 스트림의 광고를 대체합니다. 플레이리스트 매니페스트 조작 방식을 사용합니다.",
+    "description": "The generated-index page description for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-vod": {
+    "message": "VOD (Video On Demand)",
+    "description": "The label for category 'VOD (Video On Demand)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-advanced-ad-formats": {
+    "message": "Advanced Ad Formats",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-player-and-ad-ui": {
+    "message": "플레이어 & 광고 UI",
+    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-implement-interface-video-player": {
     "message": "비디오 플레이어 전달 인터페이스 구현",
-    "description": "The label for category 'Implement an Interface for Passing Video Player' in sidebar 'tutorialSidebar'"
+    "description": "The label for category 'Implement Interface Video Player' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-android-api": {
-    "message": "API",
-    "description": "The label for category 'API' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.android-api": {
+    "message": "API 레퍼런스",
+    "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-ios": {
-    "message": "iOS",
-    "description": "The label for category 'iOS' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-ios-ad-insertion": {
-    "message": "광고 삽입",
-    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-ios-ad-replacement-live": {
-    "message": "라이브 스트림 광고 대체",
-    "description": "The label for category 'Ad Replacement in Live Streams' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-ios-api": {
-    "message": "API",
-    "description": "The label for category 'API' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-html5": {
-    "message": "HTML5",
-    "description": "The label for category 'HTML5' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-html5-ad-insertion": {
-    "message": "광고 삽입",
-    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-html5-ad-replacement-live": {
-    "message": "라이브 스트림 광고 대체",
-    "description": "The label for category 'Ad Replacement in Live Streams' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-html5-api": {
-    "message": "API",
-    "description": "The label for category 'API' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ott-fast-release-notes": {
+  "sidebar.tutorialSidebar.category.android-release-notes": {
     "message": "릴리즈 노트",
     "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-fast-prompts": {
+  "sidebar.tutorialSidebar.category.android-prompts": {
     "message": "LLM 프롬프트",
-    "description": "The label for category 'Prompts for LLM' in sidebar 'tutorialSidebar'"
+    "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-prompts-android": {
-    "message": "Android",
-    "description": "The label for category 'Android' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.android-prompts-linear-tv": {
+    "message": "Linear TV (DTH / Multicast)",
+    "description": "The label for category 'Linear TV (DTH / Multicast)' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-prompts-ios": {
-    "message": "iOS",
-    "description": "The label for category 'iOS' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.web-getting-started": {
+    "message": "시작하기",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ott-prompts-html5": {
-    "message": "HTML5",
-    "description": "The label for category 'HTML5' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.web-linear-tv-fast": {
+    "message": "Linear TV & FAST",
+    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-vod": {
+    "message": "VOD (Video On Demand)",
+    "description": "The label for category 'VOD (Video On Demand)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-advanced-ad-formats": {
+    "message": "Advanced Ad Formats",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-player-and-ad-ui": {
+    "message": "플레이어 & 광고 UI",
+    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-api": {
+    "message": "API 레퍼런스",
+    "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-release-notes": {
+    "message": "릴리즈 노트",
+    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts": {
+    "message": "LLM 프롬프트",
+    "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-getting-started": {
+    "message": "시작하기",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-linear-tv-fast": {
+    "message": "Linear TV & FAST",
+    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-vod": {
+    "message": "VOD (Video On Demand)",
+    "description": "The label for category 'VOD (Video On Demand)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-advanced-ad-formats": {
+    "message": "Advanced Ad Formats",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-player-and-ad-ui": {
+    "message": "플레이어 & 광고 UI",
+    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-api": {
+    "message": "API 레퍼런스",
+    "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-release-notes": {
+    "message": "릴리즈 노트",
+    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts": {
+    "message": "LLM 프롬프트",
+    "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
   }
 }

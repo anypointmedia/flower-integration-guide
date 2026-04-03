@@ -18,24 +18,24 @@ interface PlatformCard {
 
 const platformCards: ReadonlyArray<PlatformCard> = [
   {
-    id: 'linearTv',
-    title: translate({id: 'homepage.platform.linearTv.title', message: 'Linear TV'}),
-    icon: '📺',
-    description: translate({
-      id: 'homepage.platform.linearTv.description',
-      message: 'SCTE-35 signal-based ad insertion for traditional broadcast environments',
-    }),
-    link: '/docs/linear-tv/sdk-architecture',
-  },
-  {
     id: 'android',
     title: translate({id: 'homepage.platform.android.title', message: 'Android'}),
     icon: '📱',
     description: translate({
       id: 'homepage.platform.android.description',
-      message: 'ExoPlayer & Media3 integration for OTT/FAST ad insertion on Android',
+      message: 'ExoPlayer & Media3 integration for ad insertion on Android, including DTH/Multicast and Unicast (HLS/DASH)',
     }),
-    link: '/docs/ott-fast/android/setting-up-dev-environment',
+    link: '/docs/category/android',
+  },
+  {
+    id: 'webSmartTv',
+    title: translate({id: 'homepage.platform.webSmartTv.title', message: 'Web / Smart TV'}),
+    icon: '🌐',
+    description: translate({
+      id: 'homepage.platform.webSmartTv.description',
+      message: 'HLS.js-based ad insertion for browser-based players and Smart TV platforms (Tizen, webOS, etc.)',
+    }),
+    link: '/docs/category/web--smart-tv',
   },
   {
     id: 'ios',
@@ -43,19 +43,9 @@ const platformCards: ReadonlyArray<PlatformCard> = [
     icon: '🍎',
     description: translate({
       id: 'homepage.platform.ios.description',
-      message: 'AVPlayer-based ad insertion for OTT/FAST on iOS and tvOS',
+      message: 'AVPlayer-based ad insertion for iOS and tvOS applications',
     }),
-    link: '/docs/ott-fast/ios/setting-up-dev-environment',
-  },
-  {
-    id: 'html5',
-    title: translate({id: 'homepage.platform.html5.title', message: 'HTML5'}),
-    icon: '🌐',
-    description: translate({
-      id: 'homepage.platform.html5.description',
-      message: 'HLS.js-based ad insertion for web-based OTT/FAST players',
-    }),
-    link: '/docs/ott-fast/html5/setting-up-dev-environment',
+    link: '/docs/category/ios',
   },
 ];
 
@@ -76,7 +66,7 @@ const features: ReadonlyArray<FeatureItem> = [
     title: translate({id: 'homepage.feature.multiPlatform.title', message: 'Multi-Platform Support'}),
     description: translate({
       id: 'homepage.feature.multiPlatform.description',
-      message: 'Single SDK architecture across Android, iOS, HTML5, and Linear TV with platform-native player integrations.',
+      message: 'Single SDK architecture across Android, iOS, and Web/Smart TV with platform-native player integrations.',
     }),
   },
   {
