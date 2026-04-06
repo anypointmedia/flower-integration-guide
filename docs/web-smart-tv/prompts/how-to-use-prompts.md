@@ -15,7 +15,7 @@ Use **integrated-prompt.md** when:
 - You want the LLM to generate all files at once
 - Your project doesn't have any Flower SDK code yet
 
-Fill in the parameters at the top, paste your existing Activity/ViewController code, and the LLM generates the complete integration.
+Fill in the parameters at the top, paste your existing player/component integration code, and the LLM generates the complete integration.
 
 ### Step-by-Step Prompts (Recommended for existing projects)
 

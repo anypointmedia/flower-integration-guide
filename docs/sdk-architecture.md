@@ -64,7 +64,7 @@ _AdView_ is displayed transparently by default, and "Show more" or "Skip" button
 
 ## DTH / Multicast
 
-This architecture is used for set-top box (STB) based broadcast services where ads are inserted into DTH or multicast streams. It involves an ad agent process that runs alongside the TV app on the device.
+This architecture is used for set-top box (STB)-based broadcast services where ads are inserted into DTH or multicast streams. It involves an ad agent process that runs alongside the TV app on the device.
 
 ### Basic Structure
 The following diagram illustrates the communication flow between the TV app, the SDK, the ad agent, and the ad server.

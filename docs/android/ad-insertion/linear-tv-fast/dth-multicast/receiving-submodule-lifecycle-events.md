@@ -5,10 +5,10 @@ sidebar_position: 7
 # Receiving Submodule Lifecycle Events
 
 If you need to receive events based on the lifecycle of each submodule, you can implement `SdkModuleLifecycleListener`. The available submodules are as follows:
-*   multicast `(sdk-multicast)`
-*   ima `(sdk-multicast-ima)`
-*   player `(sdk-multicast-exoplayer)`
-*   ad-ui `(sdk-ad-ui)`
+*   multicast (`sdk-multicast`)
+*   ima (`sdk-multicast-ima`)
+*   player (`sdk-multicast-exoplayer`)
+*   ad-ui (`sdk-ad-ui`)
 
 Code examples are as follows:
 

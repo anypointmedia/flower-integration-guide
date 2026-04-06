@@ -35,33 +35,17 @@
     "message": "광고 삽입",
     "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.Ad Insertion.link.generated-index.description": {
-    "message": "Android 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
-    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
-  },
   "sidebar.tutorialSidebar.category.android-linear-tv-fast": {
     "message": "Linear TV & FAST",
     "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.Linear TV & FAST.link.generated-index.description": {
-    "message": "실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
-    "description": "The generated-index page description for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-dth-multicast": {
     "message": "DTH / Multicast",
     "description": "The label for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.DTH / Multicast.link.generated-index.description": {
-    "message": "DTH(위성) 및 Multicast(IPTV) 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입. FLOWER Ad Agent를 사용합니다.",
-    "description": "The generated-index page description for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
-  },
   "sidebar.tutorialSidebar.category.android-unicast": {
     "message": "Unicast (HLS / DASH)",
     "description": "The label for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.Unicast (HLS / DASH).link.generated-index.description": {
-    "message": "유니캐스트(OTT) 환경에서 HLS/DASH 라이브 스트림의 광고를 대체합니다. 플레이리스트 매니페스트 조작 방식을 사용합니다.",
-    "description": "The generated-index page description for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-vod": {
     "message": "VOD (Video On Demand)",
@@ -158,5 +142,29 @@
   "sidebar.tutorialSidebar.category.ios-prompts": {
     "message": "LLM 프롬프트",
     "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-ad-insertion.link.generated-index.description": {
+    "message": "Android 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
+    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-linear-tv-fast.link.generated-index.description": {
+    "message": "실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
+    "description": "The generated-index page description for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-dth-multicast.link.generated-index.description": {
+    "message": "DTH(위성) 및 Multicast(IPTV) 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입. FLOWER Ad Agent를 사용합니다.",
+    "description": "The generated-index page description for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-unicast.link.generated-index.description": {
+    "message": "유니캐스트(OTT) 환경에서 HLS/DASH 라이브 스트림의 광고를 대체합니다. 플레이리스트 매니페스트 조작 방식을 사용합니다.",
+    "description": "The generated-index page description for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-ad-insertion.link.generated-index.description": {
+    "message": "브라우저 기반 플레이어 또는 Smart TV 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
+    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-ad-insertion.link.generated-index.description": {
+    "message": "iOS 또는 tvOS 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
+    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   }
 }

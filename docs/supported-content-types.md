@@ -10,7 +10,7 @@ This section outlines the content types supported by FLOWER and provides example
 
 ### Main Stream Replacement Ads
 
-This ad type utilizes ad markers (e.g., SCTE-35) to replace existing ads within the main content stream. SCTE-35 based replacement is supported across both delivery methods, but the processing mechanism differs:
+This ad type utilizes ad markers (e.g., SCTE-35) to replace existing ads within the main content stream. SCTE-35-based replacement is supported across both delivery methods, but the processing mechanism differs:
 
 *   **Unicast (HLS/DASH)**: The SDK processes the playlist manifest (m3u8 or mpd) to detect ad markers and replace ad segments within the stream.
 *   **DTH / Multicast**: The SDK detects SCTE-35 cues in the TS stream, and the ad agent plays locally cached creatives in the advertisement layer.

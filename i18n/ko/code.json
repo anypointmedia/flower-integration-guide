@@ -8,47 +8,47 @@
     "description": "The homepage tagline"
   },
   "homepage.getStarted": {
-    "message": "Get Started",
+    "message": "시작하기",
     "description": "The homepage get started button label"
   },
   "homepage.platforms.heading": {
-    "message": "Choose Your Platform"
+    "message": "플랫폼 선택"
   },
   "homepage.platform.android.title": {
     "message": "Android"
   },
   "homepage.platform.android.description": {
-    "message": "ExoPlayer & Media3 integration for ad insertion on Android, including DTH/Multicast and Unicast (HLS/DASH)"
+    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 ExoPlayer & Media3 기반 광고 연동"
   },
   "homepage.platform.webSmartTv.title": {
     "message": "Web / Smart TV"
   },
   "homepage.platform.webSmartTv.description": {
-    "message": "HLS.js-based ad insertion for browser-based players and Smart TV platforms (Tizen, webOS, etc.)"
+    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 플랫폼 광고 연동"
   },
   "homepage.platform.ios.title": {
     "message": "iOS"
   },
   "homepage.platform.ios.description": {
-    "message": "AVPlayer-based ad insertion for iOS and tvOS applications"
+    "message": "AVPlayer 기반 iOS 및 tvOS 앱 광고 연동"
   },
   "homepage.feature.cspm.title": {
-    "message": "Client-Side Playlist Manipulation"
+    "message": "클라이언트 사이드 플레이리스트 조작"
   },
   "homepage.feature.cspm.description": {
-    "message": "The viewer's device directly manipulates the playlist in coordination with the FLOWER ad server — enabling skip, overlay, and interactive ads with no SSAI infrastructure costs."
+    "message": "시청자의 기기가 FLOWER 광고 서버와 연동하여 플레이리스트를 직접 조작합니다. SSAI 인프라 비용 없이 스킵, 오버레이, 인터랙티브 광고를 지원합니다."
   },
   "homepage.feature.multiPlatform.title": {
-    "message": "Multi-Platform Support"
+    "message": "멀티 플랫폼 지원"
   },
   "homepage.feature.multiPlatform.description": {
-    "message": "Single SDK architecture across Android, iOS, and Web/Smart TV with platform-native player integrations."
+    "message": "Android, iOS, Web/Smart TV를 아우르는 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 제공합니다."
   },
   "homepage.feature.prompts.title": {
-    "message": "AI-Assisted Integration"
+    "message": "AI 지원 연동"
   },
   "homepage.feature.prompts.description": {
-    "message": "Step-by-step prompt guides to integrate the FLOWER SDK with AI coding assistants for faster onboarding."
+    "message": "AI 코딩 어시스턴트와 함께 FLOWER SDK를 빠르게 연동할 수 있는 단계별 프롬프트 가이드를 제공합니다."
   },
   "theme.ErrorPageContent.title": {
     "message": "페이지에 오류가 발생하였습니다.",
