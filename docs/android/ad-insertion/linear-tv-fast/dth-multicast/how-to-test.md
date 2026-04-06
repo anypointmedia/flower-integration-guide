@@ -46,7 +46,7 @@ adb shell am broadcast -a tv.anypoint.sdk.AD_SYNC
 
 Verify successful synchronization via the `logcat` output.
 
-Upon initial registration, a set-top box may require up to 5 minutes to receive the ad list. If synchronization does not complete within this timeframe, contact he [**helpdesk**](mailto:dev.support@anypointmedia.com).
+Upon initial registration, a set-top box may require up to 5 minutes to receive the ad list. If synchronization does not complete within this timeframe, contact the [**helpdesk**](mailto:dev.support@anypointmedia.com).
 
 A successful synchronization will yield a log entry similar to: `ready=true, status=OK`.
 

@@ -8,7 +8,7 @@ sidebar_position: 3
 
 ### FlowerAdsManager.requestAd
 
-The function above allows you to insert interstitial ads. The parameters are described below:.
+The function above allows you to insert interstitial ads. The parameters are described below:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
@@ -24,7 +24,7 @@ This method ends ad playback. There are no parameters.
 
 1. Insert replacement ads at a correct timing, consulting “Ad UI Declaration”. For interstitial ads, ensure the AdView covers the entire screen.
 2. Implement _FlowerAdsManagerListener_ interface, consulting “Implement an Interface for Receiving Ad Events”.
-3. Finally, request ads trough _FlowerAdsManager_._requestAd_.
+3. Finally, request ads through _FlowerAdsManager_._requestAd_.
 
 ```swift
 // TODO GUIDE: request ad

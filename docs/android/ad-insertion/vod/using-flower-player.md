@@ -40,9 +40,9 @@ val adsManagerListener = object : FlowerAdsManagerListener {
     }
 
     override fun onError(error: FlowerError?) {
-        // TODO GUIDE: restart to play Linear TV on ad error
+        // TODO GUIDE: restart to play VOD on ad error
         releasePlayer()
-        playLinearTv()
+        playVod()
     }
 
     override fun onAdSkipped(reason: Int) {
@@ -74,7 +74,7 @@ class PlaybackActivity : Activity() {
 
         playerView = findViewById(R.id.player_view)
 
-        playLinearTv()
+        playVod()
     }
 
     override fun onDestroy() {
@@ -84,7 +84,7 @@ class PlaybackActivity : Activity() {
         player.release()
     }
 
-    private fun playLinearTv() {
+    private fun playVod() {
         // TODO GUIDE: Create ExoPlayer using standard ExoPlayer.Builder
         val exoPlayer = ExoPlayer.Builder(this)
             .setLoadControl(
@@ -106,7 +106,7 @@ class PlaybackActivity : Activity() {
 
         val videoUrl = "https://video_url"
 
-        // TODO GUIDE: Configure linear tv ad
+        // TODO GUIDE: Configure VOD ad
         // arg0: adTagUrl, Ad tag URL issued by Flower backend system
         //       You must file a request to Anypoint Media to receive a adTagUrl.
         // arg1: contentId, Unique content ID

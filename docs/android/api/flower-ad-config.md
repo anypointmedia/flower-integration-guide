@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # FlowerAdConfig
 
-Ad config classes that used for Flower Player classes.
+Ad config classes used for Flower Player classes.
 
 ## FlowerLinearTvAdConfig
 

@@ -7,7 +7,7 @@ sidebar_label: "광고 UI 선언"
 
 광고를 표시하려면 목적에 맞는 위치에 따라 앱 레이아웃에 `AdView`를 추가해야 합니다.
 
-## _SwiftUi_
+## _SwiftUI_
 ```swift
 struct PlaybackView: View {
     public let player = AVQueuePlayer()
@@ -41,8 +41,8 @@ class PlaybackViewController: UIViewController {
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
-        view.addSubview(playerViewController.view)
         addChild(playerViewController)
+        view.addSubview(playerViewController.view)
         playerViewController.didMove(toParent: self)
 
         view.addSubview(flowerAdViewHostingController.view)

@@ -524,8 +524,6 @@ class CustomAdPlayer implements AnypointAdPlayer {
 ...
 }
 
-**_Kotlin_**
-
 ```kotlin
 class CustomAdPlayer : AnypointAdPlayer {
     override fun getProgress(): AdProgress {

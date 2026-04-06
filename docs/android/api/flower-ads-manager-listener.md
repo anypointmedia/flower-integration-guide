@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # FlowerAdsManagerListener
 
-This interface provides entrypoint to for receiving ad events during Flower SDK work.
+This interface provides an entrypoint for receiving ad events during Flower SDK work.
 
 ## Events
 

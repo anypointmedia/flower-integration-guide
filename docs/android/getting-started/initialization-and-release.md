@@ -7,7 +7,7 @@ sidebar_position: 2
 Before using any features of the SDK, you must initialize it in your OTT app's startup process. Set the operating environment mode to either _local_, _dev_, or _prod_ as described below.
 *   **_local_:** This mode can be used in a local environment and the default log level is _Verbose_.
 *   **_dev_:** This mode can be used in a development environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level is _Info_.
-*   **_prod_:** This mode can be used in a commercial environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level _Warn_.
+*   **_prod_:** This mode can be used in a commercial environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level is _Warn_.
 
 To ensure proper resource management and avoid potential memory leaks, always call the SDK release function when your OTT app terminates.
 

@@ -40,8 +40,8 @@ class PlaybackViewController: UIViewController {
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
-        view.addSubview(playerViewController.view)
         addChild(playerViewController)
+        view.addSubview(playerViewController.view)
         playerViewController.didMove(toParent: self)
 
         view.addSubview(flowerAdViewHostingController.view)
