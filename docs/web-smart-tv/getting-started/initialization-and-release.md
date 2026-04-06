@@ -10,9 +10,9 @@ sidebar_position: 2
 > `img-src` [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv)`;`
 
 Before using any features of the SDK, you must initialize it in your OTT app's startup process. Set the operating environment mode to either _local_, _dev_, or _prod_ as described below.
-*   **_local_****:** This mode can be used in a local environment and the default log level is _Verbose_.
-*   **_dev_****:** This mode can be used in a development environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level is _Info_.
-*   **_prod_****:** This mode can be used in a commercial environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level _Warn_.
+*   **_local_:** This mode can be used in a local environment and the default log level is _Verbose_.
+*   **_dev_:** This mode can be used in a development environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level is _Info_.
+*   **_prod_:** This mode can be used in a commercial environment and in this mode, the error log that is generated in the SDK is saved in the server. The default log level _Warn_.
 In HTML5 environments, you do not need to explicitly call a release function when your OTT app terminates.
 
 **_Single HTML File_**

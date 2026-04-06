@@ -5,7 +5,7 @@ sidebar_position: 1
 # 개발 환경 설정
 
 :::tip LLM 프롬프트 제공
-LLM 기반 SDK 정합을 위해서는 [Android 프롬프트 섹션](../prompts/how-to-use-prompts.md)을 참고하세요. 단계별 프롬프트와 통합 프롬프트를 사용할 수 있습니다.
+LLM 기반 SDK 정합을 위해서는 [Android 프롬프트 섹션](../prompts/vod/how-to-use-prompts.md)을 참고하세요. 단계별 프롬프트와 통합 프롬프트를 사용할 수 있습니다.
 :::
 
 ## Dependency 설정

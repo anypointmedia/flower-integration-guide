@@ -93,4 +93,4 @@ adsManager.request(new AnypointAdRequest(currentPts, spliceTime, duration, progr
 
 이 섹션은 `AnypointSdk`, `AnypointAdView`, `AdsManagerListener`를 사용하는 **Linear TV (멀티캐스트/DTH) SDK** 용입니다. **Android STB 전용**입니다.
 
-Unicast(HLS/DASH) 스트리밍 연동은 [Android 프롬프트](/docs/android/prompts/how-to-use-prompts)를 참조하세요.
+Unicast(HLS/DASH) 스트리밍 연동은 [Android VOD 프롬프트](/docs/android/prompts/vod/how-to-use-prompts)를 참조하세요.

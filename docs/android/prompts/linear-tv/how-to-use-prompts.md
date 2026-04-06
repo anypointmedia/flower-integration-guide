@@ -93,4 +93,4 @@ adsManager.request(new AnypointAdRequest(currentPts, spliceTime, duration, progr
 
 This section is for the **Linear TV (multicast/DTH) SDK** which uses `AnypointSdk`, `AnypointAdView`, and `AdsManagerListener`. It is **Android STB only**.
 
-For Unicast (HLS/DASH) streaming integration, see the [Android Prompts](/docs/android/prompts/how-to-use-prompts).
+For Unicast (HLS/DASH) streaming integration, see the [Android VOD Prompts](/docs/android/prompts/vod/how-to-use-prompts).

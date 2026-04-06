@@ -1,0 +1,10 @@
+{
+  "label": "Ad Insertion",
+  "position": 2,
+  "collapsed": true,
+  "key": "web-ad-insertion",
+  "link": {
+    "type": "generated-index",
+    "description": "Insert FLOWER ads into your browser-based player or Smart TV application. Covers UI setup, player configuration, ad insertion by content type, and advanced customization."
+  }
+}

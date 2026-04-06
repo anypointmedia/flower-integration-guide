@@ -8,47 +8,47 @@
     "description": "The homepage tagline"
   },
   "homepage.getStarted": {
-    "message": "시작하기",
+    "message": "Get Started",
     "description": "The homepage get started button label"
   },
   "homepage.platforms.heading": {
-    "message": "플랫폼 선택"
+    "message": "Choose Your Platform"
   },
   "homepage.platform.android.title": {
     "message": "Android"
   },
   "homepage.platform.android.description": {
-    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 광고를 연동합니다"
+    "message": "ExoPlayer & Media3 integration for ad insertion on Android, including DTH/Multicast and Unicast (HLS/DASH)"
   },
   "homepage.platform.webSmartTv.title": {
     "message": "Web / Smart TV"
   },
   "homepage.platform.webSmartTv.description": {
-    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 환경에 광고를 연동합니다"
+    "message": "HLS.js-based ad insertion for browser-based players and Smart TV platforms (Tizen, webOS, etc.)"
   },
   "homepage.platform.ios.title": {
     "message": "iOS"
   },
   "homepage.platform.ios.description": {
-    "message": "AVPlayer 기반 iOS 및 tvOS 앱에 광고를 연동합니다"
+    "message": "AVPlayer-based ad insertion for iOS and tvOS applications"
   },
   "homepage.feature.cspm.title": {
-    "message": "클라이언트 사이드 플레이리스트 조작"
+    "message": "Client-Side Playlist Manipulation"
   },
   "homepage.feature.cspm.description": {
-    "message": "FLOWER 광고 서버와 연동하여 시청자 단말에서 직접 플레이리스트를 조작합니다. SSAI 인프라 비용 없이 스킵, 오버레이, 인터랙티브 광고를 지원합니다."
+    "message": "The viewer's device directly manipulates the playlist in coordination with the FLOWER ad server — enabling skip, overlay, and interactive ads with no SSAI infrastructure costs."
   },
   "homepage.feature.multiPlatform.title": {
-    "message": "멀티 플랫폼 지원"
+    "message": "Multi-Platform Support"
   },
   "homepage.feature.multiPlatform.description": {
-    "message": "Android, iOS, Web/Smart TV 전반에 걸친 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 지원합니다."
+    "message": "Single SDK architecture across Android, iOS, and Web/Smart TV with platform-native player integrations."
   },
   "homepage.feature.prompts.title": {
-    "message": "AI 기반 정합 지원"
+    "message": "AI-Assisted Integration"
   },
   "homepage.feature.prompts.description": {
-    "message": "AI 코딩 어시스턴트를 활용한 FLOWER SDK 정합을 위한 단계별 프롬프트 가이드를 제공합니다."
+    "message": "Step-by-step prompt guides to integrate the FLOWER SDK with AI coding assistants for faster onboarding."
   },
   "theme.ErrorPageContent.title": {
     "message": "페이지에 오류가 발생하였습니다.",
@@ -95,7 +95,7 @@
     "description": "The label of the link targeting the tag list page"
   },
   "theme.colorToggle.ariaLabel.mode.system": {
-    "message": "시스템 모드",
+    "message": "system mode",
     "description": "The name for the system color mode"
   },
   "theme.colorToggle.ariaLabel.mode.light": {
@@ -230,7 +230,7 @@
     "description": "The ARIA label to collapse the sidebar category"
   },
   "theme.IconExternalLink.ariaLabel": {
-    "message": "(새 탭에서 열기)",
+    "message": "(opens in new tab)",
     "description": "The ARIA label for the external link icon"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
@@ -298,11 +298,11 @@
     "description": "The title attribute for collapse button of doc sidebar"
   },
   "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
-    "message": "드롭다운 펼치기",
+    "message": "Expand the dropdown",
     "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
   },
   "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
-    "message": "드롭다운 접기",
+    "message": "Collapse the dropdown",
     "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
   },
   "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
@@ -378,31 +378,31 @@
     "description": "The title of the tag list page"
   },
   "theme.CodeBlock.parameterModal.title": {
-    "message": "매개변수 입력",
+    "message": "Fill Parameters",
     "description": "Title of the parameter fill modal for code blocks"
   },
   "theme.CodeBlock.parameterModal.copied": {
-    "message": "복사 완료!",
+    "message": "Copied!",
     "description": "Text shown after successful copy"
   },
   "theme.CodeBlock.parameterModal.copyButton": {
-    "message": "클립보드에 복사",
+    "message": "Copy to Clipboard",
     "description": "Copy button text in parameter modal"
   },
   "theme.CodeBlock.parameterModal.hint": {
-    "message": "비어 있는 필드는 {{placeholder}}를 그대로 유지합니다",
+    "message": "Empty fields keep {{placeholder}} as-is",
     "description": "Hint text explaining empty parameter fields"
   },
   "theme.CodeBlock.parameterModal.inputPlaceholder": {
-    "message": "{paramName} 입력",
+    "message": "Enter {paramName}",
     "description": "Placeholder for parameter input field"
   },
   "theme.CodeBlock.parameterCopyButton.ariaLabel": {
-    "message": "매개변수와 함께 복사",
+    "message": "Copy with parameters",
     "description": "Aria label for parameter copy button"
   },
   "theme.CodeBlock.parameterCopyButton.title": {
-    "message": "매개변수와 함께 복사",
+    "message": "Copy with parameters",
     "description": "Title for parameter copy button"
   }
 }

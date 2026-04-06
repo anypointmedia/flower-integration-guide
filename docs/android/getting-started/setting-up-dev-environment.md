@@ -5,7 +5,7 @@ sidebar_position: 1
 # Setting up Development Environment
 
 :::tip LLM Prompts Available
-For LLM-assisted SDK integration, see the [Android Prompts section](../prompts/how-to-use-prompts.md). Step-by-step and integrated prompts are available.
+For LLM-assisted SDK integration, see the [Android Prompts section](../prompts/vod/how-to-use-prompts.md). Step-by-step and integrated prompts are available.
 :::
 
 ## Dependency Setting

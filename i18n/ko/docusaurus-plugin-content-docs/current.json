@@ -8,7 +8,7 @@
     "description": "The label for category 'Android' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Android.link.generated-index.description": {
-    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 FLOWER SDK를 연동합니다. Linear TV & FAST, VOD, Advanced Ad Formats을 지원합니다.",
+    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 FLOWER SDK를 연동합니다. Linear TV & FAST, VOD, Advanced Ad Formats을 지원합니다. DTH/Multicast 연동은 광고 삽입 > Linear TV & FAST > DTH / Multicast를 참고하세요.",
     "description": "The generated-index page description for category 'Android' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Web / Smart TV": {
@@ -31,19 +31,27 @@
     "message": "시작하기",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
+  "sidebar.tutorialSidebar.category.android-ad-insertion": {
+    "message": "광고 삽입",
+    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Ad Insertion.link.generated-index.description": {
+    "message": "Android 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
+    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
   "sidebar.tutorialSidebar.category.android-linear-tv-fast": {
     "message": "Linear TV & FAST",
     "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.android-linear-tv-fast.link.generated-index.description": {
-    "message": "Android에서 실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
+  "sidebar.tutorialSidebar.category.Linear TV & FAST.link.generated-index.description": {
+    "message": "실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
     "description": "The generated-index page description for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-dth-multicast": {
     "message": "DTH / Multicast",
     "description": "The label for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.android-dth-multicast.link.generated-index.description": {
+  "sidebar.tutorialSidebar.category.DTH / Multicast.link.generated-index.description": {
     "message": "DTH(위성) 및 Multicast(IPTV) 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입. FLOWER Ad Agent를 사용합니다.",
     "description": "The generated-index page description for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
   },
@@ -51,7 +59,7 @@
     "message": "Unicast (HLS / DASH)",
     "description": "The label for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.android-unicast.link.generated-index.description": {
+  "sidebar.tutorialSidebar.category.Unicast (HLS / DASH).link.generated-index.description": {
     "message": "유니캐스트(OTT) 환경에서 HLS/DASH 라이브 스트림의 광고를 대체합니다. 플레이리스트 매니페스트 조작 방식을 사용합니다.",
     "description": "The generated-index page description for category 'Unicast (HLS / DASH)' in sidebar 'tutorialSidebar'"
   },
@@ -62,10 +70,6 @@
   "sidebar.tutorialSidebar.category.android-advanced-ad-formats": {
     "message": "Advanced Ad Formats",
     "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.android-player-and-ad-ui": {
-    "message": "플레이어 & 광고 UI",
-    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-implement-interface-video-player": {
     "message": "비디오 플레이어 전달 인터페이스 구현",
@@ -87,9 +91,17 @@
     "message": "Linear TV (DTH / Multicast)",
     "description": "The label for category 'Linear TV (DTH / Multicast)' in sidebar 'tutorialSidebar'"
   },
+  "sidebar.tutorialSidebar.category.android-prompts-vod": {
+    "message": "VOD (Unicast)",
+    "description": "The label for category 'VOD (Unicast)' in sidebar 'tutorialSidebar'"
+  },
   "sidebar.tutorialSidebar.category.web-getting-started": {
     "message": "시작하기",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-ad-insertion": {
+    "message": "광고 삽입",
+    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.web-linear-tv-fast": {
     "message": "Linear TV & FAST",
@@ -102,10 +114,6 @@
   "sidebar.tutorialSidebar.category.web-advanced-ad-formats": {
     "message": "Advanced Ad Formats",
     "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.web-player-and-ad-ui": {
-    "message": "플레이어 & 광고 UI",
-    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.web-api": {
     "message": "API 레퍼런스",
@@ -123,6 +131,10 @@
     "message": "시작하기",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
+  "sidebar.tutorialSidebar.category.ios-ad-insertion": {
+    "message": "광고 삽입",
+    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
   "sidebar.tutorialSidebar.category.ios-linear-tv-fast": {
     "message": "Linear TV & FAST",
     "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
@@ -134,10 +146,6 @@
   "sidebar.tutorialSidebar.category.ios-advanced-ad-formats": {
     "message": "Advanced Ad Formats",
     "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.ios-player-and-ad-ui": {
-    "message": "플레이어 & 광고 UI",
-    "description": "The label for category 'Player & Ad UI' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.ios-api": {
     "message": "API 레퍼런스",
