@@ -360,10 +360,10 @@ function countArgs(code, openIdx) {
 // ─── Main ───
 
 const promptDirs = [
-  { name: 'linear-tv', dir: join(DOCS_DIR, 'linear-tv/prompts') },
-  { name: 'ott-android', dir: join(DOCS_DIR, 'ott-fast/prompts/android') },
-  { name: 'ott-ios', dir: join(DOCS_DIR, 'ott-fast/prompts/ios') },
-  { name: 'ott-html5', dir: join(DOCS_DIR, 'ott-fast/prompts/html5') },
+  { name: 'android-linear', dir: join(DOCS_DIR, 'android/prompts/linear-tv') },
+  { name: 'android-vod', dir: join(DOCS_DIR, 'android/prompts/vod') },
+  { name: 'ios', dir: join(DOCS_DIR, 'ios/prompts') },
+  { name: 'web-smart-tv', dir: join(DOCS_DIR, 'web-smart-tv/prompts') },
 ];
 
 for (const { name, dir } of promptDirs) {

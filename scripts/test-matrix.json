@@ -1,8 +1,8 @@
 {
   "$description": "Parameter combinations and expected/forbidden patterns for branch testing",
 
-  "linear-tv": {
-    "template": "docs/linear-tv/prompts/integrated-prompt.md",
+  "android-linear": {
+    "template": "docs/android/prompts/linear-tv/integrated-prompt.md",
     "defaults": {
       "SDK_VERSION": "2.0.7",
       "INITIAL_SERVICE_ID": "101"
@@ -79,8 +79,8 @@
     ]
   },
 
-  "ott-android": {
-    "template": "docs/ott-fast/prompts/android/integrated-prompt.md",
+  "android-vod": {
+    "template": "docs/android/prompts/vod/integrated-prompt.md",
     "defaults": {
       "SDK_VERSION": "2.8.0",
       "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",
@@ -170,8 +170,8 @@
     ]
   },
 
-  "ott-ios": {
-    "template": "docs/ott-fast/prompts/ios/integrated-prompt.md",
+  "ios": {
+    "template": "docs/ios/prompts/integrated-prompt.md",
     "defaults": {
       "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",
       "PREROLL_AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?preroll=1",
@@ -367,8 +367,8 @@
     ]
   },
 
-  "ott-html5": {
-    "template": "docs/ott-fast/prompts/html5/integrated-prompt.md",
+  "web-smart-tv": {
+    "template": "docs/web-smart-tv/prompts/integrated-prompt.md",
     "defaults": {
       "SDK_VERSION": "2.8.0",
       "AD_TAG_URL": "https://reds-ad.anypoint.tv/ads?test=1",

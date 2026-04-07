@@ -3,7 +3,7 @@
   "_description": "SDK public API contract. Source of truth for prompt validation. Update when SDK changes.",
   "_lastVerified": "2026-03-23",
 
-  "linear-tv": {
+  "android-linear": {
     "AnypointSdk": {
       "package": "tv.anypoint.api",
       "type": "class",
@@ -139,7 +139,7 @@
     }
   },
 
-  "ott-android": {
+  "android-vod": {
     "FlowerSdk": {
       "package": "tv.anypoint.flower.android.sdk.api",
       "type": "object",
@@ -210,7 +210,7 @@
     }
   },
 
-  "ott-ios": {
+  "ios": {
     "FlowerSdk": {
       "package": "FlowerSdk",
       "type": "class",
@@ -269,7 +269,7 @@
     }
   },
 
-  "ott-html5": {
+  "web-smart-tv": {
     "FlowerSdk": {
       "type": "global",
       "methods": ["init()", "setEnv(String)", "setLogLevel(String)"],

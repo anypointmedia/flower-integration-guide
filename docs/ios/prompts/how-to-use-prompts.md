@@ -46,19 +46,7 @@ Before using any prompt, replace the `{{...}}` placeholders:
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | Type of ad content |
 | `APPROACH` | `flower-player` \| `media-player-hook` | Integration approach (see below) |
-| `SDK_VERSION` | e.g., `2.8.0` | Flower SDK version provided to your project |
-
-### iOS Additional Parameters
-
-| Parameter | Values | Description |
-|-----------|--------|-------------|
 | `UI_FRAMEWORK` | `swiftui` \| `uikit` | iOS UI framework |
-
-### HTML5 Additional Parameters
-
-| Parameter | Values | Description |
-|-----------|--------|-------------|
-| `PLAYER_TYPE` | `hls.js` \| `bitmovin` \| `dash.js` \| `none` | HTML5 video player library |
 
 ## Choosing APPROACH
 

@@ -46,19 +46,7 @@ sidebar_position: 0
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | 광고 콘텐츠 유형 |
 | `APPROACH` | `flower-player` \| `media-player-hook` | 연동 방식 (아래 참조) |
-| `SDK_VERSION` | 예: `2.8.0` | 프로젝트에 제공된 Flower SDK 버전 |
-
-### iOS 추가 매개변수
-
-| 매개변수 | 값 | 설명 |
-|-----------|--------|-------------|
 | `UI_FRAMEWORK` | `swiftui` \| `uikit` | iOS UI 프레임워크 |
-
-### HTML5 추가 매개변수
-
-| 매개변수 | 값 | 설명 |
-|-----------|--------|-------------|
-| `PLAYER_TYPE` | `hls.js` \| `bitmovin` \| `dash.js` \| `none` | HTML5 비디오 플레이어 라이브러리 |
 
 ## APPROACH 선택
 
