@@ -1,0 +1,10 @@
+{
+  "label": "DTH / Multicast",
+  "position": 1,
+  "collapsed": true,
+  "key": "android-dth-multicast",
+  "link": {
+    "type": "generated-index",
+    "description": "SCTE-35 signal-based ad insertion for DTH (satellite) and Multicast (IPTV) broadcast environments. Uses the FLOWER Ad Agent for ad delivery and playback."
+  }
+}

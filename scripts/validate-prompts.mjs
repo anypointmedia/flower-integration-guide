@@ -29,10 +29,10 @@ function extractPlaceholders(filePath) {
 }
 
 const platformPrompts = {
-  'linear-tv': join(DOCS_DIR, 'linear-tv/prompts/integrated-prompt.md'),
-  'ott-android': join(DOCS_DIR, 'ott-fast/prompts/android/integrated-prompt.md'),
-  'ott-ios': join(DOCS_DIR, 'ott-fast/prompts/ios/integrated-prompt.md'),
-  'ott-html5': join(DOCS_DIR, 'ott-fast/prompts/html5/integrated-prompt.md'),
+  'android-linear': join(DOCS_DIR, 'android/prompts/linear-tv/integrated-prompt.md'),
+  'android-vod': join(DOCS_DIR, 'android/prompts/vod/integrated-prompt.md'),
+  'ios': join(DOCS_DIR, 'ios/prompts/integrated-prompt.md'),
+  'web-smart-tv': join(DOCS_DIR, 'web-smart-tv/prompts/integrated-prompt.md'),
 };
 
 const placeholdersByPlatform = {};
@@ -43,8 +43,8 @@ for (const [platform, filePath] of Object.entries(platformPrompts)) {
   }
 }
 
-// Check OTT platforms share the same placeholders (minus platform-specific ones)
-const ottPlatforms = ['ott-android', 'ott-ios', 'ott-html5'];
+// Check non-linear platforms share the same placeholders (minus platform-specific ones)
+const ottPlatforms = ['android-vod', 'ios', 'web-smart-tv'];
 // Platform-specific placeholders that are NOT expected across all OTT platforms
 // SDK_VERSION: iOS uses SPM (version set in Xcode UI), not in code
 const platformSpecific = new Set(['UI_FRAMEWORK', 'PLAYER_TYPE', 'SDK_VERSION']);
@@ -80,10 +80,10 @@ function extractApiCalls(filePath) {
 }
 
 const promptDirs = [
-  { name: 'linear-tv', dir: join(DOCS_DIR, 'linear-tv/prompts') },
-  { name: 'ott-android', dir: join(DOCS_DIR, 'ott-fast/prompts/android') },
-  { name: 'ott-ios', dir: join(DOCS_DIR, 'ott-fast/prompts/ios') },
-  { name: 'ott-html5', dir: join(DOCS_DIR, 'ott-fast/prompts/html5') },
+  { name: 'android-linear', dir: join(DOCS_DIR, 'android/prompts/linear-tv') },
+  { name: 'android-vod', dir: join(DOCS_DIR, 'android/prompts/vod') },
+  { name: 'ios', dir: join(DOCS_DIR, 'ios/prompts') },
+  { name: 'web-smart-tv', dir: join(DOCS_DIR, 'web-smart-tv/prompts') },
 ];
 
 for (const { name, dir } of promptDirs) {
@@ -124,12 +124,14 @@ for (const { name, dir } of promptDirs) {
 
 console.log('\n=== 3. Placeholder Documentation ===\n');
 
-const howToUsePaths = [
-  join(DOCS_DIR, 'linear-tv/prompts/how-to-use-prompts.md'),
-  join(DOCS_DIR, 'ott-fast/prompts/how-to-use-prompts.md'),
+const howToUseEntries = [
+  { path: join(DOCS_DIR, 'android/prompts/linear-tv/how-to-use-prompts.md'), platforms: ['android-linear'] },
+  { path: join(DOCS_DIR, 'android/prompts/vod/how-to-use-prompts.md'), platforms: ['android-vod'] },
+  { path: join(DOCS_DIR, 'ios/prompts/how-to-use-prompts.md'), platforms: ['ios'] },
+  { path: join(DOCS_DIR, 'web-smart-tv/prompts/how-to-use-prompts.md'), platforms: ['web-smart-tv'] },
 ];
 
-for (const howToPath of howToUsePaths) {
+for (const { path: howToPath, platforms: relevantPlatforms } of howToUseEntries) {
   if (!existsSync(howToPath)) continue;
 
   const howToContent = readFileSync(howToPath, 'utf-8');
@@ -142,12 +144,6 @@ for (const howToPath of howToUsePaths) {
   while ((match = paramTablePattern.exec(howToContent)) !== null) {
     documentedParams.add(match[1]);
   }
-
-  // Find which platforms this how-to covers
-  const isLinearTv = howToPath.includes('linear-tv');
-  const relevantPlatforms = isLinearTv
-    ? ['linear-tv']
-    : ['ott-android', 'ott-ios', 'ott-html5'];
 
   const allUsedPlaceholders = new Set();
   for (const platform of relevantPlatforms) {

@@ -4,7 +4,7 @@
     "description": "The homepage title"
   },
   "homepage.tagline": {
-    "message": "Linear TV 및 OTT/FAST 플랫폼을 위한 광고 정합 SDK 문서",
+    "message": "Android, Web/Smart TV, iOS 플랫폼을 위한 광고 정합 SDK 문서",
     "description": "The homepage tagline"
   },
   "homepage.getStarted": {
@@ -14,47 +14,41 @@
   "homepage.platforms.heading": {
     "message": "플랫폼 선택"
   },
-  "homepage.platform.linearTv.title": {
-    "message": "Linear TV"
-  },
-  "homepage.platform.linearTv.description": {
-    "message": "기존 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입"
-  },
   "homepage.platform.android.title": {
     "message": "Android"
   },
   "homepage.platform.android.description": {
-    "message": "Android OTT/FAST 광고 삽입을 위한 ExoPlayer 및 Media3 연동"
+    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 ExoPlayer & Media3 기반 광고 연동"
+  },
+  "homepage.platform.webSmartTv.title": {
+    "message": "Web / Smart TV"
+  },
+  "homepage.platform.webSmartTv.description": {
+    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 플랫폼 광고 연동"
   },
   "homepage.platform.ios.title": {
     "message": "iOS"
   },
   "homepage.platform.ios.description": {
-    "message": "iOS 및 tvOS OTT/FAST를 위한 AVPlayer 기반 광고 삽입"
-  },
-  "homepage.platform.html5.title": {
-    "message": "HTML5"
-  },
-  "homepage.platform.html5.description": {
-    "message": "웹 기반 OTT/FAST 플레이어를 위한 HLS.js 기반 광고 삽입"
+    "message": "AVPlayer 기반 iOS 및 tvOS 앱 광고 연동"
   },
   "homepage.feature.cspm.title": {
     "message": "클라이언트 사이드 플레이리스트 조작"
   },
   "homepage.feature.cspm.description": {
-    "message": "FLOWER 광고 서버와 연동하여 시청자 단말에서 직접 플레이리스트를 조작합니다. SSAI 인프라 비용 없이 스킵, 오버레이, 인터랙티브 광고를 지원합니다."
+    "message": "시청자의 기기가 FLOWER 광고 서버와 연동하여 플레이리스트를 직접 조작합니다. SSAI 인프라 비용 없이 스킵, 오버레이, 인터랙티브 광고를 지원합니다."
   },
   "homepage.feature.multiPlatform.title": {
     "message": "멀티 플랫폼 지원"
   },
   "homepage.feature.multiPlatform.description": {
-    "message": "Android, iOS, HTML5, Linear TV 전반에 걸친 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 지원합니다."
+    "message": "Android, iOS, Web/Smart TV를 아우르는 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 제공합니다."
   },
   "homepage.feature.prompts.title": {
-    "message": "AI 기반 정합 지원"
+    "message": "AI 지원 연동"
   },
   "homepage.feature.prompts.description": {
-    "message": "AI 코딩 어시스턴트를 활용한 FLOWER SDK 정합을 위한 단계별 프롬프트 가이드를 제공합니다."
+    "message": "AI 코딩 어시스턴트와 함께 FLOWER SDK를 빠르게 연동할 수 있는 단계별 프롬프트 가이드를 제공합니다."
   },
   "theme.ErrorPageContent.title": {
     "message": "페이지에 오류가 발생하였습니다.",
@@ -236,7 +230,7 @@
     "description": "The ARIA label to collapse the sidebar category"
   },
   "theme.IconExternalLink.ariaLabel": {
-    "message": "(새 탭에서 열기)",
+    "message": "(새 탭에서 열림)",
     "description": "The ARIA label for the external link icon"
   },
   "theme.navbar.mobileLanguageDropdown.label": {
@@ -384,11 +378,11 @@
     "description": "The title of the tag list page"
   },
   "theme.CodeBlock.parameterModal.title": {
-    "message": "매개변수 입력",
+    "message": "파라미터 입력",
     "description": "Title of the parameter fill modal for code blocks"
   },
   "theme.CodeBlock.parameterModal.copied": {
-    "message": "복사 완료!",
+    "message": "복사됨!",
     "description": "Text shown after successful copy"
   },
   "theme.CodeBlock.parameterModal.copyButton": {
@@ -396,7 +390,7 @@
     "description": "Copy button text in parameter modal"
   },
   "theme.CodeBlock.parameterModal.hint": {
-    "message": "비어 있는 필드는 {{placeholder}}를 그대로 유지합니다",
+    "message": "빈 필드는 {{placeholder}}를 그대로 유지합니다",
     "description": "Hint text explaining empty parameter fields"
   },
   "theme.CodeBlock.parameterModal.inputPlaceholder": {
@@ -404,11 +398,11 @@
     "description": "Placeholder for parameter input field"
   },
   "theme.CodeBlock.parameterCopyButton.ariaLabel": {
-    "message": "매개변수와 함께 복사",
+    "message": "파라미터와 함께 복사",
     "description": "Aria label for parameter copy button"
   },
   "theme.CodeBlock.parameterCopyButton.title": {
-    "message": "매개변수와 함께 복사",
+    "message": "파라미터와 함께 복사",
     "description": "Title for parameter copy button"
   }
 }

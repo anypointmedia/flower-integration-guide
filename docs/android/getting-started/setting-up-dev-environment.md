@@ -1,0 +1,98 @@
+---
+sidebar_position: 1
+---
+
+# Setting up Development Environment
+
+:::tip LLM Prompts Available
+For LLM-assisted SDK integration, see the [Android Prompts section](../prompts/vod/how-to-use-prompts.md). Step-by-step and integrated prompts are available.
+:::
+
+## Dependency Setting
+To use the FLOWER SDK in your Android project, add the library to Gradle dependencies through AnypointMedia's Maven repository.
+
+```plain
+repositories {
+   maven(url = "https://maven.anypoint.tv/repository/public-release")
+}
+
+...
+
+dependencies {
+    implementation("flower-sdk:sdk-android-ott:X.X.X")
+}
+```
+
+## Android Cleartext Traffic Exception Configuration
+When using the FLOWER SDK, a specific domain must be configured as a cleartext traffic exception in order for the SDK to communicate properly over HTTP.
+Starting from Android 9 (API level 28), cleartext (HTTP) traffic is blocked by default.
+
+You can choose one of the two methods below:
+1. Allow cleartext traffic for a specific domain using Network Security Config (Recommended)
+2. Enable cleartext traffic globally using usesCleartextTraffic="true"
+
+### Method 1 (Recommended) — Allow Only a Specific Domain
+
+#### 1. Create Network Security Config File
+
+Create the following file:
+
+```plain
+app/src/main/res/xml/network_security_config.xml
+```
+
+#### 2. Add the Following Configuration
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">
+            prod-reds-device-ad-distributor.ap-northeast-2.elasticbeanstalk.com
+        </domain>
+    </domain-config>
+</network-security-config>
+```
+
+cleartextTrafficPermitted="true"
+→ Allows HTTP traffic only for this domain.
+
+includeSubdomains="true"
+→ Also allows all subdomains (set to false if not needed).
+
+### 3. Apply It in AndroidManifest.xml
+
+Add the following inside the <application> tag:
+
+```xml
+<application
+    android:name=".MyApplication"
+    android:networkSecurityConfig="@xml/network_security_config"
+    android:usesCleartextTraffic="false"
+    ... >
+```
+
+This approach limits HTTP access to the specified domain only and is more secure.
+
+### Method 2 — Allow Cleartext Traffic Globally (Not Recommended)
+
+You can enable HTTP for all domains by setting:
+
+```xml
+<application
+    android:name=".MyApplication"
+    android:usesCleartextTraffic="true"
+    ... >
+```
+
+Important Notes
+*   This allows HTTP traffic for all domains.
+*   In this case, Network Security Config is not required.
+*   This approach is not recommended for production environments due to security risks.
+
+### (Reference) Android Version Behavior
+
+| Android Version | Behavior |
+| ---| --- |
+| API 28+ (Android 9+) | HTTP blocked by default |
+| API 27 and below | HTTP allowed by default |
