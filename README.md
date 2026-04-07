@@ -1,6 +1,6 @@
 # FLOWER Integration Guide
 
-FLOWER SDK integration documentation for Linear TV and OTT/FAST platforms, built with [Docusaurus](https://docusaurus.io/).
+FLOWER SDK integration documentation for Android, Web/Smart TV, and iOS platforms, built with [Docusaurus](https://docusaurus.io/).
 
 **Live site:** https://flower-docs.anypoint.tv
 
@@ -50,7 +50,7 @@ npm start -- --locale ko
 ```
 
 Translation files:
-- `i18n/ko/docusaurus-plugin-content-docs/` — translated docs
+- `i18n/ko/docusaurus-plugin-content-docs/current/` — translated docs (mirrors `docs/` structure)
 - `i18n/ko/docusaurus-theme-classic/` — UI strings (navbar, footer)
 - `i18n/ko/code.json` — custom component strings
 
@@ -86,57 +86,63 @@ node scripts/run-branch-tests.mjs --platform ott-android
 
 ```
 docs/
-├── intro.mdx                    # Landing page
-├── linear-tv/                   # Linear TV (Multicast, DTH)
-│   ├── sdk-architecture.md
-│   ├── project-settings.md
-│   ├── preparing-to-use/
-│   ├── inserting-ads/
-│   ├── scte-35-decoder.md
-│   ├── ad-player/
-│   ├── how-to-test.md
-│   ├── release-notes/
-│   └── prompts/                 # LLM-assisted integration prompts
-│       ├── how-to-use-prompts.md
-│       ├── integrated-prompt.md
-│       └── step-{1..4}-*.md
-└── ott-fast/                    # OTT/FAST
-    ├── supported-content-types.md
-    ├── sdk-architecture.md
-    ├── android/
-    ├── ios/
-    ├── html5/
-    ├── release-notes/
-    └── prompts/                 # LLM-assisted integration prompts
-        ├── how-to-use-prompts.md
-        ├── android/
-        │   ├── integrated-prompt.md
-        │   └── step-{1..4}-*.md
-        ├── ios/
-        │   ├── integrated-prompt.md
-        │   └── step-{1..4}-*.md
-        └── html5/
-            ├── integrated-prompt.md
-            └── step-{1..4}-*.md
+├── intro.mdx                        # Landing page
+├── sdk-architecture.md              # SDK architecture overview
+├── supported-content-types.md       # Supported content types
+├── android/                         # Android platform
+│   ├── getting-started/             # Dev environment, initialization, logging, PiP
+│   ├── ad-insertion/                # Ad integration guides
+│   │   ├── linear-tv-fast/          # DTH/Multicast & Unicast
+│   │   ├── vod/                     # VOD ad implementation
+│   │   └── advanced-ad-formats/     # Inline ads, etc.
+│   ├── api/                         # API reference
+│   ├── prompts/                     # LLM-assisted integration prompts
+│   │   ├── linear-tv/
+│   │   └── vod/
+│   └── release-notes/
+├── ios/                             # iOS platform
+│   ├── getting-started/
+│   ├── ad-insertion/
+│   │   ├── linear-tv-fast/
+│   │   ├── vod/
+│   │   └── advanced-ad-formats/
+│   ├── api/
+│   ├── prompts/
+│   └── release-notes/
+└── web-smart-tv/                    # Web / Smart TV platform (Tizen, webOS, etc.)
+    ├── getting-started/
+    ├── ad-insertion/
+    │   ├── linear-tv-fast/
+    │   ├── vod/
+    │   └── advanced-ad-formats/
+    ├── api/
+    ├── prompts/
+    └── release-notes/
 
-i18n/ko/                         # Korean translation
+i18n/ko/                             # Korean translation
 ├── code.json
 ├── docusaurus-plugin-content-docs/
+│   └── current/                     # Mirrors docs/ structure
 └── docusaurus-theme-classic/
 
 scripts/
-├── api-contract.json            # SDK public API contract (source of truth)
-├── test-matrix.json             # Parameter combinations for branch testing
-├── validate-prompts.mjs         # Placeholder & cross-reference validation
-├── validate-api-contract.mjs    # API contract conformance checks
-├── validate-code-blocks.mjs     # Code block syntax & method signature checks
-└── run-branch-tests.mjs         # LLM branch testing runner
+├── api-contract.json                # SDK public API contract (source of truth)
+├── test-matrix.json                 # Parameter combinations for branch testing
+├── validate-prompts.mjs             # Placeholder & cross-reference validation
+├── validate-api-contract.mjs        # API contract conformance checks
+├── validate-code-blocks.mjs         # Code block syntax & method signature checks
+└── run-branch-tests.mjs             # LLM branch testing runner
 
-src/theme/                       # Custom theme components
+tests/prompt-validation/fixtures/    # Test fixtures for prompt validation
+├── linear-tv/                       # Linear TV scenarios
+└── ott-fast/                        # OTT/FAST scenarios (android, ios, html5)
+
+src/theme/                           # Custom theme components
 └── CodeBlock/Buttons/
-    └── ParameterCopyButton/     # Copy button with parameter substitution
+    └── ParameterCopyButton/         # Copy button with parameter substitution
 
 static/
-├── CNAME                        # Custom domain config
-└── img/                         # Static assets
+├── CNAME                            # Custom domain config
+├── .nojekyll                        # Disable Jekyll processing
+└── img/                             # Static assets (logo, favicon, doc images)
 ```
