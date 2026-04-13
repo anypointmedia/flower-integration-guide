@@ -12,7 +12,7 @@
  *
  * Options:
  *   --dry-run     Show test matrix without calling LLM
- *   --platform X  Run only one platform (linear-tv, ott-android, etc.)
+ *   --platform X  Run only one platform (android-linear, android-vod, ios, web-smart-tv)
  */
 
 import { readFileSync } from 'fs';

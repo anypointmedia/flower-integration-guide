@@ -1,0 +1,10 @@
+{
+  "label": "Ad Insertion",
+  "position": 2,
+  "collapsed": true,
+  "key": "android-ad-insertion",
+  "link": {
+    "type": "generated-index",
+    "description": "Insert FLOWER ads into your Android application. Covers UI setup, player configuration, ad insertion by content type, and advanced customization."
+  }
+}

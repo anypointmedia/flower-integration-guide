@@ -119,33 +119,33 @@ function extractMethodCalls(content, className) {
 const META_KEYS = new Set(['$schema', '_description', '_lastVerified']);
 
 const platformPrompts = {
-  'linear-tv': [
-    join(DOCS_DIR, 'linear-tv/prompts/integrated-prompt.md'),
-    join(DOCS_DIR, 'linear-tv/prompts/step-1-project-setup.md'),
-    join(DOCS_DIR, 'linear-tv/prompts/step-2-ad-ui-and-player.md'),
-    join(DOCS_DIR, 'linear-tv/prompts/step-3-ad-integration.md'),
-    join(DOCS_DIR, 'linear-tv/prompts/step-4-cleanup.md'),
+  'android-linear': [
+    join(DOCS_DIR, 'android/prompts/linear-tv/integrated-prompt.md'),
+    join(DOCS_DIR, 'android/prompts/linear-tv/step-1-project-setup.md'),
+    join(DOCS_DIR, 'android/prompts/linear-tv/step-2-ad-ui-and-player.md'),
+    join(DOCS_DIR, 'android/prompts/linear-tv/step-3-ad-integration.md'),
+    join(DOCS_DIR, 'android/prompts/linear-tv/step-4-cleanup.md'),
   ],
-  'ott-android': [
-    join(DOCS_DIR, 'ott-fast/prompts/android/integrated-prompt.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/android/step-1-project-setup.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/android/step-2-ad-ui-and-player.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/android/step-3-ad-integration.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/android/step-4-cleanup.md'),
+  'android-vod': [
+    join(DOCS_DIR, 'android/prompts/vod/integrated-prompt.md'),
+    join(DOCS_DIR, 'android/prompts/vod/step-1-project-setup.md'),
+    join(DOCS_DIR, 'android/prompts/vod/step-2-ad-ui-and-player.md'),
+    join(DOCS_DIR, 'android/prompts/vod/step-3-ad-integration.md'),
+    join(DOCS_DIR, 'android/prompts/vod/step-4-cleanup.md'),
   ],
-  'ott-ios': [
-    join(DOCS_DIR, 'ott-fast/prompts/ios/integrated-prompt.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/ios/step-1-project-setup.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/ios/step-2-ad-ui-and-player.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/ios/step-3-ad-integration.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/ios/step-4-cleanup.md'),
+  'ios': [
+    join(DOCS_DIR, 'ios/prompts/integrated-prompt.md'),
+    join(DOCS_DIR, 'ios/prompts/step-1-project-setup.md'),
+    join(DOCS_DIR, 'ios/prompts/step-2-ad-ui-and-player.md'),
+    join(DOCS_DIR, 'ios/prompts/step-3-ad-integration.md'),
+    join(DOCS_DIR, 'ios/prompts/step-4-cleanup.md'),
   ],
-  'ott-html5': [
-    join(DOCS_DIR, 'ott-fast/prompts/html5/integrated-prompt.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/html5/step-1-project-setup.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/html5/step-2-ad-ui-and-player.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/html5/step-3-ad-integration.md'),
-    join(DOCS_DIR, 'ott-fast/prompts/html5/step-4-cleanup.md'),
+  'web-smart-tv': [
+    join(DOCS_DIR, 'web-smart-tv/prompts/integrated-prompt.md'),
+    join(DOCS_DIR, 'web-smart-tv/prompts/step-1-project-setup.md'),
+    join(DOCS_DIR, 'web-smart-tv/prompts/step-2-ad-ui-and-player.md'),
+    join(DOCS_DIR, 'web-smart-tv/prompts/step-3-ad-integration.md'),
+    join(DOCS_DIR, 'web-smart-tv/prompts/step-4-cleanup.md'),
   ],
 };
 
