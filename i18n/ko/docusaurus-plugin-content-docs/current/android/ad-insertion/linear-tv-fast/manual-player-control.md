@@ -44,8 +44,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         playLinearTv()
     }
 
-    override fun onAdSkipped(reason: Int) {
-        logger.info { "onAdSkipped: $reason" }
+    override fun onAdBreakSkipped(reason: Int) {
+        logger.info { "onAdBreakSkipped: $reason" }
     }
 }
 flowerAdView.adsManager.addListener(adsManagerListener)
@@ -111,10 +111,12 @@ flowerAdView.adsManager.addListener(adsManagerListener)
 ## 실시간 채널 광고 요청 예시
 
 :::tip 프리롤 광고와 재생 시작
-`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. 반환된 URL을 플레이어에 설정한 뒤, `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
+`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
 
-- **`prerollAdTagUrl`을 설정하지 않은 경우:** `player.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
-- **`prerollAdTagUrl`을 설정한 경우:** SDK가 프리롤 광고를 먼저 재생한 뒤 자동으로 콘텐츠 재생을 시작하므로, `player.play()`를 별도로 호출할 필요가 없습니다.
+- **`prerollAdTagUrl`을 설정하지 않은 경우:** 반환된 URL을 플레이어에 설정한 뒤 `player.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
+- **`prerollAdTagUrl`을 설정한 경우:** 반환된 URL을 바로 플레이어에 설정하지 않고, 기존 `FlowerAdsManagerListener`를 제거한 뒤 임시 리스너를 등록합니다. 임시 리스너의 `onCompleted()`가 호출되면 그 시점에 반환된 URL을 플레이어에 설정하고 재생을 시작한 뒤, 임시 리스너를 제거하고 원래 리스너를 다시 등록합니다.
+
+이렇게 처리하는 이유는, 본 콘텐츠 영상이 미리 로딩되면서 광고 시작 전에 콘텐츠의 잔상이 화면에 남을 수 있고, 광고와 본 콘텐츠가 동시에 로딩되면서 네트워크 자원을 불필요하게 소모하기 때문입니다.
 :::
 
 ```kotlin
@@ -142,14 +144,41 @@ private fun playLinearTv() {
         mapOf("custom-stream-header" to "custom-stream-header-value"),
         prerollAdTagUrl
     )
-    player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
-
-    // If prerollAdTagUrl is null, call player.play() directly to start playback immediately.
-    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
-    // and then automatically starts content playback, so player.play() is not needed.
     if (prerollAdTagUrl == null) {
+        // prerollAdTagUrl이 없으면 반환된 URL을 바로 설정하고 재생을 시작합니다.
+        player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
         player.prepare()
         player.play()
+    } else {
+        // prerollAdTagUrl이 있으면 기존 리스너를 제거하고 임시 리스너를 등록합니다.
+        // 프리롤 광고가 완료(onCompleted)된 시점에 스트림 URL을 설정하고 재생을 시작합니다.
+        flowerAdView.adsManager.removeListener(adsManagerListener)
+
+        val prerollListener = object : FlowerAdsManagerListener {
+            override fun onPrepare(adDurationMs: Int) {}
+            override fun onPlay() {}
+            override fun onCompleted() {
+                // 프리롤 광고 완료 후 스트림 URL 설정 및 재생 시작
+                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+                player.prepare()
+                player.play()
+
+                // 임시 리스너를 제거하고 원래 리스너를 복원합니다.
+                flowerAdView.adsManager.removeListener(this)
+                flowerAdView.adsManager.addListener(adsManagerListener)
+            }
+            override fun onError(error: FlowerError?) {
+                // 프리롤 광고 에러 시에도 스트림 재생 시작 및 리스너 복원
+                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+                player.prepare()
+                player.play()
+
+                flowerAdView.adsManager.removeListener(this)
+                flowerAdView.adsManager.addListener(adsManagerListener)
+            }
+            override fun onAdBreakSkipped(reason: Int) {}
+        }
+        flowerAdView.adsManager.addListener(prerollListener)
     }
 }
 

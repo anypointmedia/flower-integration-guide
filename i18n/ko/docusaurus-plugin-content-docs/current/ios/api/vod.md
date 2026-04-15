@@ -5,13 +5,13 @@ sidebar_label: "VOD"
 
 # VOD
 
-## Methods
+## 메소드
 
 ### FlowerAdsManager.requestVodAd
 
-VOD 콘텐츠 진입 전 사용하는 함수입니다. 매개변수는 아래와 같습니다.
+VOD 콘텐츠 진입 전 사용하는 함수입니다. 매개변수는 아래와 같습니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
 | contentId | string | 콘텐츠의 고유 아이디<br/>Flower 백엔드 시스템에 등록되어야 함 |

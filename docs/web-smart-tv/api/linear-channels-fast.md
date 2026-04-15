@@ -8,9 +8,7 @@ sidebar_position: 1
 
 ### FlowerAdsManager.changeChannelUrl
 
-The function above allows you to dynamically change the stream URL of a live broadcast. 
-
-The parameters are described below:
+The function above allows you to dynamically change the stream URL of a live broadcast. The parameters are described below:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
@@ -25,9 +23,7 @@ The parameters are described below:
 
 ### FlowerAdsManager.changeChannelExtraParams
 
-This function above allows you to change extraParams, which is additional targeting information, during a live broadcast. 
-
-The parameter is described below:
+This function above allows you to change extraParams, which is additional targeting information, during a live broadcast. The parameter is described below:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |

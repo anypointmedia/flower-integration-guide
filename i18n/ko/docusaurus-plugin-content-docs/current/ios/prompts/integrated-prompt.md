@@ -234,7 +234,7 @@ IMPORTANT: The FlowerAdsManagerListener protocol requires ALL of these methods:
   - onPlay()
   - onCompleted()
   - onError(error: FlowerError?)
-  - onAdSkipped(reason: Int32)
+  - onAdBreakSkipped(reason: Int32)
   - onAdBreakPrepare(adInfos: NSMutableArray)
 
 You MUST implement all 6 methods even if some are empty. Missing methods cause compile errors.
@@ -252,7 +252,7 @@ For FlowerPlayer (FlowerAVPlayer):
       func onPlay() { /* hide player controls */ }
       func onCompleted() { /* show player controls */ }
       func onError(error: FlowerError?) { /* restart playback */ }
-      func onAdSkipped(reason: Int32) {}
+      func onAdBreakSkipped(reason: Int32) {}
       func onAdBreakPrepare(adInfos: NSMutableArray) {}
   }
 
@@ -262,7 +262,7 @@ For FlowerPlayer (FlowerAVPlayer):
       func onPlay() {}
       func onCompleted() {}
       func onError(error: FlowerError?) {}
-      func onAdSkipped(reason: Int32) {}
+      func onAdBreakSkipped(reason: Int32) {}
       func onAdBreakPrepare(adInfos: NSMutableArray) {}
   }
 
@@ -318,7 +318,7 @@ For MediaPlayerHook:
               if !self.view.isContentEnd { self.view.player.play() }
           }
       }
-      func onAdSkipped(reason: Int32) {}
+      func onAdBreakSkipped(reason: Int32) {}
       func onAdBreakPrepare(adInfos: NSMutableArray) {}
   }
 
@@ -354,7 +354,7 @@ If AD_TYPE is "interstitial":
               self.adView.adsManager.removeListener(adsManagerListener: self)
           }
       }
-      func onAdSkipped(reason: Int32) {}
+      func onAdBreakSkipped(reason: Int32) {}
       func onAdBreakPrepare(adInfos: NSMutableArray) {}
   }
 

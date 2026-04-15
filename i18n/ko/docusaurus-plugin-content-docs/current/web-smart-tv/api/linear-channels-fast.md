@@ -5,15 +5,15 @@ sidebar_label: 실시간 채널 / FAST
 
 # 실시간 채널 / FAST
 
-## Methods
+## 메소드
 
 ### FlowerAdsManager.changeChannelUrl
 
 실시간 방송의 스트림 URL을 변경할 때 사용하는 함수입니다.
 
-다음은 전달 매개변수에 대한 설명입니다.
+다음은 전달 매개변수에 대한 설명입니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | videoUrl | string | 원본 재생 URL |
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
@@ -28,9 +28,9 @@ sidebar_label: 실시간 채널 / FAST
 
 추가 타겟팅 정보인 extraParams를 실시간 방송 도중에 변경할 때 사용하는 함수입니다.
 
-다음은 전달 매개변수에 대한 설명입니다.
+다음은 전달 매개변수에 대한 설명입니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보 |
 
@@ -38,7 +38,7 @@ sidebar_label: 실시간 채널 / FAST
 
 실시간 방송을 중단할 때 사용하는 API입니다. 매개변수는 없습니다.
 
-## Work Process
+## 동작 흐름
 
 1. '광고 UI 선언'을 참고하여 적절한 위치에 대체 광고를 삽입합니다.
 2. 광고 재생 중 별도 처리가 필요한 경우 _FlowerAdsManagerListener_ 인터페이스를 구현하면 광고 재생 또는 종료에 대한 이벤트를 수신할 수 있습니다.

@@ -76,8 +76,8 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
         }
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 
@@ -132,8 +132,8 @@ extension PlayerViewController: FlowerAdsManagerListener {
         }
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 
@@ -158,15 +158,15 @@ If you are using an unsupported player, please contact [Helpdesk](mailto:dev-su
 
 ### 4. Additional Parameters for Ad Requests – `extraParams`
 
-> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile web apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
+> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
 
 #### Parameter List
 
-| Key<br/>(\* indicates web app required) | Value | Example |
+| Key<br/>(\* indicates mobile app required) | Value | Example |
 | ---| ---| --- |
 | serviceId\* | App package name | "tv.anypoint.service" |
-| os\* | OS of the device running the app | "Android" |
-| adId\* | Ad identifier of the device running the app | Android: Google's GAID value |
+| os\* | OS of the device running the app | "iOS" |
+| adId\* | Ad identifier of the device running the app | iOS: Apple's IDFA value |
 
 ### 5. VOD Ad API Call – `requestVodAd(...)`
 

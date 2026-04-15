@@ -8,7 +8,7 @@ sidebar_label: "비디오 플레이어 전달 인터페이스 구현"
 실시간 채널 또는 VOD의 경우 본 콘텐츠를 재생하는 비디오 플레이어 정보를 SDK에 전달해야 합니다.
 지원 플레이어:
 
-| **Environment** | **Player** |
+| **환경** | **플레이어** |
 | ---| --- |
 | iOS | AVQueuePlayer<br/>VLCMediaListPlayer (MobileVLCKit@3) |
 
@@ -16,7 +16,7 @@ SDK가 지원하는 플레이어를 사용하는 경우 SDK에서 제공하는 M
 
 ## MediaPlayerHook 인터페이스 설명
 
-| **Function** | **Description** |
+| **메소드** | **설명** |
 | ---| --- |
 | getPlayer() | 본 콘텐츠를 재생하는 플레이어 객체를 반환합니다. |
 

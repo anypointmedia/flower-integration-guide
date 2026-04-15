@@ -66,8 +66,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         }
     }
 
-    override fun onAdSkipped(reason: Int) {
-        logger.info { "onAdSkipped: $reason" }
+    override fun onAdBreakSkipped(reason: Int) {
+        logger.info { "onAdBreakSkipped: $reason" }
     }
 }
 flowerAdView.adsManager.addListener(adsManagerListener)

@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.3 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li></ol> |
 | 2.3.0 | 2026.02.25 | **BugFix** <ol><li>광고 마커가 있는 라이브 채널 진입 시 시간 불일치 수정</li><li>장시간 재생 시 발생하는 시간 불일치 수정</li></ol> **Feature** <ol><li>긴 윈도우의 플레이리스트 처리 시 성능 개선</li><li>인터랙티브 광고 UI 개선</li><li>TV 환경에서 광고의 "자세히 보기" 선택 시 QR 코드 표시 기능 추가</li></ol> |
 | 2.2.2 | 2026.01.09 | **BugFix** <ol><li>트래킹 시간 불일치 문제 수정</li></ol> **Feature** <ol><li>광고 트래킹 로직 개선</li><li>현재 시간 및 타임존 URL 매크로 추가</li></ol> |
 | 2.2.1 | 2025.12.19 | **Feature** <ol><li>Bitmovin 플레이어 사용 시 광고 트래킹 개선</li><li>VOD 광고 요청 타임아웃을 3초에서 5초로 변경</li></ol> |

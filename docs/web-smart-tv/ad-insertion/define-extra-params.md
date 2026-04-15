@@ -15,10 +15,10 @@ You can update `extraParams` during live broadcasts.
 | **Key**<br/>(_Note: All keys marked with an asterisk (\*_) are required.) | **Value** | **Example** |
 | ---| ---| --- |
 | serviceId\* | The package name of the app. | "tv.anypoint.service" |
-| os\* | The operating system of the device running the app. | "iOS" or "Android" |
-| adId\* | The ad identifier of the device running the app. | iOS: Uses the IDFA value provided by Apple.<br/>Android: Uses the GAID value provided by Google. |
+| os\* | The operating system of the device running the app. | "Web" |
+| adId\* | The ad identifier of the device running the app. | User identifier or session ID |
 
-| **Key (example)** | **Value (example)** |
+| **Key (examples)** | **Value (examples)** |
 | ---| --- |
 | title | My Summer Vacation |
 | genre | horror |

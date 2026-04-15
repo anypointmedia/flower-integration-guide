@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.8 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li><li>`requestChannelAd` now throws `FlowerError` when no ad response is available in direct ad playback mode</li></ol> |
 | 2.9.6 | Mar 26, 2026 | **Feature** <ol><li>Improved logic for calculating playback time when ads are played directly</li></ol> **BugFix** <ol><li>Fixed a bug where tracking URLs are missing in Wrapper ads</li></ol> |
 | 2.9.5 | Mar 26, 2026 | **Feature** <ol><li>Downgraded the Kotlin version to 2.0.21</li></ol> |
 | 2.9.4 | Mar 19, 2026 | **Feature** <ol><li>Improved accuracy of event tracking when using an independent ad player</li></ol> |
@@ -50,7 +51,7 @@ sidebar_label: Release Notes
 | 1.0.23 | Sep 06, 2024 | **BugFix** <ol><li>Fixed parsing errors in certain ad responses and creative playlist formats.</li></ol> |
 | 1.0.22 | Sep 03, 2024 | **Feature** <ol><li>Included enhanced targeting data in ad requests.</li></ol> |
 | 1.0.21 | Aug 09, 2024 | **Feature** <ol><li>Added support for ad insertion in DRM-enabled DASH streams.</li><li>Introduced the `adTagHeaders` parameter to the `changeChannelUrl()` API, allowing the inclusion of custom HTTP headers during ad requests.</li><li>Introduced `channelStreamHeaders` parameter to the `changeChannelUrl()` API, allowing the inclusion of custom HTTP headers during stream requests.</li><li>Introduced the `changeChannelExtraParams` API, enabling the modification of targeting information during a live stream.</li></ol> |
-| 1.0.20 | Jul 18, 2024 | **Feature** <ol><li>Added a feature to retrieve `MediaPlayerAdapter` instance from `MediaPlayerHook` for custom player support</li><li>Added `onAdSkipped` in `FlowerAdsManagerListener`</li></ol> |
+| 1.0.20 | Jul 18, 2024 | **Feature** <ol><li>Added a feature to retrieve `MediaPlayerAdapter` instance from `MediaPlayerHook` for custom player support</li><li>Added `onAdBreakSkipped` in `FlowerAdsManagerListener`</li></ol> |
 | 1.0.19 | Apr 12, 2024 | **BugFix** <ol><li>Added the defense logic for errors that occur in the linear TV player.</li><li>If an error occurs in the linear TV player, the SDK will be reset.</li></ol> |
 | ~~1.0.18~~<br/>Deprecated | Mar 29, 2024 | **Feature** <ol><li>Changed the compileSdk version from 33 to 32.</li></ol> |
 | ~~1.0.17~~<br/>Deprecated | Mar 29, 2024 | **Feature** <ol><li>Changed the compileSdk version from 34 to 33.</li></ol> |

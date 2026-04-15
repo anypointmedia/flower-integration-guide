@@ -48,9 +48,9 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         playLinearTv()
     }
 
-    override fun onAdSkipped(reason: Int) {
+    override fun onAdBreakSkipped(reason: Int) {
         // OPTIONAL GUIDE: Additional actions on ad skip
-        logger.info { "onAdSkipped: $reason" }
+        logger.info { "onAdBreakSkipped: $reason" }
     }
 }
 
@@ -150,7 +150,7 @@ class PlaybackActivity : Activity() {
             override fun onError(error: FlowerError?) {
                 // OPTIONAL GUIDE: Implement custom actions for when the error occurs in Flower SDK
             }
-            override fun onAdSkipped(reason: Int) {
+            override fun onAdBreakSkipped(reason: Int) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
             }
         }

@@ -17,7 +17,7 @@ This guide walks you through the complete process of inserting inline ads into c
 
 > Please refer to the Ad Insertion menu > Declare the Ad UI section for ad UI declaration.
 
-### 2. Receiving Ad Events - `FlowerAdsManagerListener`
+### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To handle inline ad insertion at the appropriate ad start and end points, the SDK provides the ad event reception interface `FlowerAdsManagerListener`. Below is an implementation example.
 
@@ -43,9 +43,9 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 flowerAdView.adsManager.addListener(adsManagerListener)
 ```
 
-### 3. Additional Parameters for Ad Requests - `extraParams`
+### 3. Additional Parameters for Ad Requests – `extraParams`
 
-> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile web apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
+> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
 
 #### Parameter List
 

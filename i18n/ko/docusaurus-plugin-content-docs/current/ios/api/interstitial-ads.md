@@ -5,13 +5,13 @@ sidebar_label: "전면 광고"
 
 # 전면 광고
 
-## Methods
+## 메소드
 
 ### FlowerAdsManager.requestAd
 
-전면 광고를 삽입하기 위해 사용하는 함수입니다. 매개변수는 아래와 같습니다.
+전면 광고를 삽입하기 위해 사용하는 함수입니다. 매개변수는 아래와 같습니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 null) |

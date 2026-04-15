@@ -35,7 +35,7 @@ This method stops the playback of linear channels. There are no parameters.
 
 ## Work Process
 
-1. Insert replacement ads at a correct timing, consulting “Ad UI Declaration”
+1. Insert replacement ads at the correct timing, consulting “Ad UI Declaration”
 2. If you need additional processing during ad playback, you can listen for events corresponding to ad playbacks or finishes by implementing the _FlowerAdsManagerListener_ interface.
 3. Finally, change the original streaming URL by using _FlowerAdsManager_._changeChannelUrl_ and then send it to the player.
 4. (Optional) If targeting information changes during streaming, update the SDK with the new information using FlowerAdsManager.changeChannelExtraParams.

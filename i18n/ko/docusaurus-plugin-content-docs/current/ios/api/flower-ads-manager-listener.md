@@ -46,7 +46,7 @@ Flower SDK에서 오류가 발생했을 때 발생하는 이벤트입니다.
 | ---| ---| --- |
 | error | FlowerError? | 메시지를 포함한 에러 객체 |
 
-### onAdSkipped
+### onAdBreakSkipped
 
 광고가 건너뛰기 되었을 때 발생하는 이벤트입니다.
 

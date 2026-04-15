@@ -58,8 +58,8 @@ const adsManagerListener = {
         }
     },
 
-    onAdSkipped(reason) {
-        console.log(`onAdSkipped: ${reason}`);
+    onAdBreakSkipped(reason) {
+        console.log(`onAdBreakSkipped: ${reason}`);
     }
 };
 flowerAdView.adsManager.addListener(adsManagerListener);

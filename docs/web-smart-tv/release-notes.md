@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.3 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li></ol> |
 | 2.3.0 | Feb 25, 2026 | **BugFix** <ol><li>Fixed a time mismatch when entering a live channel with ad marker</li><li>Fixed a time mismatch that occurred during long-duration playback</li></ol> **Feature** <ol><li>Improved performance when processing playlists with long window</li><li>Enhanced the interactive ad UI</li><li>Added QR code display when selecting “More Info” on ads in TV environments</li></ol> |
 | 2.2.2 | Jan 09, 2026 | **BugFix** <ol><li>Fixed the tracking time mismatch issue.</li></ol> **Feature** <ol><li>Enhanced the logic about tracking ad</li><li>Added current time and timezone URL macros</li></ol> |
 | 2.2.1 | Dec 19, 2025 | **Feature** <ol><li>Improved ad tracking when using bitmovin player.</li><li>Changed the timeout for VOD ad requests from 3 to 5 seconds.</li></ol> |

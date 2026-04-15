@@ -53,7 +53,6 @@ flowchart TD
   B["FlowerAdView.FlowerAdsManager.changeChannelUrl"]:::appCall
   C["ContentPlayer.setMediaUrl"]:::appCall
   C2["ContentPlayer.play"]:::appCall
-  C3["ContentPlayer.play"]
   D{"With prerollAdTagUrl?"}
   E["Playing Pre-roll AD ⭐"]
   H["FlowerAdsManagerListener.onPrepare"]:::sdkEvent
@@ -69,7 +68,7 @@ flowchart TD
 
   A --> B --> C --> D
   D -- "Yes" --> E --> H3
-  E --> C3 --> F
+  E --> C2
   D -- "No" --> C2 --> F
   F --> G --> G2 --> H
   G2 -- "Ad MediaSegment Started" --> I

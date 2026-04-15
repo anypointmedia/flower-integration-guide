@@ -13,10 +13,9 @@ sidebar_label: "인라인 광고 적용"
 5. **정리 작업 수행:** 광고 종료 후 `stop()` 및 `removeListener()`를 호출해 리소스를 정리합니다.
 
 ## 단계별 상세 설명
-
 ### 1. 광고 UI 선언
 
-> 광고 UI 선언은 광고 삽입 메뉴 > 광고 UI 선언 섹션을 참고해주세요.
+> 광고 UI 선언은 광고 삽입 메뉴 > 광고 UI 선언 섹션을 참고하세요.
 
 ### 2. 광고 이벤트 수신 -- `FlowerAdsManagerListener`
 
@@ -89,7 +88,7 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 #### 파라미터 목록
 
-| Key<br/>(\* 표시는 웹앱 필수) | Value | Example |
+| 키<br/>(\* 표시는 웹앱 필수) | 값 | 예시 |
 | ---| ---| --- |
 | serviceId\* | 앱의 패키지 이름 | "tv.anypoint.service" |
 | os\* | 앱이 실행되는 기기의 OS | "Android" |
@@ -99,9 +98,9 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 #### FlowerAdsManager.requestAd()
 
-인라인 광고를 요청하는 데 사용하는 함수입니다. 다음은 매개변수에 대한 설명입니다.
+인라인 광고를 요청하는 데 사용하는 함수입니다. 다음은 매개변수에 대한 설명입니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | adTagUrl | String | 광고 서버에서 발급된 광고 태그 URL |
 | extraParams | \[String: String\] | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 빈 dictionary) |
@@ -112,7 +111,6 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 인라인 광고를 종료할 때 사용하는 API입니다. 매개변수는 없습니다.
 
 ## 인라인 광고 요청 예시
-
 ```swift
 // TODO GUIDE: request inline ad
 // arg0: adTagUrl, url from flower system.

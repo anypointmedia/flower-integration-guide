@@ -44,8 +44,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         playLinearTv()
     }
 
-    override fun onAdSkipped(reason: Int) {
-        logger.info { "onAdSkipped: $reason" }
+    override fun onAdBreakSkipped(reason: Int) {
+        logger.info { "onAdBreakSkipped: $reason" }
     }
 }
 flowerAdView.adsManager.addListener(adsManagerListener)
@@ -111,10 +111,12 @@ API used to stop live broadcasts. No parameters.
 ## Linear Channel Ad Request Example
 
 :::tip Pre-roll Ads and Playback Start
-When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. The playback start behavior differs depending on whether `prerollAdTagUrl` is set.
 
-- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
-- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+- **If `prerollAdTagUrl` is not set:** Set the returned URL on the player and call `player.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** Do not set the returned URL on the player immediately. Instead, remove the existing `FlowerAdsManagerListener` and register a temporary listener. When the temporary listener's `onCompleted()` is called, set the returned URL on the player and start playback, then remove the temporary listener and re-register the original listener.
+
+This approach prevents the main content from briefly flashing on screen before the pre-roll ad starts, and avoids unnecessary network resource consumption caused by the ad and main content loading simultaneously.
 :::
 
 ```kotlin
@@ -142,14 +144,41 @@ private fun playLinearTv() {
         mapOf("custom-stream-header" to "custom-stream-header-value"),
         prerollAdTagUrl
     )
-    player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
-
-    // If prerollAdTagUrl is null, call player.play() directly to start playback immediately.
-    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
-    // and then automatically starts content playback, so player.play() is not needed.
     if (prerollAdTagUrl == null) {
+        // If prerollAdTagUrl is not set, set the returned URL directly and start playback.
+        player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
         player.prepare()
         player.play()
+    } else {
+        // If prerollAdTagUrl is set, remove the existing listener and register a temporary one.
+        // Set the stream URL and start playback after the pre-roll ad completes (onCompleted).
+        flowerAdView.adsManager.removeListener(adsManagerListener)
+
+        val prerollListener = object : FlowerAdsManagerListener {
+            override fun onPrepare(adDurationMs: Int) {}
+            override fun onPlay() {}
+            override fun onCompleted() {
+                // Set stream URL and start playback after pre-roll ad completes
+                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+                player.prepare()
+                player.play()
+
+                // Remove temporary listener and restore the original listener
+                flowerAdView.adsManager.removeListener(this)
+                flowerAdView.adsManager.addListener(adsManagerListener)
+            }
+            override fun onError(error: FlowerError?) {
+                // Start stream playback and restore listener even on pre-roll ad error
+                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+                player.prepare()
+                player.play()
+
+                flowerAdView.adsManager.removeListener(this)
+                flowerAdView.adsManager.addListener(adsManagerListener)
+            }
+            override fun onAdBreakSkipped(reason: Int) {}
+        }
+        flowerAdView.adsManager.addListener(prerollListener)
     }
 }
 

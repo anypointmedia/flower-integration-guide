@@ -100,8 +100,8 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
         playLinearTv()
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 // Register the listener with FlowerAVPlayer
@@ -169,7 +169,7 @@ struct PlaybackView: View {
             func onError(error: FlowerError?) {
                 // OPTIONAL GUIDE: Implement custom actions for when the error occurs in Flower SDK
             }
-            func onAdSkipped(reason: Int32) {
+            func onAdBreakSkipped(reason: Int32) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
             }
             func onAdBreakPrepare(adInfos: NSMutableArray) {
@@ -257,7 +257,7 @@ class PlaybackViewController: UIViewController {
             func onError(error: FlowerError?) {
                 // OPTIONAL GUIDE: Implement custom actions for when the error occurs in Flower SDK
             }
-            func onAdSkipped(reason: Int32) {
+            func onAdBreakSkipped(reason: Int32) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
             }
             func onAdBreakPrepare(adInfos: NSMutableArray) {

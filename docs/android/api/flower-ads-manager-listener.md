@@ -46,7 +46,7 @@ The following describes the parameters:
 | ---| ---| --- |
 | error | FlowerError? | Error object including message. |
 
-### onAdSkipped
+### onAdBreakSkipped
 
 The event dispatched when an ad is skipped.
 

@@ -44,8 +44,8 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
         playLinearTv()
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
@@ -68,15 +68,15 @@ If you are using an unsupported player, please contact [Helpdesk](mailto:dev-su
 
 ### 4. Additional Parameters for Ad Requests – `extraParams`
 
-> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile web apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
+> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
 
 #### Parameter List
 
-| Key<br/>(\* indicates web app required) | Value | Example |
+| Key<br/>(\* indicates mobile app required) | Value | Example |
 | ---| ---| --- |
-| serviceId\* | App package name | "tv.anypoint.service" |
-| os\* | OS of the device running the app | "Android" |
-| adId\* | Ad identifier of the device running the app | Android: Google's GAID value |
+| serviceId\* | App bundle identifier | "tv.anypoint.service" |
+| os\* | OS of the device running the app | "iOS" |
+| adId\* | Ad identifier of the device running the app | iOS: Apple's IDFA value |
 
 ### 5. Linear Channel Ad API Call – `changeChannelUrl(...)`
 
@@ -110,10 +110,12 @@ API used to stop live broadcasts. No parameters.
 ## Linear Channel Ad Request Example
 
 :::tip Pre-roll Ads and Playback Start
-When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. The playback start behavior differs depending on whether `prerollAdTagUrl` is set.
 
-- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
-- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+- **If `prerollAdTagUrl` is not set:** Set the returned URL on the player and call `player.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** Do not set the returned URL on the player immediately. Instead, remove the existing `FlowerAdsManagerListener` and register a temporary listener. When the temporary listener's `onCompleted()` is called, set the returned URL on the player and start playback, then remove the temporary listener and re-register the original listener.
+
+This approach prevents the main content from briefly flashing on screen before the pre-roll ad starts, and avoids unnecessary network resource consumption caused by the ad and main content loading simultaneously.
 :::
 
 ```swift
@@ -141,19 +143,63 @@ private func playLinearTv() {
         channelStreamHeaders: ["custom-stream-header": "custom-stream-header-value"],
         prerollAdTagUrl: prerollAdTagUrl
     )
-    player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
-
-    // If prerollAdTagUrl is nil, call player.play() directly to start playback immediately.
-    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
-    // and then automatically starts content playback, so player.play() is not needed.
     if prerollAdTagUrl == nil {
+        // If prerollAdTagUrl is not set, set the returned URL directly and start playback.
+        player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
         player.play()
+    } else {
+        // If prerollAdTagUrl is set, remove the existing listener and register a temporary one.
+        // Set the stream URL and start playback after the pre-roll ad completes (onCompleted).
+        flowerAdView.adsManager.removeListener(adsManagerListener: adsManagerListener)
+
+        let prerollListener = PrerollAdsManagerListener(
+            onCompletedHandler: { [weak self] listener in
+                guard let self = self else { return }
+                // Set stream URL and start playback after pre-roll ad completes
+                player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
+                player.play()
+
+                // Remove temporary listener and restore the original listener
+                flowerAdView.adsManager.removeListener(adsManagerListener: listener)
+                flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
+            },
+            onErrorHandler: { [weak self] listener, _ in
+                guard let self = self else { return }
+                // Start stream playback and restore listener even on pre-roll ad error
+                player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
+                player.play()
+
+                flowerAdView.adsManager.removeListener(adsManagerListener: listener)
+                flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
+            }
+        )
+        flowerAdView.adsManager.addListener(adsManagerListener: prerollListener)
     }
 }
 
 // TODO GUIDE: change extraParams during stream playback
 func onStreamProgramChanged(targetingInfo: String) {
     flowerAdView.adsManager.changeChannelExtraParams(extraParams: ["myTargetingKey": targetingInfo])
+}
+
+// Temporary listener for pre-roll ad completion
+class PrerollAdsManagerListener: FlowerAdsManagerListener {
+    private let onCompletedHandler: (PrerollAdsManagerListener) -> Void
+    private let onErrorHandler: (PrerollAdsManagerListener, FlowerError?) -> Void
+
+    init(
+        onCompletedHandler: @escaping (PrerollAdsManagerListener) -> Void,
+        onErrorHandler: @escaping (PrerollAdsManagerListener, FlowerError?) -> Void
+    ) {
+        self.onCompletedHandler = onCompletedHandler
+        self.onErrorHandler = onErrorHandler
+    }
+
+    func onPrepare(adDurationMs: Int32) {}
+    func onPlay() {}
+    func onCompleted() { onCompletedHandler(self) }
+    func onError(error: FlowerError?) { onErrorHandler(self, error) }
+    func onAdBreakSkipped(reason: Int32) {}
 }
 ```
 

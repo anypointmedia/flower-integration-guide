@@ -66,8 +66,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         }
     }
 
-    override fun onAdSkipped(reason: Int) {
-        logger.info { "onAdSkipped: $reason" }
+    override fun onAdBreakSkipped(reason: Int) {
+        logger.info { "onAdBreakSkipped: $reason" }
     }
 }
 flowerAdView.adsManager.addListener(adsManagerListener)
@@ -92,7 +92,7 @@ If you are using an unsupported player, please contact [Helpdesk](mailto:dev-su
 
 ### 4. Additional Parameters for Ad Requests – `extraParams`
 
-> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For web apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
+> When requesting ads using the Flower SDK, passing additional parameters helps the SDK provide the most suitable ads. For mobile apps, since the SDK cannot determine the ad serving context on its own, these parameters must be passed to the SDK when requesting ads.
 
 #### Parameter List
 

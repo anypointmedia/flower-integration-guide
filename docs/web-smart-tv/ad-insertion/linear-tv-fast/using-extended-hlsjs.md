@@ -100,8 +100,8 @@ const adsManagerListener = {
         playLinearTv();
     },
 
-    onAdSkipped(reason) {
-        console.log(`onAdSkipped: ${reason}`);
+    onAdBreakSkipped(reason) {
+        console.log(`onAdBreakSkipped: ${reason}`);
     }
 };
 // Register the listener with FlowerHls
@@ -177,7 +177,7 @@ function playLinearTv() {
         onError(error) {
             // OPTIONAL GUIDE: Implement custom actions for when the error occurs in Flower SDK
         },
-        onAdSkipped(reason) {
+        onAdBreakSkipped(reason) {
             // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped
         }
     };

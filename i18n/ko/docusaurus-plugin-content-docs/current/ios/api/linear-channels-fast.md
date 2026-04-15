@@ -5,13 +5,13 @@ sidebar_label: "실시간 채널 / FAST"
 
 # 실시간 채널 / FAST
 
-## Methods
+## 메소드
 
 ### FlowerAdsManager.changeChannelUrl
 
-실시간 방송의 스트림 URL을 동적으로 변경할 수 있는 함수입니다. 매개변수는 아래와 같습니다.
+실시간 방송의 스트림 URL을 동적으로 변경할 수 있는 함수입니다. 매개변수는 아래와 같습니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | videoUrl | string | 원본 재생 URL |
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
@@ -24,9 +24,9 @@ sidebar_label: "실시간 채널 / FAST"
 
 ### FlowerAdsManager.changeChannelExtraParams
 
-추가 타겟팅 정보인 extraParams를 실시간 방송 도중에 변경할 수 있는 함수입니다. 매개변수는 아래와 같습니다.
+추가 타겟팅 정보인 extraParams를 실시간 방송 도중에 변경할 수 있는 함수입니다. 매개변수는 아래와 같습니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보 |
 

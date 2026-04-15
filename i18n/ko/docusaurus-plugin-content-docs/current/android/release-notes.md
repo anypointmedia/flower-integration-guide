@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.8 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li><li>Direct ad playback 방식에서 광고 응답이 없는 경우 `requestChannelAd`가 `FlowerError`를 throw하도록 변경</li></ol> |
 | 2.9.6 | 2026.03.26 | **Feature** <ol><li>광고를 직접 재생할 때 재생 시간 계산 로직 개선</li></ol> **BugFix** <ol><li>Wrapper 광고에서 트래킹 URL이 누락되는 버그 수정</li></ol> |
 | 2.9.5 | 2026.03.26 | **Feature** <ol><li>Kotlin 버전을 2.0.21로 다운그레이드</li></ol> |
 | 2.9.4 | 2026.03.19 | **Feature** <ol><li>독립 광고 플레이어 사용 시 이벤트 트래킹 정확도 개선</li></ol> |
@@ -50,7 +51,7 @@ sidebar_label: "릴리즈 노트"
 | 1.0.23 | 2024.09.06 | **BugFix** <ol><li>특정 형식의 광고 응답 및 소재 플레이리스트 파싱 오류 수정</li></ol> |
 | 1.0.22 | 2024.09.03 | **Feature** <ol><li>광고 요청 시 타겟팅 정보 개선</li></ol> |
 | 1.0.21 | 2024.08.09 | **Feature** <ol><li>DRM이 적용된 DASH 스트림 광고 삽입 지원</li><li>`changeChannelUrl()` API에 광고 요청 시 사용자 정의 HTTP 헤더를 추가할 수 있는 `adTagHeaders` 파라미터 추가</li><li>`changeChannelUrl()` API에 스트림 요청 시 사용자 정의 HTTP 헤더를 포함할 수 있는 `channelStreamHeaders` 파라미터 추가</li><li>스트림 재생 중 타겟팅 정보를 교체할 수 있는 `changeChannelExtraParams` API 추가</li></ol> |
-| 1.0.20 | 2024.07.18 | **Feature** <ol><li>커스텀 플레이어 지원을 위해 `MediaPlayerHook`에서 `MediaPlayerAdapter`을 반환하는 기능 추가</li><li>`FlowerAdsManagerListener`에 `onAdSkipped` 함수 추가</li></ol> |
+| 1.0.20 | 2024.07.18 | **Feature** <ol><li>커스텀 플레이어 지원을 위해 `MediaPlayerHook`에서 `MediaPlayerAdapter`을 반환하는 기능 추가</li><li>`FlowerAdsManagerListener`에 `onAdBreakSkipped` 함수 추가</li></ol> |
 | 1.0.19 | 2024.04.12 | **BugFix** <ol><li>Linear TV 플레이어 오류에 대한 방어 로직 추가</li><li>Linear TV 플레이어에서 오류 발생 시 SDK 리셋 처리</li></ol> |
 | ~~1.0.18~~<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 33에서 32로 변경</li></ol> |
 | ~~1.0.17~~<br/>Deprecated | 2024.03.29 | **Feature** <ol><li>compileSdk 버전을 34에서 33으로 변경</li></ol> |

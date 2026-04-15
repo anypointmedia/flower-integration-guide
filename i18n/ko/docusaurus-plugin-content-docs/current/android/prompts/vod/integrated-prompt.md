@@ -396,7 +396,7 @@ For MediaPlayerHook:
               if (!isContentEnd) { player.playWhenReady = true }
           }
       }
-      override fun onAdSkipped(reason: Int) {}
+      override fun onAdBreakSkipped(reason: Int) {}
       override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {}
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)

@@ -17,7 +17,7 @@ sidebar_label: "VOD Pre-roll, Mid-roll, Post-roll 광고 적용"
 
 ### 1. 광고 UI 선언
 
-> 광고 UI 선언은 광고 삽입 메뉴 > 광고 UI 선언 섹션을 참고해주세요.
+> 광고 UI 선언은 광고 삽입 메뉴 > 광고 UI 선언 섹션을 참고하세요.
 
 ### 2. 광고 이벤트 수신 -- `FlowerAdsManagerListener`
 
@@ -77,8 +77,8 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
         }
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 
@@ -133,8 +133,8 @@ extension PlayerViewController: FlowerAdsManagerListener {
         }
     }
 
-    func onAdSkipped(reason: Int32) {
-        os_log(OSLogType.info, log: .default, "onAdSkipped: %d", reason)
+    func onAdBreakSkipped(reason: Int32) {
+        os_log(OSLogType.info, log: .default, "onAdBreakSkipped: %d", reason)
     }
 }
 
@@ -163,7 +163,7 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 #### 파라미터 목록
 
-| Key<br/>(\* 표시는 웹앱 필수) | Value | Example |
+| 키<br/>(\* 표시는 웹앱 필수) | 값 | 예시 |
 | ---| ---| --- |
 | serviceId\* | 앱의 패키지 이름 | "tv.anypoint.service" |
 | os\* | 앱이 실행되는 기기의 OS | "Android" |
@@ -175,9 +175,9 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 VOD 콘텐츠 진입 전 광고를 요청하는 데 사용하는 함수입니다.
 
-다음은 매개변수에 대한 설명입니다.
+다음은 매개변수에 대한 설명입니다:
 
-| **Parameter** | **Type** | **Description** |
+| **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | adTagUrl | String | 광고 서버에서 발급된 광고 태그 URL |
 | contentId | String | 콘텐츠의 고유 아이디<br/>Flower 백엔드 시스템에 등록되어야 함 |
@@ -214,7 +214,6 @@ VOD 콘텐츠를 일시정지할 때 이 API를 호출합니다. 매개변수는
 VOD 콘텐츠를 재개할 때 이 API를 호출합니다. 매개변수는 없습니다.
 
 ## VOD 광고 요청 예시
-
 ```swift
 // TODO GUIDE: request vod ad
 // arg0: adTagUrl, url from flower system.

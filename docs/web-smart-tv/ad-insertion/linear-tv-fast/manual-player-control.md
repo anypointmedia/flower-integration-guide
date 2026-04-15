@@ -44,8 +44,8 @@ const adsManagerListener = {
         playLinearTv();
     },
 
-    onAdSkipped(reason) {
-        console.log(`onAdSkipped: ${reason}`);
+    onAdBreakSkipped(reason) {
+        console.log(`onAdBreakSkipped: ${reason}`);
     }
 };
 flowerAdView.adsManager.addListener(adsManagerListener);
@@ -111,10 +111,12 @@ API used to stop live broadcasts. No parameters.
 ## Linear Channel Ad Request Example
 
 :::tip Pre-roll Ads and Playback Start
-When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. The playback start behavior differs depending on whether `prerollAdTagUrl` is set.
 
-- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
-- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+- **If `prerollAdTagUrl` is not set:** Set the returned URL on the player and call `videoElement.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** Do not load the returned URL on the player immediately. Instead, remove the existing `FlowerAdsManagerListener` and register a temporary listener. When the temporary listener's `onCompleted()` is called, load the returned URL on the player and start playback, then remove the temporary listener and re-register the original listener.
+
+This approach prevents the main content from briefly flashing on screen before the pre-roll ad starts, and avoids unnecessary network resource consumption caused by the ad and main content loading simultaneously.
 :::
 
 ### _HLS.js_
@@ -155,15 +157,44 @@ function playLinearTv() {
         prerollAdTagUrl
     );
 
-    player.loadSource(changedChannelUrl);
-
-    // If prerollAdTagUrl is null, call videoElement.play() directly to start playback immediately.
-    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
-    // and then automatically starts content playback, so videoElement.play() is not needed.
     if (prerollAdTagUrl == null) {
+        // If prerollAdTagUrl is not set, load the returned URL directly and start playback.
+        player.loadSource(changedChannelUrl);
         player.on(Hls.Events.MANIFEST_PARSED, function() {
             videoElement.play();
         });
+    } else {
+        // If prerollAdTagUrl is set, remove the existing listener and register a temporary one.
+        // Load the stream URL and start playback after the pre-roll ad completes (onCompleted).
+        flowerAdView.adsManager.removeListener(adsManagerListener);
+
+        const prerollListener = {
+            onPrepare(adDurationMs) {},
+            onPlay() {},
+            onCompleted() {
+                // Load stream URL and start playback after pre-roll ad completes
+                player.loadSource(changedChannelUrl);
+                player.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoElement.play();
+                });
+
+                // Remove temporary listener and restore the original listener
+                flowerAdView.adsManager.removeListener(prerollListener);
+                flowerAdView.adsManager.addListener(adsManagerListener);
+            },
+            onError(error) {
+                // Start stream playback and restore listener even on pre-roll ad error
+                player.loadSource(changedChannelUrl);
+                player.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoElement.play();
+                });
+
+                flowerAdView.adsManager.removeListener(prerollListener);
+                flowerAdView.adsManager.addListener(adsManagerListener);
+            },
+            onAdBreakSkipped(reason) {}
+        };
+        flowerAdView.adsManager.addListener(prerollListener);
     }
 }
 

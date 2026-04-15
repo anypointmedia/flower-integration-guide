@@ -5,7 +5,7 @@ sidebar_label: 개발 환경 설정
 
 # 개발 환경 설정
 
-## Browser/Smart TV Support
+## 브라우저/스마트 TV 지원
 Flower SDK는 아래의 브라우저 및 스마트 TV OS를 지원합니다.
 
 | **Chrome** | **Firefox** | **Edge** | **Safari** | **webOS TV** | **Tizen OS TV** |
