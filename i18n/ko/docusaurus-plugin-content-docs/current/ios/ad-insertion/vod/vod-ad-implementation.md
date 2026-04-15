@@ -173,15 +173,15 @@ flowerAdView.adsManager.addListener(adsManagerListener: self)
 
 #### FlowerAdsManager.requestVodAd()
 
-VOD 컨텐츠 진입 전 광고를 요청하는 데 사용하는 함수입니다.
+VOD 콘텐츠 진입 전 광고를 요청하는 데 사용하는 함수입니다.
 
 다음은 매개변수에 대한 설명입니다.
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
 | adTagUrl | String | 광고 서버에서 발급된 광고 태그 URL |
-| contentId | String | 컨텐츠의 고유 아이디<br/>Flower 백엔드 시스템에 등록되어야 함 |
-| durationMs | Int64 | VOD 컨텐츠의 전체 재생 시간(ms) |
+| contentId | String | 콘텐츠의 고유 아이디<br/>Flower 백엔드 시스템에 등록되어야 함 |
+| durationMs | Int64 | VOD 콘텐츠의 전체 재생 시간(ms) |
 | extraParams | \[String: String\] | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 _nil_) |
 | mediaPlayerHook | MediaPlayerHook | 비디오 플레이어를 반환하는 인터페이스 구현 객체 |
 | adTagHeaders | \[String: String\] | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |
@@ -203,15 +203,15 @@ NotificationCenter.default.addObserver(self, selector: #selector(onEnded), name:
 ```
 ####  FlowerAdsManager.stop()
 
-VOD 컨텐츠를 나갈 때 이 API를 호출합니다. 매개변수는 없습니다.
+VOD 콘텐츠를 나갈 때 이 API를 호출합니다. 매개변수는 없습니다.
 
 #### FlowerAdsManager.pause()
 
-VOD 컨텐츠를 일시정지할 때 이 API를 호출합니다. 매개변수는 없습니다.
+VOD 콘텐츠를 일시정지할 때 이 API를 호출합니다. 매개변수는 없습니다.
 
 #### FlowerAdsManager.resume()
 
-VOD 컨텐츠를 재개할 때 이 API를 호출합니다. 매개변수는 없습니다.
+VOD 콘텐츠를 재개할 때 이 API를 호출합니다. 매개변수는 없습니다.
 
 ## VOD 광고 요청 예시
 

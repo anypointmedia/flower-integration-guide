@@ -2,29 +2,29 @@
 sidebar_position: 1
 ---
 
-# Flower Player 사용
+# Using Flower Player
 
-Flower Player를 사용하면 기존 실시간 TV 재생 설정에 광고 재생을 간편하게 정합할 수 있습니다.
+Using Flower Player, you can simply integrate ad playback into your existing linear tv playback setup.
 
-Flower Player에 대한 자세한 내용은 [Flower Player 소개](../../about-flower-players)를 참고하세요.
+See [About Flower Players](../about-flower-players) to read more about Flower Players.
 
-## 작업 순서
+## Workflow
 
-이 다이어그램은 Flower Player를 사용한 실시간 TV 광고 삽입 워크플로우를 보여줍니다.
+This diagram illustrates the ad insertion workflow in linear tv using Flower Player.
 ![](/img/docs/a1d85d95-eea9-4dd9-9ade-dfb83220e169.png)
 ![](/img/docs/1f582e96-3472-4888-9bed-2b42fdb0060d.png)
 
 ## FlowerLinearTvAdConfig
 
-실시간 방송에서 광고 삽입 시 필요한 정보를 지정할 때 사용되는 클래스입니다.
+Class used to specify information required for ad insertion in live broadcasts.
 
-자세한 내용은 [FlowerAdConfig](../../../api/flower-ad-config)를 참고하세요.
+For more information, see [FlowerAdConfig](../../api/flower-ad-config).
 
-## 광고 이벤트 수신
+## Receiving Ad Events
 
-실시간 채널에 광고를 삽입할 때, 광고 재생 시작/종료 시점에 UI 제어 로직이 필요할 수 있습니다. 이를 위해 Flower SDK는 광고 이벤트를 수신하는 리스너 인터페이스 **FlowerAdsManagerListener**를 제공하며, 아래와 같이 구현할 수 있습니다.
+When inserting ads into linear channels, UI control logic may be needed at ad playback start/end points. For this, Flower SDK provides a listener interface **FlowerAdsManagerListener** for receiving ad events, which can be implemented as follows.
 
-자세한 내용은 [FlowerAdsManagerListener](../../../api/flower-ads-manager-listener)를 참고하세요.
+For more information, see [FlowerAdsManagerListener](../../api/flower-ads-manager-listener).
 
 ```kotlin
 val adsManagerListener = object : FlowerAdsManagerListener {
@@ -58,9 +58,9 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 player.addAdListener(adsManagerListener)
 ```
 
-## 전체 예시
+## Full Example
 
-아래는 실시간 TV 스트림에 광고를 삽입하는 예시입니다. FlowerExoPlayer2를 사용합니다.
+The example shows an example to insert ads in linear tv stream. The example uses FlowerExoPlayer2.
 
 ```kotlin
 class PlaybackActivity : Activity() {
@@ -167,9 +167,9 @@ class PlaybackActivity : Activity() {
 }
 ```
 
-## 관련 API
+## Related APIs
 
-*   [FlowerAdConfig](../../../api/flower-ad-config)
-*   [FlowerExoPlayer2](../../../api/flower-exo-player2)
-*   [FlowerMedia3ExoPlayer](../../../api/flower-media3-exo-player)
-*   [FlowerBitmovinPlayer](../../../api/flower-bitmovin-player)
+*   [FlowerAdConfig](../../api/flower-ad-config)
+*   [FlowerExoPlayer2](../../api/flower-exo-player2)
+*   [FlowerMedia3ExoPlayer](../../api/flower-media3-exo-player)
+*   [FlowerBitmovinPlayer](../../api/flower-bitmovin-player)

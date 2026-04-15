@@ -1,5 +1,6 @@
 ---
-sidebar_position: 3
+sidebar_position: 100
+sidebar_label: "릴리즈 노트"
 ---
 
 # HTML5 SDK

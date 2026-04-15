@@ -1,5 +1,6 @@
 ---
-sidebar_position: 2
+sidebar_position: 100
+sidebar_label: Release Notes
 ---
 
 # iOS SDK

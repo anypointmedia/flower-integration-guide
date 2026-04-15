@@ -8,6 +8,78 @@ import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 
+interface PlatformLink {
+  platform: string;
+  link: string;
+}
+
+interface ContentTypeItem {
+  id: string;
+  title: string;
+  platformLinks: ReadonlyArray<PlatformLink>;
+}
+
+interface ContentTypeGroup {
+  id: string;
+  title: string;
+  items: ReadonlyArray<ContentTypeItem>;
+}
+
+const contentTypeGroups: ReadonlyArray<ContentTypeGroup> = [
+  {
+    id: 'linearTv',
+    title: translate({id: 'homepage.contentType.linearTv.title', message: 'Linear TV (incl. FAST)'}),
+    items: [
+      {
+        id: 'unicast',
+        title: translate({id: 'homepage.contentType.unicast.title', message: 'Unicast (HLS / DASH)'}),
+        platformLinks: [
+          {platform: 'Android', link: '/docs/android-linear-tv-fast'},
+          {platform: 'iOS', link: '/docs/ios-linear-tv-fast'},
+          {platform: 'Web / Smart TV', link: '/docs/web-linear-tv-fast'},
+        ],
+      },
+      {
+        id: 'satellite',
+        title: translate({id: 'homepage.contentType.satellite.title', message: 'Satellite / Multicast (DTH / IPTV)'}),
+        platformLinks: [
+          {platform: 'Android', link: '/docs/category/satelliteiptv'},
+        ],
+      },
+    ],
+  },
+  {
+    id: 'vod',
+    title: translate({id: 'homepage.contentType.vod.title', message: 'VOD (Video On Demand)'}),
+    items: [
+      {
+        id: 'vodAd',
+        title: '',
+        platformLinks: [
+          {platform: 'Android', link: '/docs/android-vod'},
+          {platform: 'iOS', link: '/docs/ios-vod'},
+          {platform: 'Web / Smart TV', link: '/docs/web-vod'},
+        ],
+      },
+    ],
+  },
+  {
+    id: 'advancedAd',
+    title: translate({id: 'homepage.contentType.advancedAd.title', message: 'Advanced Ad Formats'}),
+    items: [
+      {
+        id: 'advancedAdFormats',
+        title: '',
+        platformLinks: [
+          {platform: 'Android', link: '/docs/android-advanced-ad-formats'},
+          {platform: 'iOS', link: '/docs/ios-advanced-ad-formats'},
+          {platform: 'Web / Smart TV', link: '/docs/web-advanced-ad-formats'},
+        ],
+      },
+    ],
+  },
+];
+
 interface PlatformCard {
   id: string;
   title: string;
@@ -21,31 +93,22 @@ const platformCards: ReadonlyArray<PlatformCard> = [
     id: 'android',
     title: translate({id: 'homepage.platform.android.title', message: 'Android'}),
     icon: '📱',
-    description: translate({
-      id: 'homepage.platform.android.description',
-      message: 'ExoPlayer & Media3 integration for ad insertion on Android, including DTH/Multicast and Unicast (HLS/DASH)',
-    }),
+    description: '',
     link: '/docs/category/android',
-  },
-  {
-    id: 'webSmartTv',
-    title: translate({id: 'homepage.platform.webSmartTv.title', message: 'Web / Smart TV'}),
-    icon: '🌐',
-    description: translate({
-      id: 'homepage.platform.webSmartTv.description',
-      message: 'HLS.js-based ad insertion for browser-based players and Smart TV platforms (Tizen, webOS, etc.)',
-    }),
-    link: '/docs/category/web--smart-tv',
   },
   {
     id: 'ios',
     title: translate({id: 'homepage.platform.ios.title', message: 'iOS'}),
     icon: '🍎',
-    description: translate({
-      id: 'homepage.platform.ios.description',
-      message: 'AVPlayer-based ad insertion for iOS and tvOS applications',
-    }),
+    description: '',
     link: '/docs/category/ios',
+  },
+  {
+    id: 'webSmartTv',
+    title: translate({id: 'homepage.platform.webSmartTv.title', message: 'Web / Smart TV'}),
+    icon: '🌐',
+    description: '',
+    link: '/docs/category/web--smart-tv',
   },
 ];
 
@@ -89,8 +152,13 @@ function HomepageHeader() {
           </Translate>
         </Heading>
         <p className="hero__subtitle">
-          <Translate id="homepage.tagline" description="The homepage tagline">
-            {siteConfig.tagline}
+          <Translate id="homepage.heroDescription" description="The homepage hero description about FLOWER platform">
+            Anypoint Media's FLOWER platform empowers the world's leading media operators to recapture lost ad revenue, unlock new premium formats, and radically reduce operational costs.
+          </Translate>
+        </p>
+        <p className="hero__subtitle" style={{fontSize: '1rem', opacity: 0.9}}>
+          <Translate id="homepage.heroSubDescription" description="The homepage hero sub-description about integration guide">
+            This guide provides step-by-step instructions for integrating with the FLOWER system across various platforms and environments.
           </Translate>
         </p>
         <div className={styles.buttons}>
@@ -107,13 +175,44 @@ function HomepageHeader() {
   );
 }
 
-function PlatformCards() {
+function ContentTypeSection() {
   return (
     <section className={styles.platforms}>
       <div className="container">
         <Heading as="h2" className={styles.sectionTitle}>
+          <Translate id="homepage.contentType.heading">
+            By Content Type
+          </Translate>
+        </Heading>
+        {contentTypeGroups.map((group) => (
+          <div key={group.id} className={styles.contentTypeGroup}>
+            <Heading as="h3" className={styles.contentTypeGroupTitle}>{group.title}</Heading>
+            {group.items.map((item) => (
+              <div key={item.id} className={styles.contentTypeItem}>
+                {item.title && <Heading as="h4" className={styles.contentTypeItemTitle}>{item.title}</Heading>}
+                <div className={styles.platformLinkGrid}>
+                  {item.platformLinks.map((pl) => (
+                    <Link key={pl.platform} to={pl.link} className={styles.platformLinkCard}>
+                      <span className={styles.platformLinkPlatform}>{pl.platform}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PlatformSection() {
+  return (
+    <section className={styles.platforms} style={{paddingTop: 0}}>
+      <div className="container">
+        <Heading as="h2" className={styles.sectionTitle}>
           <Translate id="homepage.platforms.heading">
-            Choose Your Platform
+            By Platform
           </Translate>
         </Heading>
         <div className={styles.platformGrid}>
@@ -157,7 +256,8 @@ export default function Home(): ReactNode {
       description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
-        <PlatformCards />
+        <ContentTypeSection />
+        <PlatformSection />
         <Features />
       </main>
     </Layout>

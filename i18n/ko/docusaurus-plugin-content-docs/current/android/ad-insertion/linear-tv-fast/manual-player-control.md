@@ -110,6 +110,13 @@ flowerAdView.adsManager.addListener(adsManagerListener)
 
 ## 실시간 채널 광고 요청 예시
 
+:::tip 프리롤 광고와 재생 시작
+`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. 반환된 URL을 플레이어에 설정한 뒤, `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
+
+- **`prerollAdTagUrl`을 설정하지 않은 경우:** `player.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
+- **`prerollAdTagUrl`을 설정한 경우:** SDK가 프리롤 광고를 먼저 재생한 뒤 자동으로 콘텐츠 재생을 시작하므로, `player.play()`를 별도로 호출할 필요가 없습니다.
+:::
+
 ```kotlin
 private fun playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
@@ -122,6 +129,9 @@ private fun playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to null if pre-roll ads are not needed
+    val prerollAdTagUrl: String? = "https://ad_request?target=preroll"
+
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",
         "https://ad_request",
@@ -130,9 +140,17 @@ private fun playLinearTv() {
         mediaPlayerHook,
         mapOf("custom-ad-header" to "custom-ad-header-value"),
         mapOf("custom-stream-header" to "custom-stream-header-value"),
-        "https://ad_request?target=preroll"
+        prerollAdTagUrl
     )
     player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+
+    // If prerollAdTagUrl is null, call player.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so player.play() is not needed.
+    if (prerollAdTagUrl == null) {
+        player.prepare()
+        player.play()
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback
@@ -155,7 +173,7 @@ SDK가 공식적으로 지원하지 않는 플레이어를 사용하는 경우, 
 | adTagUrl | string | 광고 서버에서 발급된 광고 태그 URL |
 | channelId | string | 고유 채널 ID<br/>Flower 백엔드 시스템에 등록되어야 함 |
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 _null_) |
-| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter 인터페이스 구현 객체<br/>자세한 내용은 [플레이어를 직접 제어하는 경우](../../implement-interface-video-player/direct-player-control) 문서를 참고하세요. |
+| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter 인터페이스 구현 객체<br/>자세한 내용은 [플레이어를 직접 제어하는 경우](../implement-interface-video-player/direct-player-control) 문서를 참고하세요. |
 | adTagHeaders | map | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |
 | channelStreamHeaders | map | (Optional) 원본 스트림 요청 시 추가할 HTTP 헤더 정보 |
 | prerollAdTagUrl | string | (Optional) 프리롤용 광고 서버 발급 광고 태그 URL |

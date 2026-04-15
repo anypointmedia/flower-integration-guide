@@ -4,58 +4,71 @@ sidebar_position: 2
 
 # Supported Content Types and Ad Services
 
-This section outlines the content types supported by FLOWER and provides examples of how you can use our ad services.
+An overview of the content types FLOWER supports and real-world scenarios for each ad service.
 
 ## Linear Channels
 
 ### Main Stream Replacement Ads
 
-This ad type utilizes ad markers (e.g., SCTE-35) to replace existing ads within the main content stream. SCTE-35-based replacement is supported across both delivery methods, but the processing mechanism differs:
+Replaces existing ad segments within the main content stream using ad markers (e.g., SCTE-35). Supported across both delivery methods with different processing mechanisms.
 
 *   **Unicast (HLS/DASH)**: The SDK processes the playlist manifest (m3u8 or mpd) to detect ad markers and replace ad segments within the stream.
-*   **DTH / Multicast**: The SDK detects SCTE-35 cues in the TS stream, and the ad agent plays locally cached creatives in the advertisement layer.
+*   **Satellite/IPTV**: The SDK detects SCTE-35, DTMF cue tones, and EPG-based virtual cues to replace ad segments within the stream.
 
 #### Example Uses
-*   Replace existing ad breaks with your own house ads.
-*   Monetize FAST channels by inserting ads between content segments.
-*   Generate revenue by replacing ads during live sports broadcasts.
+
+*   Replace existing ad breaks on broadcast or cable channels with your own or targeted ads to capture additional revenue.
+*   Maximize ad inventory on FAST channels by inserting programmatic ads between content segments.
+*   Place premium ads during natural breaks in live sports — halftime, quarter breaks, and timeouts.
+*   Serve region-specific ads to meet local advertiser demand.
 
 ### Channel Entry Ads
 
-These ads play before a viewer enters the main content stream. When a viewer requests to watch live content, they will first see the entry ad before transitioning to the main stream. Available for unicast (HLS/DASH) delivery.
+Ads displayed at the moment a viewer tunes into a live channel, before the main content begins. The viewer seamlessly transitions to the live stream once the ad finishes. Available for Unicast (HLS/DASH) delivery.
 
 #### Example Uses
-*   Monetize free channels by setting up channel entry ads.
-*   Generate ad revenue from ad-supported plans on your dynamic OTT service.
+
+*   Monetize free channels by generating ad revenue at every channel-switch moment.
+*   Turn the channel entry point into a premium ad slot for AVOD-tier OTT services.
+*   Promote new original content or campaigns at the channel entry point to boost viewer awareness.
 
 ### Analog Cue and Push-Triggered Ads
 
-These ad types are specific to DTH / Multicast delivery, where the backend system triggers ad playback on client devices.
+Ad types specific to Satellite/IPTV (satellite DTH and IPTV multicast) delivery, where the backend system directly triggers ad playback on client devices.
 
-*   **Analog Cue**: Ad cues detected by the Head-End (H/E) system are relayed to devices via the Anypoint platform, instructing them to start ad playback.
-*   **Push-Triggered (Virtual Cue)**: The backend generates virtual cues based on the broadcast program schedule and transmits them to devices via the push server.
+*   **Digital Cue (SCTE-35)**: Replaces ad segments based on SCTE-35 packets embedded in the TS stream.
+*   **Analog Cue**: Ad cues detected by the Head-End (H/E) system are relayed to devices via the Anypoint platform to replace ad segments.
+*   **Push-Triggered (Virtual Cue)**: The backend generates virtual cues based on the broadcast program schedule (EPG) and relays them to devices via the Anypoint platform to replace ad segments.
 
 #### Example Uses
-*   Insert ads at broadcast commercial breaks detected by the Head-End system.
-*   Schedule ad breaks based on program timetables without requiring in-stream markers.
+
+*   Play locally cached targeted ads on set-top boxes, timed to broadcast ad breaks detected by the H/E system.
+*   Schedule ad breaks based on program timetables to deliver ads at precise moments — even on channels without in-stream markers.
+*   Concentrate ad delivery during prime-time slots to maximize CPM.
 
 ## VOD
 
-FLOWER supports various ad formats for VOD content:
-*   Pre-roll Ads: Insert ads before the main content begins.
-*   Post-roll Ads: Insert ads after the main content ends.
-*   Mid-roll Ads: Insert ads at regular intervals or designated ad insertion points within the content.
+Insert ads before, during, or after VOD content playback.
 
-### Example Uses
-*   Monetize long-form VOD content by inserting pre-roll, mid-roll, and post-roll ads.
-*   Use ad insertion points to place ads at natural breaks in the content.
+*   **Pre-roll Ads**: Played before the main content begins.
+*   **Mid-roll Ads**: Played at regular intervals or designated insertion points within the content.
+*   **Post-roll Ads**: Played after the main content ends.
+
+#### Example Uses
+
+*   Combine pre-roll, mid-roll, and post-roll ads across feature films and drama series to maximize per-episode revenue.
+*   Place mid-roll ads at natural scene transitions (chapter points) to minimize viewer drop-off.
+*   Insert ads into free content on AVOD services while offering an ad-free experience for premium subscribers.
+*   Apply pre-roll only for short-form content to keep the ad experience concise.
 
 ## Webpage / App
 
-FLOWER enables you to seamlessly integrate video ads into your webpages and apps.
+Insert video ads within webpages and apps.
 
-### Example Uses
-*   Insert a 300x400 sized video ad at the bottom right of the portal site's main page.
-*   Insert a video ad in the middle of a blog post.
-*   Insert interstitial ads between game levels.
-*   Monetize app access by requiring users to watch an ad before entering.
+#### Example Uses
+
+*   Place inline video ads on high-traffic portal home pages to convert page views into ad revenue.
+*   Embed video ads mid-article in news or blog content for natural exposure within the reading flow.
+*   Show interstitial ads at level transitions or reward moments in gaming apps to maintain engagement while generating revenue.
+*   Display a brand video ad in the masthead area on app launch to offer a premium ad placement.
+*   Apply rewarded ads that require viewing before accessing specific features in free-to-use apps.

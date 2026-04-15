@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Adding an Ad Layer
 
-As shown in **SDK Architecture > Video Layer Arrangement**, add `tv.anypoint.api.ads.AnypointAdView` between the real-time broadcast layer and the TV UI layer.
+As described in **[Design](./design#view-layer-arrangement)** (View Layer Arrangement), add `tv.anypoint.api.ads.AnypointAdView` between the real-time broadcast layer and the TV UI layer.
 
 Below are code examples demonstrating how to add it using XML and how to add it dynamically in code.
 

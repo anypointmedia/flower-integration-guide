@@ -1,12 +1,17 @@
 ---
-sidebar_position: 1
+sidebar_position: 100
+sidebar_label: Release Notes
 ---
 
 # Android SDK
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
-| 2.9.0 | Feb 25, 2026 | **BugFix** <ol><li>Fixed a time mismatch when entering a live channel with ad marker</li><li>Fixed a time mismatch that occurred during long-duration playback</li></ol> **Feature** <ol><li>Improved performance when processing playlists with long window</li><li>Enhanced the interactive ad UI</li><li>Added QR code display when selecting “More Info” on ads in TV environments</li></ol> |
+| 2.9.6 | Mar 26, 2026 | **Feature** <ol><li>Improved logic for calculating playback time when ads are played directly</li></ol> **BugFix** <ol><li>Fixed a bug where tracking URLs are missing in Wrapper ads</li></ol> |
+| 2.9.5 | Mar 26, 2026 | **Feature** <ol><li>Downgraded the Kotlin version to 2.0.21</li></ol> |
+| 2.9.4 | Mar 19, 2026 | **Feature** <ol><li>Improved accuracy of event tracking when using an independent ad player</li></ol> |
+| 2.9.2 | Mar 09, 2026 | **Feature** <ol><li>Support for incremental ad podding in linear TV with direct ad playback (without manipulation)</li><li>Updated `requestChannelAd` to return its response using a coroutine Flow</li></ol> |
+| 2.9.0 | Feb 25, 2026 | **BugFix** <ol><li>Fixed a time mismatch when entering a live channel with ad marker</li><li>Fixed a time mismatch that occurred during long-duration playback</li></ol> **Feature** <ol><li>Improved performance when processing playlists with long window</li><li>Enhanced the interactive ad UI</li><li>Added QR code display when selecting "More Info" on ads in TV environments</li></ol> |
 | 2.8.3 | Jan 09, 2026 | **BugFix** <ol><li>Fixed the tracking time mismatch issue.</li></ol> **Feature** <ol><li>Enhanced the logic about tracking ad</li><li>Added current time and timezone URL macros</li><li>Enhanced the logic to parse the XML content</li><li>Changed the timeout for VOD ad requests from 3 to 5 seconds</li></ol> |
 | 2.8.2 | Dec 15, 2025 | **BugFix** <ol><li>Fixed an issue where the requestChannelAd() API would return an empty ad list and a success response when a timeout occurred.</li></ol> |
 | 2.8.1 | Dec 12, 2025 | **BugFix** <ol><li>Fixed a crash on devices without WebView.</li><li>Fixed an ad tracking issue in Exoplayer when playing DASH streams.</li></ol> |

@@ -4,7 +4,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'FLOWER Integration Guide',
-  tagline: 'Ad integration SDK documentation for Android, Web/Smart TV, and iOS platforms',
+  tagline:
+    'Ad integration SDK documentation for Android, Satellite/IPTV, Web/Smart TV, and iOS platforms',
   favicon: 'img/favicon.png',
 
   future: {
@@ -30,7 +31,13 @@ const config: Config = {
 
   markdown: {
     format: 'detect',
+    mermaid: true,
+    mdx1Compat: {
+      admonitions: true,
+    },
   },
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   presets: [
     [
@@ -38,6 +45,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          admonitions: true,
         },
         blog: false,
         theme: {

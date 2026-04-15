@@ -1,6 +1,10 @@
 {
-  "label": "Linear TV & FAST",
+  "label": "Linear TV (incl. FAST)",
   "position": 2,
   "collapsed": true,
-  "key": "ios-linear-tv-fast"
+  "key": "ios-linear-tv-fast",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-linear-tv-fast"
+  }
 }

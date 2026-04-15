@@ -2,5 +2,9 @@
   "label": "VOD (Video On Demand)",
   "position": 3,
   "collapsed": true,
-  "key": "ios-vod"
+  "key": "ios-vod",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-vod"
+  }
 }

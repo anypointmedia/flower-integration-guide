@@ -2,5 +2,9 @@
   "label": "Advanced Ad Formats",
   "position": 5,
   "collapsed": true,
-  "key": "android-advanced-ad-formats"
+  "key": "android-advanced-ad-formats",
+  "link": {
+    "type": "generated-index",
+    "slug": "android-advanced-ad-formats"
+  }
 }

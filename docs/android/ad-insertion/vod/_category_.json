@@ -2,5 +2,9 @@
   "label": "VOD (Video On Demand)",
   "position": 4,
   "collapsed": true,
-  "key": "android-vod"
+  "key": "android-vod",
+  "link": {
+    "type": "generated-index",
+    "slug": "android-vod"
+  }
 }

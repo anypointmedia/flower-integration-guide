@@ -54,7 +54,7 @@ flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
 
 ### 3. 플레이어 전달 -- `MediaPlayerHook`
 
-> 실시간 채널의 경우 본 컨텐츠를 재생하는 플레이어를 SDK에 전달해야 합니다.
+> 실시간 채널의 경우 본 콘텐츠를 재생하는 플레이어를 SDK에 전달해야 합니다.
 
 #### 지원 플레이어
 

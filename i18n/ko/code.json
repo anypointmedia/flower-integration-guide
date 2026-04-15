@@ -4,33 +4,71 @@
     "description": "The homepage title"
   },
   "homepage.tagline": {
-    "message": "Android, Web/Smart TV, iOS 플랫폼을 위한 광고 정합 SDK 문서",
+    "message": "Android, Satellite/IPTV, Web/Smart TV, iOS 플랫폼을 위한 광고 정합 SDK 문서",
     "description": "The homepage tagline"
+  },
+  "homepage.heroDescription": {
+    "message": "Anypoint Media의 FLOWER 플랫폼은 전 세계 미디어 사업자가 손실된 광고 수익을 회수하고, 새로운 프리미엄 광고 포맷을 활용하며, 운영 비용을 획기적으로 절감할 수 있도록 지원합니다.",
+    "description": "The homepage hero description about FLOWER platform"
+  },
+  "homepage.heroSubDescription": {
+    "message": "본 가이드는 다양한 플랫폼 및 환경에서 FLOWER 시스템과 통합하기 위한 단계별 연동 방법을 제공합니다.",
+    "description": "The homepage hero sub-description about integration guide"
   },
   "homepage.getStarted": {
     "message": "시작하기",
     "description": "The homepage get started button label"
   },
+  "homepage.contentType.heading": {
+    "message": "콘텐츠 유형별"
+  },
+  "homepage.contentType.linearTv.title": {
+    "message": "Linear TV (incl. FAST)"
+  },
+  "homepage.contentType.unicast.title": {
+    "message": "유니캐스트 (HLS / DASH)"
+  },
+  "homepage.contentType.unicast.description": {
+    "message": "OTT 전송 환경에서 플레이리스트 매니페스트 조작을 통한 실시간 스트림 광고 삽입."
+  },
+  "homepage.contentType.satellite.title": {
+    "message": "위성 / 멀티캐스트 (DTH / IPTV)"
+  },
+  "homepage.contentType.satellite.description": {
+    "message": "위성 및 IPTV 멀티캐스트 방송 환경에서 SCTE-35 신호 기반 광고 삽입."
+  },
+  "homepage.contentType.vod.title": {
+    "message": "VOD (Video On Demand)"
+  },
+  "homepage.contentType.vod.description": {
+    "message": "온디맨드 콘텐츠의 Pre-roll, Mid-roll, Post-roll 광고 삽입."
+  },
+  "homepage.contentType.advancedAd.title": {
+    "message": "Advanced Ad Formats"
+  },
+  "homepage.contentType.advancedAd.description": {
+    "message": "인라인 및 전면 광고 구현."
+  },
   "homepage.platforms.heading": {
-    "message": "플랫폼 선택"
+    "message": "플랫폼별"
   },
   "homepage.platform.android.title": {
     "message": "Android"
   },
   "homepage.platform.android.description": {
-    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 ExoPlayer & Media3 기반 광고 연동"
+    "message": "ExoPlayer & Media3 기반 광고 연동"
   },
   "homepage.platform.webSmartTv.title": {
     "message": "Web / Smart TV"
   },
   "homepage.platform.webSmartTv.description": {
-    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 플랫폼 광고 연동"
+    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 광고 연동"
   },
   "homepage.platform.ios.title": {
     "message": "iOS"
   },
   "homepage.platform.ios.description": {
-    "message": "AVPlayer 기반 iOS 및 tvOS 앱 광고 연동"
+    "message": "AVPlayer 기반 iOS 및 tvOS 광고 연동"
   },
   "homepage.feature.cspm.title": {
     "message": "클라이언트 사이드 플레이리스트 조작"

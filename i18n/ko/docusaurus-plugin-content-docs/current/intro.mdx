@@ -8,38 +8,42 @@ import DocCard from '@theme/DocCard';
 
 # FLOWER 정합 가이드
 
-정합 도중 문의사항이나 논의사항이 있을 경우 [Helpdesk](mailto:dev-support@anypointmedia.com)에 요청해주시면 도움을 드리겠습니다.
+본 가이드는 다양한 플랫폼 및 환경에서 FLOWER 시스템과 통합하기 위한 단계별 연동 방법을 제공합니다. 정합 도중 문의사항이나 논의사항이 있을 경우 [Helpdesk](mailto:dev-support@anypointmedia.com)에 요청해주시면 도움을 드리겠습니다.
 
 플랫폼에 맞는 연동 가이드를 선택하세요:
 
 <section className="row margin-top--lg">
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'Android',
       href: '/docs/category/android',
-      description: 'DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 광고를 연동합니다.',
     }} />
   </article>
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
+    <DocCard item={{
+      type: 'link',
+      label: 'Satellite/IPTV',
+      href: '/docs/category/satelliteiptv',
+    }} />
+  </article>
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'Web / Smart TV',
       href: '/docs/category/web--smart-tv',
-      description: 'HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 환경에 광고를 연동합니다.',
     }} />
   </article>
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'iOS',
       href: '/docs/category/ios',
-      description: 'AVPlayer 기반 iOS 및 tvOS 앱에 광고를 연동합니다.',
     }} />
   </article>
 </section>
 
 각 플랫폼은 다음 콘텐츠 유형을 지원합니다:
-- **Linear TV & FAST** — 실시간 채널 광고 삽입
+- **Linear TV (incl. FAST)** — 실시간 채널 광고 삽입
 - **VOD (Video On Demand)** — Pre-roll, Mid-roll, Post-roll 광고
 - **Advanced Ad Formats** — 인라인 및 전면 광고

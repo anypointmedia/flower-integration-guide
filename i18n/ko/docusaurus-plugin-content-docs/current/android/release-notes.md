@@ -1,11 +1,16 @@
 ---
-sidebar_position: 1
+sidebar_position: 100
+sidebar_label: "릴리즈 노트"
 ---
 
 # Android SDK
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.6 | 2026.03.26 | **Feature** <ol><li>광고를 직접 재생할 때 재생 시간 계산 로직 개선</li></ol> **BugFix** <ol><li>Wrapper 광고에서 트래킹 URL이 누락되는 버그 수정</li></ol> |
+| 2.9.5 | 2026.03.26 | **Feature** <ol><li>Kotlin 버전을 2.0.21로 다운그레이드</li></ol> |
+| 2.9.4 | 2026.03.19 | **Feature** <ol><li>독립 광고 플레이어 사용 시 이벤트 트래킹 정확도 개선</li></ol> |
+| 2.9.2 | 2026.03.09 | **Feature** <ol><li>직접 광고 재생(매니퓰레이션 없이) 방식의 리니어 TV에서 점진적 광고 포딩 지원</li><li>`requestChannelAd`가 코루틴 Flow를 통해 응답을 반환하도록 변경</li></ol> |
 | 2.9.0 | 2026.02.25 | **BugFix** <ol><li>광고 마커가 있는 라이브 채널 진입 시 시간 불일치 수정</li><li>장시간 재생 시 발생하는 시간 불일치 수정</li></ol> **Feature** <ol><li>긴 윈도우의 플레이리스트 처리 시 성능 개선</li><li>인터랙티브 광고 UI 개선</li><li>TV 환경에서 광고의 "자세히 보기" 선택 시 QR 코드 표시 기능 추가</li></ol> |
 | 2.8.3 | 2026.01.09 | **BugFix** <ol><li>트래킹 시간 불일치 문제 수정</li></ol> **Feature** <ol><li>광고 트래킹 로직 개선</li><li>현재 시간 및 타임존 URL 매크로 추가</li><li>XML 콘텐츠 파싱 로직 개선</li><li>VOD 광고 요청 타임아웃을 3초에서 5초로 변경</li></ol> |
 | 2.8.2 | 2025.12.15 | **BugFix** <ol><li>타임아웃 발생 시 `requestChannelAd()` API가 빈 광고 목록과 성공 응답을 반환하는 문제 수정</li></ol> |
@@ -19,7 +24,7 @@ sidebar_position: 1
 | 2.6.1 | 2025.10.29 | **BugFix** <ol><li>ExoPlayer에서 TextureView 사용 시 광고 뷰가 표시되지 않는 문제 수정</li></ol> |
 | 2.6.0 | 2025.10.17 | **Feature** <ol><li>구글 광고를 가능한 경우 인코딩 없이 즉시 재생하도록 개선</li></ol> |
 | 2.5.1 | 2025.10.14 | **BugFix** <ol><li>스킵 가능한 광고가 스킵되지 않았는데도 예비 광고가 삽입되는 문제 수정</li></ol> |
-| 2.5.0 | 2025.10.02 | **Feature** <ol><li>VOD 컨텐츠를 재생할 때 Flower Player 지원 추가</li><li>Bitmovin 플레이어를 감싸는 FlowerBitmovinPlayer 추가</li></ol> **BugFix** <ol><li>VOD 광고가 PIP 모드에서 재생되지 않는 문제 수정. 이 수정은 Flower 플레이어를 요구함.</li></ol> |
+| 2.5.0 | 2025.10.02 | **Feature** <ol><li>VOD 콘텐츠를 재생할 때 Flower Player 지원 추가</li><li>Bitmovin 플레이어를 감싸는 FlowerBitmovinPlayer 추가</li></ol> **BugFix** <ol><li>VOD 광고가 PIP 모드에서 재생되지 않는 문제 수정. 이 수정은 Flower 플레이어를 요구함.</li></ol> |
 | 2.4.2 | 2025.10.02 | **BugFix** <ol><li>2.3.3에서 업그레이드된 코틀린 버전을 2.2.0에서 2.0.21로 롤백</li></ol> |
 | 2.4.1 | 2025.09.22 | **Feature** <ol><li>`requestChannelAd()` API를 사용할 때 광고 로드 속도 개선</li></ol> **BugFix** <ol><li>캐시 파일을 위해 가용 스토리지 용량을 계산할 때 발생하는 오버플로우 수정</li></ol> |
 | 2.4.0 | 2025.09.19 | **Feature** <ol><li>자체 광고 서빙 시스템을 사용할 때 광고 스킵 기능을 옵트아웃할 수 있는 `FlowerSdk.ignoreSkip()` API 추가</li></ol> |

@@ -3,12 +3,16 @@
     "message": "Next",
     "description": "The label for version current"
   },
+  "sidebar.tutorialSidebar.category.SDK Architecture": {
+    "message": "SDK 설계",
+    "description": "The label for category 'SDK Architecture' in sidebar 'tutorialSidebar'"
+  },
   "sidebar.tutorialSidebar.category.Android": {
     "message": "Android",
     "description": "The label for category 'Android' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Android.link.generated-index.description": {
-    "message": "DTH/Multicast 및 Unicast(HLS/DASH) 환경에서 Android 앱에 FLOWER SDK를 연동합니다. Linear TV & FAST, VOD, Advanced Ad Formats을 지원합니다. DTH/Multicast 연동은 광고 삽입 > Linear TV & FAST > DTH / Multicast를 참고하세요.",
+    "message": "Unicast(HLS/DASH) 환경에서 Android 앱에 FLOWER SDK를 연동합니다. Linear TV (incl. FAST), VOD, Advanced Ad Formats을 지원합니다. 위성(DTH) 및 IPTV 멀티캐스트 연동은 Satellite/IPTV 섹션을 참고하세요.",
     "description": "The generated-index page description for category 'Android' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Web / Smart TV": {
@@ -16,7 +20,7 @@
     "description": "The label for category 'Web / Smart TV' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Web / Smart TV.link.generated-index.description": {
-    "message": "HLS.js 기반 브라우저 및 Smart TV(Tizen, webOS 등) 환경에 FLOWER SDK를 연동합니다.",
+    "message": "HTML5 기반의 웹 브라우저 및 Smart TV(Tizen, webOS 등) 환경에 FLOWER SDK를 연동합니다.",
     "description": "The generated-index page description for category 'Web / Smart TV' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.iOS": {
@@ -24,7 +28,7 @@
     "description": "The label for category 'iOS' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.iOS.link.generated-index.description": {
-    "message": "AVPlayer 기반 iOS 및 tvOS 앱에 FLOWER SDK를 연동합니다.",
+    "message": "iOS 및 tvOS 앱에 FLOWER SDK를 연동합니다.",
     "description": "The generated-index page description for category 'iOS' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-getting-started": {
@@ -36,12 +40,16 @@
     "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-linear-tv-fast": {
-    "message": "Linear TV & FAST",
-    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+    "message": "Linear TV (incl. FAST)",
+    "description": "The label for category 'Linear TV (incl. FAST)' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.android-dth-multicast": {
-    "message": "DTH / Multicast",
-    "description": "The label for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
+  "sidebar.tutorialSidebar.category.Satellite/IPTV": {
+    "message": "Satellite/IPTV",
+    "description": "The label for category 'Satellite/IPTV' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Satellite/IPTV.link.generated-index.description": {
+    "message": "위성(DTH) 및 IPTV 멀티캐스트 방송 환경에서 DTMF 큐톤 또는 SCTE-35를 사용한 대체 광고를 연동합니다.",
+    "description": "The generated-index page description for category 'Satellite/IPTV' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-unicast": {
     "message": "Unicast (HLS / DASH)",
@@ -72,8 +80,8 @@
     "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-prompts-linear-tv": {
-    "message": "Linear TV (DTH / Multicast)",
-    "description": "The label for category 'Linear TV (DTH / Multicast)' in sidebar 'tutorialSidebar'"
+    "message": "Linear TV (Satellite/IPTV)",
+    "description": "The label for category 'Linear TV (Satellite/IPTV)' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-prompts-vod": {
     "message": "VOD (Unicast)",
@@ -88,8 +96,8 @@
     "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.web-linear-tv-fast": {
-    "message": "Linear TV & FAST",
-    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+    "message": "Linear TV (incl. FAST)",
+    "description": "The label for category 'Linear TV (incl. FAST)' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.web-vod": {
     "message": "VOD (Video On Demand)",
@@ -102,10 +110,6 @@
   "sidebar.tutorialSidebar.category.web-api": {
     "message": "API 레퍼런스",
     "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.web-release-notes": {
-    "message": "릴리즈 노트",
-    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.web-prompts": {
     "message": "LLM 프롬프트",
@@ -120,8 +124,8 @@
     "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.ios-linear-tv-fast": {
-    "message": "Linear TV & FAST",
-    "description": "The label for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
+    "message": "Linear TV (incl. FAST)",
+    "description": "The label for category 'Linear TV (incl. FAST)' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.ios-vod": {
     "message": "VOD (Video On Demand)",
@@ -135,10 +139,6 @@
     "message": "API 레퍼런스",
     "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
   },
-  "sidebar.tutorialSidebar.category.ios-release-notes": {
-    "message": "릴리즈 노트",
-    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
-  },
   "sidebar.tutorialSidebar.category.ios-prompts": {
     "message": "LLM 프롬프트",
     "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
@@ -149,11 +149,7 @@
   },
   "sidebar.tutorialSidebar.category.android-linear-tv-fast.link.generated-index.description": {
     "message": "실시간 채널 및 FAST 콘텐츠에 광고를 삽입합니다. 전송 방식을 선택하세요.",
-    "description": "The generated-index page description for category 'Linear TV & FAST' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.android-dth-multicast.link.generated-index.description": {
-    "message": "DTH(위성) 및 Multicast(IPTV) 방송 환경을 위한 SCTE-35 시그널 기반 광고 삽입. FLOWER Ad Agent를 사용합니다.",
-    "description": "The generated-index page description for category 'DTH / Multicast' in sidebar 'tutorialSidebar'"
+    "description": "The generated-index page description for category 'Linear TV (incl. FAST)' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.android-unicast.link.generated-index.description": {
     "message": "유니캐스트(OTT) 환경에서 HLS/DASH 라이브 스트림의 광고를 대체합니다. 플레이리스트 매니페스트 조작 방식을 사용합니다.",
@@ -166,5 +162,9 @@
   "sidebar.tutorialSidebar.category.ios-ad-insertion.link.generated-index.description": {
     "message": "iOS 또는 tvOS 앱에 FLOWER 광고를 삽입합니다. UI 설정, 플레이어 구성, 콘텐츠 유형별 광고 삽입, 고급 커스터마이징을 다룹니다.",
     "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.satellite-iptv-release-notes": {
+    "message": "릴리즈 노트",
+    "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
   }
 }

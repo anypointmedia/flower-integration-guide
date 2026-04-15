@@ -1,6 +1,6 @@
 # FLOWER Integration Guide
 
-FLOWER SDK integration documentation for Android, Web/Smart TV, and iOS platforms, built with [Docusaurus](https://docusaurus.io/).
+FLOWER SDK integration documentation for Android, Satellite/IPTV, Web/Smart TV, and iOS platforms, built with [Docusaurus](https://docusaurus.io/).
 
 **Live site:** https://flower-docs.anypoint.tv
 
@@ -87,12 +87,13 @@ node scripts/run-branch-tests.mjs --platform ott-android
 ```
 docs/
 ├── intro.mdx                        # Landing page
-├── sdk-architecture.md              # SDK architecture overview
+├── sdk-architecture/                # SDK architecture (Unicast overview + subpages)
 ├── supported-content-types.md       # Supported content types
+├── satellite-iptv/                  # Satellite (DTH) & IPTV multicast (SCTE-35, Ad Agent)
 ├── android/                         # Android platform
 │   ├── getting-started/             # Dev environment, initialization, logging, PiP
 │   ├── ad-insertion/                # Ad integration guides
-│   │   ├── linear-tv-fast/          # DTH/Multicast & Unicast
+│   │   ├── linear-tv-fast/          # Unicast (HLS/DASH) for Linear TV (incl. FAST)
 │   │   ├── vod/                     # VOD ad implementation
 │   │   └── advanced-ad-formats/     # Inline ads, etc.
 │   ├── api/                         # API reference
@@ -108,7 +109,7 @@ docs/
 │   │   └── advanced-ad-formats/
 │   ├── api/
 │   ├── prompts/
-│   └── release-notes/
+│   └── release-notes.md
 └── web-smart-tv/                    # Web / Smart TV platform (Tizen, webOS, etc.)
     ├── getting-started/
     ├── ad-insertion/
@@ -117,7 +118,7 @@ docs/
     │   └── advanced-ad-formats/
     ├── api/
     ├── prompts/
-    └── release-notes/
+    └── release-notes.md
 
 i18n/ko/                             # Korean translation
 ├── code.json

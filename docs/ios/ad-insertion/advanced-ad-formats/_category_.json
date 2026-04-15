@@ -2,5 +2,9 @@
   "label": "Advanced Ad Formats",
   "position": 4,
   "collapsed": true,
-  "key": "ios-advanced-ad-formats"
+  "key": "ios-advanced-ad-formats",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-advanced-ad-formats"
+  }
 }

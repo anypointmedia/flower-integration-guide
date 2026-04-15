@@ -2,5 +2,9 @@
   "label": "VOD (Video On Demand)",
   "position": 3,
   "collapsed": true,
-  "key": "web-vod"
+  "key": "web-vod",
+  "link": {
+    "type": "generated-index",
+    "slug": "web-vod"
+  }
 }

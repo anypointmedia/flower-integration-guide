@@ -8,38 +8,42 @@ import DocCard from '@theme/DocCard';
 
 # FLOWER Integration Guide
 
-If you have any questions or issues during integration, please contact our [Helpdesk](mailto:dev-support@anypointmedia.com) for assistance.
+This guide provides step-by-step instructions for integrating with the FLOWER system across various platforms and environments. If you have any questions or issues during integration, please contact our [Helpdesk](mailto:dev-support@anypointmedia.com) for assistance.
 
 Choose the integration guide that matches your platform:
 
 <section className="row margin-top--lg">
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'Android',
       href: '/docs/category/android',
-      description: 'ExoPlayer & Media3 integration for ad insertion on Android, including DTH/Multicast and Unicast (HLS/DASH).',
     }} />
   </article>
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
+    <DocCard item={{
+      type: 'link',
+      label: 'Satellite/IPTV',
+      href: '/docs/category/satelliteiptv',
+    }} />
+  </article>
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'Web / Smart TV',
       href: '/docs/category/web--smart-tv',
-      description: 'HLS.js-based ad insertion for browser-based players and Smart TV platforms (Tizen, webOS, etc.).',
     }} />
   </article>
-  <article className="col col--4 margin-bottom--lg">
+  <article className="col col--6 col--md--3 margin-bottom--lg">
     <DocCard item={{
       type: 'link',
       label: 'iOS',
       href: '/docs/category/ios',
-      description: 'AVPlayer-based ad insertion for iOS and tvOS applications.',
     }} />
   </article>
 </section>
 
 Each platform supports the following content types:
-- **Linear TV & FAST** — Ad insertion for live linear TV channels and FAST streams
+- **Linear TV (incl. FAST)** — Ad insertion for live linear TV channels and FAST streams
 - **VOD (Video On Demand)** — Pre-roll, mid-roll, and post-roll ads
 - **Advanced Ad Formats** — Inline and interstitial ads

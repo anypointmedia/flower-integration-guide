@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # 광고 레이어 추가
 
-**SDK 설계 > 비디오 레이어의 구조**를 참고하여 실시간 방송 레이어와 TV UI 레이어 사이에 `tv.anypoint.api.ads.AnypointAdView`를 추가합니다.
+**[설계](./design#비디오-레이어의-구조)** 페이지의 비디오 레이어 구조를 참고하여 실시간 방송 레이어와 TV UI 레이어 사이에 `tv.anypoint.api.ads.AnypointAdView`를 추가합니다.
 
 XML을 사용하는 방법과 코드에서 동적으로 추가하는 방법의 코드 예시입니다.
 

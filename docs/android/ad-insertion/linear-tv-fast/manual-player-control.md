@@ -110,6 +110,13 @@ API used to stop live broadcasts. No parameters.
 
 ## Linear Channel Ad Request Example
 
+:::tip Pre-roll Ads and Playback Start
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+
+- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+:::
+
 ```kotlin
 private fun playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
@@ -122,6 +129,9 @@ private fun playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to null if pre-roll ads are not needed
+    val prerollAdTagUrl: String? = "https://ad_request?target=preroll"
+
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",
         "https://ad_request",
@@ -130,9 +140,17 @@ private fun playLinearTv() {
         mediaPlayerHook,
         mapOf("custom-ad-header" to "custom-ad-header-value"),
         mapOf("custom-stream-header" to "custom-stream-header-value"),
-        "https://ad_request?target=preroll"
+        prerollAdTagUrl
     )
     player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
+
+    // If prerollAdTagUrl is null, call player.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so player.play() is not needed.
+    if (prerollAdTagUrl == null) {
+        player.prepare()
+        player.play()
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback
@@ -155,7 +173,7 @@ Instead of passing a `MediaPlayerHook`, you pass a `MediaPlayerAdapter` implemen
 | adTagUrl | string | Ad tag URL issued by the ad server |
 | channelId | string | Unique channel ID<br/>Must be registered in the Flower backend system |
 | extraParams | map | Additional pre-agreed information for targeting (_null_ if none) |
-| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter interface implementation object<br/>For more details, refer to the [In case of direct player control](../../implement-interface-video-player/direct-player-control) documentation. |
+| mediaPlayerAdapter | MediaPlayerAdapter | MediaPlayerAdapter interface implementation object<br/>For more details, refer to the [In case of direct player control](../implement-interface-video-player/direct-player-control) documentation. |
 | adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
 | channelStreamHeaders | map | (Optional) HTTP header information to add when requesting the original stream |
 | prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll |

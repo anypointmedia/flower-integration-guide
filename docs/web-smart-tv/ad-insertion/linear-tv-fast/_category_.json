@@ -1,6 +1,10 @@
 {
-  "label": "Linear TV & FAST",
+  "label": "Linear TV (incl. FAST)",
   "position": 2,
   "collapsed": true,
-  "key": "web-linear-tv-fast"
+  "key": "web-linear-tv-fast",
+  "link": {
+    "type": "generated-index",
+    "slug": "web-linear-tv-fast"
+  }
 }
