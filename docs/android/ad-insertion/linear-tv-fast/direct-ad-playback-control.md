@@ -101,18 +101,16 @@ val timeout = 5000L // 5 seconds timeout for ad request
 // Throws FlowerError if no ads are available or a timeout occurs.
 // Returns emptyFlow() if a duplicate transactionId is used.
 lifecycleScope.launch {
-    try {
-        flowerAdView.adsManager.requestChannelAd(
-            transactionId,
-            cueDuration,
-            uniqueProgramId,
-            timeout,
-        ).collect { flowerAd ->
-            Log.i("FlowerSDK Example", "Received ad: ${flowerAd.id}")
-            playFlowerAd(flowerAd)
-        }
-    } catch (e: FlowerError) {
+    flowerAdView.adsManager.requestChannelAd(
+        transactionId,
+        cueDuration,
+        uniqueProgramId,
+        timeout,
+    ).catch { e ->
         Log.e("FlowerSDK Example", "Ad request failed: ${e.message}")
+    }.collect { flowerAd ->
+        Log.i("FlowerSDK Example", "Received ad: ${flowerAd.id}")
+        playFlowerAd(flowerAd)
     }
 }
 ```

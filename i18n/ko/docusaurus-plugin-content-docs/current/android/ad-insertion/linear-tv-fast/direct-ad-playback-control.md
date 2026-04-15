@@ -102,18 +102,16 @@ val timeout = 5000L // 5 seconds timeout for ad request
 // 응답된 광고가 없거나 타임아웃 시 FlowerError를 throw합니다.
 // 동일한 transactionId로 중복 요청 시 emptyFlow()를 반환합니다.
 lifecycleScope.launch {
-    try {
-        flowerAdView.adsManager.requestChannelAd(
-            transactionId,
-            cueDuration,
-            uniqueProgramId,
-            timeout,
-        ).collect { flowerAd ->
-            Log.i("FlowerSDK Example", "Received ad: ${flowerAd.id}")
-            playFlowerAd(flowerAd)
-        }
-    } catch (e: FlowerError) {
+    flowerAdView.adsManager.requestChannelAd(
+        transactionId,
+        cueDuration,
+        uniqueProgramId,
+        timeout,
+    ).catch { e ->
         Log.e("FlowerSDK Example", "Ad request failed: ${e.message}")
+    }.collect { flowerAd ->
+        Log.i("FlowerSDK Example", "Received ad: ${flowerAd.id}")
+        playFlowerAd(flowerAd)
     }
 }
 ```
