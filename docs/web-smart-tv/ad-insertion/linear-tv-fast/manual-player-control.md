@@ -110,6 +110,13 @@ API used to stop live broadcasts. No parameters.
 
 ## Linear Channel Ad Request Example
 
+:::tip Pre-roll Ads and Playback Start
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+
+- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+:::
+
 ### _HLS.js_
 ```javascript
 function playLinearTv() {
@@ -134,6 +141,9 @@ function playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to null if pre-roll ads are not needed
+    const prerollAdTagUrl = 'https://ad_request?target=preroll';
+
     const changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         'https://XXX',
         'https://ad_request',
@@ -142,13 +152,19 @@ function playLinearTv() {
         mediaPlayerHook,
         { 'custom-ad-header': 'custom-ad-header-value' },
         { 'custom-stream-header': 'custom-stream-header-value' },
-        'https://ad_request?target=preroll'
+        prerollAdTagUrl
     );
 
     player.loadSource(changedChannelUrl);
-    player.on(Hls.Events.MANIFEST_PARSED, function() {
-        videoElement.play();
-    });
+
+    // If prerollAdTagUrl is null, call videoElement.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so videoElement.play() is not needed.
+    if (prerollAdTagUrl == null) {
+        player.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoElement.play();
+        });
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback

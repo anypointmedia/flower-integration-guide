@@ -111,6 +111,13 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 
 ## Linear Channel Ad Request Example
 
+:::tip 프리롤 광고와 재생 시작
+`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. 반환된 URL을 플레이어에 설정한 뒤, `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
+
+- **`prerollAdTagUrl`을 설정하지 않은 경우:** `player.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
+- **`prerollAdTagUrl`을 설정한 경우:** SDK가 프리롤 광고를 먼저 재생한 뒤 자동으로 콘텐츠 재생을 시작하므로, `player.play()`를 별도로 호출할 필요가 없습니다.
+:::
+
 ### _HLS.js_
 ```javascript
 function playLinearTv() {
@@ -135,6 +142,9 @@ function playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to null if pre-roll ads are not needed
+    const prerollAdTagUrl = 'https://ad_request?target=preroll';
+
     const changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         'https://XXX',
         'https://ad_request',
@@ -143,13 +153,19 @@ function playLinearTv() {
         mediaPlayerHook,
         { 'custom-ad-header': 'custom-ad-header-value' },
         { 'custom-stream-header': 'custom-stream-header-value' },
-        'https://ad_request?target=preroll'
+        prerollAdTagUrl
     );
 
     player.loadSource(changedChannelUrl);
-    player.on(Hls.Events.MANIFEST_PARSED, function() {
-        videoElement.play();
-    });
+
+    // If prerollAdTagUrl is null, call videoElement.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so videoElement.play() is not needed.
+    if (prerollAdTagUrl == null) {
+        player.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoElement.play();
+        });
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback

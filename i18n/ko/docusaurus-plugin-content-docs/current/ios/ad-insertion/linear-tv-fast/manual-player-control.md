@@ -110,6 +110,13 @@ flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
 
 ## 실시간 채널 광고 요청 예시
 
+:::tip 프리롤 광고와 재생 시작
+`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. 반환된 URL을 플레이어에 설정한 뒤, `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
+
+- **`prerollAdTagUrl`을 설정하지 않은 경우:** `player.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
+- **`prerollAdTagUrl`을 설정한 경우:** SDK가 프리롤 광고를 먼저 재생한 뒤 자동으로 콘텐츠 재생을 시작하므로, `player.play()`를 별도로 호출할 필요가 없습니다.
+:::
+
 ```swift
 private func playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
@@ -122,6 +129,9 @@ private func playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to nil if pre-roll ads are not needed
+    let prerollAdTagUrl: String? = "https://ad_request?target=preroll"
+
     let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         videoUrl: "https://XXX",
         adTagUrl: "https://ad_request",
@@ -130,9 +140,16 @@ private func playLinearTv() {
         mediaPlayerHook: mediaPlayerHook,
         adTagHeaders: ["custom-ad-header": "custom-ad-header-value"],
         channelStreamHeaders: ["custom-stream-header": "custom-stream-header-value"],
-        prerollAdTagUrl: "https://ad_request?target=preroll"
+        prerollAdTagUrl: prerollAdTagUrl
     )
     player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
+
+    // If prerollAdTagUrl is nil, call player.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so player.play() is not needed.
+    if prerollAdTagUrl == nil {
+        player.play()
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback

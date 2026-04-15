@@ -73,6 +73,16 @@ const config: Config = {
           label: 'Integration Guide',
         },
         {
+          href: 'https://forms.gle/8wkA8eFiBQQCSNWi8',
+          label: 'Book a Demo',
+          position: 'right',
+        },
+        {
+          href: 'mailto:global@anypointmedia.com',
+          label: 'Contact Sales',
+          position: 'right',
+        },
+        {
           type: 'localeDropdown',
           position: 'right',
         },

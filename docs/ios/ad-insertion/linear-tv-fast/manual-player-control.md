@@ -109,6 +109,13 @@ API used to stop live broadcasts. No parameters.
 
 ## Linear Channel Ad Request Example
 
+:::tip Pre-roll Ads and Playback Start
+When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. After setting the returned URL on the player, the playback start behavior differs depending on whether `prerollAdTagUrl` is set.
+
+- **If `prerollAdTagUrl` is not set:** You must call `player.play()` directly to start content playback.
+- **If `prerollAdTagUrl` is set:** The SDK plays the pre-roll ad first and then automatically starts content playback, so there is no need to call `player.play()` separately.
+:::
+
 ```swift
 private func playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
@@ -121,6 +128,9 @@ private func playLinearTv() {
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
+    // (Optional) Set to nil if pre-roll ads are not needed
+    let prerollAdTagUrl: String? = "https://ad_request?target=preroll"
+
     let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         videoUrl: "https://XXX",
         adTagUrl: "https://ad_request",
@@ -129,9 +139,16 @@ private func playLinearTv() {
         mediaPlayerHook: mediaPlayerHook,
         adTagHeaders: ["custom-ad-header": "custom-ad-header-value"],
         channelStreamHeaders: ["custom-stream-header": "custom-stream-header-value"],
-        prerollAdTagUrl: "https://ad_request?target=preroll"
+        prerollAdTagUrl: prerollAdTagUrl
     )
     player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedChannelUrl)!))
+
+    // If prerollAdTagUrl is nil, call player.play() directly to start playback immediately.
+    // If prerollAdTagUrl is set, the SDK plays the pre-roll ad first
+    // and then automatically starts content playback, so player.play() is not needed.
+    if prerollAdTagUrl == nil {
+        player.play()
+    }
 }
 
 // TODO GUIDE: change extraParams during stream playback
