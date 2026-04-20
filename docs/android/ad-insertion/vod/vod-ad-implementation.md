@@ -49,18 +49,31 @@ val adsManagerListener = object : FlowerAdsManagerListener {
     }
 
     override fun onCompleted() {
-        // TODO GUIDE: resume VOD content after ad complete
         CoroutineScope(Dispatchers.Main).launch {
-            if (!isContentEnd) {
+            if (!isContentPrepared) {
+                // TODO GUIDE: load VOD source and start playback after pre-roll completes
+                //             (or when no pre-roll ad is served)
+                prepareContentSource()
+                isContentPrepared = true
+            } else if (!isContentEnd) {
+                // TODO GUIDE: a mid-roll ad has finished - resume the main VOD content
                 player.playWhenReady = true
+            } else {
+                // TODO GUIDE: a post-roll ad has finished - VOD playback is fully done.
+                //             Run any post-playback actions here
+                //             (e.g., auto-advance to the next episode, return to the previous screen).
             }
         }
     }
 
     override fun onError(error: FlowerError?) {
-        // TODO GUIDE: resume VOD content on ad error
         CoroutineScope(Dispatchers.Main).launch {
-            if (!isContentEnd) {
+            if (!isContentPrepared) {
+                // TODO GUIDE: load VOD source when pre-roll ad fails
+                prepareContentSource()
+                isContentPrepared = true
+            } else if (!isContentEnd) {
+                // TODO GUIDE: resume VOD content on ad error
                 player.playWhenReady = true
             }
         }
@@ -149,6 +162,13 @@ Call this API used when resuming VOD content. No parameters required.
 
 ## VOD Ad Request Example
 
+:::tip Defer loading the VOD source until the pre-roll completes
+Do not load the main VOD source on the player immediately after calling `requestVodAd(...)`.
+Instead, wait for `FlowerAdsManagerListener.onCompleted()` (or `onError()`), check whether the content has not yet been prepared (e.g., `isContentPrepared == false`), and only then load the VOD source and start playback.
+
+If the VOD source is loaded right after `requestVodAd(...)`, the first frame of the main content may briefly appear before the pre-roll ad starts.
+:::
+
 ```kotlin
 // TODO GUIDE: request vod ad
 // arg0: adTagUrl, url from flower system.
@@ -158,6 +178,10 @@ Call this API used when resuming VOD content. No parameters required.
 // arg3: extraParams, values you can provide for targeting
 // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
 // arg5: adTagHeaders, (Optional) values included in headers for ad request
+//
+// NOTE: Do NOT load the VOD source on the player here.
+//       The VOD source must be loaded inside FlowerAdsManagerListener.onCompleted()
+//       (see step 2) so it is played after the pre-roll ad finishes.
 flowerAdView.adsManager.requestVodAd(
     adTagUrl = "https://ad_request",
     contentId = "100",

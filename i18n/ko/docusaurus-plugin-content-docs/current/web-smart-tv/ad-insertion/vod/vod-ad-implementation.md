@@ -45,15 +45,28 @@ const adsManagerListener = {
     },
 
     onCompleted() {
-        // TODO GUIDE: resume VOD content after ad complete
-        if (!isContentEnd) {
+        if (!isContentPrepared) {
+            // TODO GUIDE: pre-roll 광고 종료 후(또는 pre-roll 광고가 없는 경우)
+            //             VOD 소스를 로드하고 재생을 시작합니다.
+            prepareContentSource();
+            isContentPrepared = true;
+        } else if (!isContentEnd) {
+            // TODO GUIDE: mid-roll 광고가 종료된 시점 - 본편 VOD 재생을 재개합니다.
             yourPlayer.play();
+        } else {
+            // TODO GUIDE: post-roll 광고가 종료된 시점 - VOD 재생이 완전히 종료되었습니다.
+            //             재생 종료 이후 수행해야 할 작업을 여기에 구현하세요
+            //             (예: 다음 에피소드로 자동 이동, 이전 화면으로 복귀 등).
         }
     },
 
     onError(error) {
-        // TODO GUIDE: resume VOD content on ad error
-        if (!isContentEnd) {
+        if (!isContentPrepared) {
+            // TODO GUIDE: pre-roll 광고 실패 시에도 VOD 소스를 로드합니다.
+            prepareContentSource();
+            isContentPrepared = true;
+        } else if (!isContentEnd) {
+            // TODO GUIDE: resume VOD content on ad error
             yourPlayer.play();
         }
     },
@@ -136,6 +149,13 @@ VOD 콘텐츠를 재개할 때 사용하는 API입니다. 매개변수는 없습
 
 ## VOD 광고 요청 예시
 
+:::tip pre-roll 광고가 끝난 뒤에 VOD 소스를 로드하세요
+`requestVodAd(...)` 호출 직후에 본편 VOD 소스를 플레이어에 바로 로드하지 마세요.
+`FlowerAdsManagerListener.onCompleted()`(또는 `onError()`)가 호출된 시점에 본편이 아직 준비되지 않았는지(예: `isContentPrepared === false`) 판단한 뒤, 그때 VOD 소스를 로드하고 재생을 시작해야 합니다.
+
+`requestVodAd(...)` 직후에 VOD 소스를 로드하면 pre-roll 광고가 재생되기 전에 본편의 첫 프레임이 잠깐 노출될 수 있습니다.
+:::
+
 ### _HLS.js_
 
 ```javascript
@@ -159,6 +179,10 @@ function playVod() {
     // arg3: extraParams, values you can provide for targeting
     // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
+    //
+    // NOTE: 이 지점에서 VOD 소스를 플레이어에 로드하지 마세요.
+    //       pre-roll 광고 종료 후에 재생되도록 step 2의
+    //       FlowerAdsManagerListener.onCompleted() 내부에서 VOD 소스를 로드해야 합니다.
     flowerAdView.adsManager.requestVodAd(
         'https://ad_request',
         '100',
@@ -167,9 +191,13 @@ function playVod() {
         mediaPlayerHook,
         { 'custom-ad-header': 'custom-ad-header-value' }
     );
+}
 
-    player.loadSource('https://vod_content_url');
-    player.on(Hls.Events.MANIFEST_PARSED, function() {
+// TODO GUIDE: VOD 소스 로드. pre-roll 광고가 끝난 시점에
+//             FlowerAdsManagerListener.onCompleted()(또는 onError())에서 호출합니다.
+function prepareContentSource() {
+    yourPlayer.loadSource('https://vod_content_url');
+    yourPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
         videoElement.play();
     });
 }
