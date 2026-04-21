@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.3 | 2026.04.21 | **Feature** <ol><li>PIP 모드일 때 광고 무시 설정 추가 `FlowerSdk.setIgnoreAdBreakInPIPMode`</li><li>PIP 모드일 때 광고 미사용 시 광고 플레이어 별도 사용 처리</li></ol> |
 | 2.3.2 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li></ol> |
 | 2.2.3 | 2026.01.16 | **Feature** <ol><li>네트워크가 불안정할 때 광고 트래킹 개선</li><li>디바이스 핑거프린트 확인 절차 개선</li><li>VOD 광고 요청 타임아웃을 3초에서 5초로 변경</li><li>디바이스 핑거프린트 라이브러리를 네이티브 라이브러리로 교체</li></ol> **BugFix** <ol><li>광고 요청 및 트래킹 스레드 분리</li><li>VOD에서 광고 사이에 메인 콘텐츠가 표시되는 문제 수정</li></ol> |
 | 2.2.0 | 2025.12.03 | **Feature** <ol><li>FlowerAVPlayer에 VOD 재생 지원 추가</li><li>Flower Player를 사용하지 않는 경우에도 앱이 PiP 모드 상태를 SDK에 전달할 수 있도록 `FlowerSdk.notifyPictureInPictureModeChanged()` API 추가</li></ol> **Feature** <ol><li>긴 재생 윈도우의 스트림 재생 시 광고 트래킹 개선</li></ol> **BugFix** <ol><li>VMAP 매니페스트 파싱이 되지 않는 문제 수정</li><li>스트림 전환 시 발생하는 크래시 수정</li><li>HLS/DASH 스트림에서 발생하는 조작 오류 수정</li></ol> |

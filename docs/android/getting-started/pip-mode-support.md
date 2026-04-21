@@ -6,7 +6,7 @@ sidebar_position: 4
 
 > This API is available in Flower Android SDK version 2.8.0 and later.
 
-Flower SDK can correctly handle Picture-in-Picture behavior when ads are displayed as overlay on top of existing content (for example, VOD midroll cases when Flower Player is not used). To ensure proper behavior during PiP mode transitions, the application should notify the SDK about Picture-in-Picture state changes using the following API:
+Flower SDK restricts CTA (Call To Action) functionality in PIP (Picture-in-Picture) mode. To ensure correct behavior, the application must notify the SDK about state changes using the following API. For PIP mode handling specific to VOD, please refer to the [VOD PIP Mode Support](../ad-insertion/vod/pip-mode-support) page.
 
 ```kotlin
 FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode: Boolean)

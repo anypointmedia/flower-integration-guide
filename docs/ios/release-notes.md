@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.3 | Apr 21, 2026 | **Feature** <ol><li>Added `FlowerSdk.setIgnoreAdBreakInPIPMode` setting to ignore ads in PIP mode</li><li>Handled separate ad player usage when ads are disabled in PIP mode</li></ol> |
 | 2.3.2 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li></ol> |
 | 2.2.3 | Jan 16, 2026 | **Feature** <ol><li>Improved ad tracking when the network is unstable.</li><li>Improved procedure for resolving device fingerprints.</li><li>Changed the timeout for VOD ad requests from 3 to 5 seconds.</li><li>Replaced the device fingerprint library (use a native library).</li></ol> **BugFix** <ol><li>Separated threads for ad request or tracking.</li><li>Fixed an issue where the main content is shown between ads in VOD.</li></ol> |
 | 2.2.0 | Dec 3, 2025 | **Feature** <ol><li>Added VOD playback support to FlowerAVPlayer.</li><li>Added the `FlowerSdk.notifyPictureInPictureModeChanged()`  API so that, even when Flower Player is not used, the app can pass the PiP mode state to the SDK for correct behavior.</li></ol> **Feature** <ol><li>Improved ad tracking when playing streams with long play window.</li></ol> **BugFix** <ol><li>Fixed an issue that the VMAP manifest cannot be parsed.</li><li>Fixed crash when switching between streams.</li><li>Fixed manipulation error on HLS/DASH streams.</li></ol> |
