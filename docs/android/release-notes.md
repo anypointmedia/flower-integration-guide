@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.10 | May 4, 2026 | **Feature** <ol><li>Internalized QR code rendering</li></ol> **BugFix** <ol><li>Fixed an issue where the complete event was intermittently missing from the Google IMA SDK</li></ol> |
 | 2.9.9 | Apr 21, 2026 | **Feature** <ol><li>Added `FlowerSdk.setIgnoreAdBreakInPIPMode` setting to ignore ads in PIP mode</li><li>Handled separate ad player usage when ads are disabled in PIP mode</li><li>Released remaining resources on exit when using direct ad playback mode in Linear TV</li><li>Ignored Up/Down key events when there is only one ad-related button</li></ol> |
 | 2.9.8 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li><li>`requestChannelAd` now throws `FlowerError` when no ad response is available in direct ad playback mode</li></ol> |
 | 2.9.6 | Mar 26, 2026 | **Feature** <ol><li>Improved logic for calculating playback time when ads are played directly</li></ol> **BugFix** <ol><li>Fixed a bug where tracking URLs are missing in Wrapper ads</li></ol> |
