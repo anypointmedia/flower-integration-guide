@@ -7,7 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
-| 2.9.10 | 2026.05.04 | **Feature** <ol><li>QR 코드 렌더링 내제화</li></ol> **BugFix** <ol><li>Google IMA SDK에서 간헐적으로 complete 이벤트가 누락되는 문제 수정</li></ol> |
+| 2.9.11 | 2026.05.04 | **Feature** <ol><li>QR 코드 렌더링 내제화</li><li>광고 직접 재생 방식의 경우 현재 재생 시점이 광고의 최대 길이보다 초과되는 경우에 대한 방어 코드 추가</li></ol> **BugFix** <ol><li>Google IMA SDK에서 간헐적으로 complete 이벤트가 누락되는 문제 수정</li></ol> |
 | 2.9.9 | 2026.04.21 | **Feature** <ol><li>PIP 모드일 때 광고 무시 설정 추가 `FlowerSdk.setIgnoreAdBreakInPIPMode`</li><li>PIP 모드일 때 광고 미사용 시 광고 플레이어 별도 사용 처리</li><li>LinearTv에서 광고 직접 재생 방식일 경우 종료 시 잔여 리소스 해제 처리</li><li>광고 관련 버튼이 하나일 때 Up, Down 키 이벤트 처리 무시</li></ol> |
 | 2.9.8 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li><li>Direct ad playback 방식에서 광고 응답이 없는 경우 `requestChannelAd`가 `FlowerError`를 throw하도록 변경</li></ol> |
 | 2.9.6 | 2026.03.26 | **Feature** <ol><li>광고를 직접 재생할 때 재생 시간 계산 로직 개선</li></ol> **BugFix** <ol><li>Wrapper 광고에서 트래킹 URL이 누락되는 버그 수정</li></ol> |
