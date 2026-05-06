@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.4 | 2026.05.06 | **Feature** <ol><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li></ol> |
 | 2.3.3 | 2026.04.21 | **Feature** <ol><li>PIP 모드일 때 광고 무시 설정 추가 `FlowerSdk.setIgnoreAdBreakInPIPMode`</li><li>PIP 모드일 때 광고 미사용 시 광고 플레이어 별도 사용 처리</li></ol> |
 | 2.3.2 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li></ol> |
 | 2.2.3 | 2026.01.16 | **Feature** <ol><li>네트워크가 불안정할 때 광고 트래킹 개선</li><li>디바이스 핑거프린트 확인 절차 개선</li><li>VOD 광고 요청 타임아웃을 3초에서 5초로 변경</li><li>디바이스 핑거프린트 라이브러리를 네이티브 라이브러리로 교체</li></ol> **BugFix** <ol><li>광고 요청 및 트래킹 스레드 분리</li><li>VOD에서 광고 사이에 메인 콘텐츠가 표시되는 문제 수정</li></ol> |
