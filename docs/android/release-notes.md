@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.13 | May 11, 2026 | **Feature** <ol><li>Added `onAdPlay` event to `FlowerAdsManagerListener` for delivering ad metadata when each individual ad unit starts playback</li><li>Added `onAdUserAction` event to `FlowerAdsManagerListener` for delivering user interactions (`learn_more`, `skip`) with the ad</li><li>Added `playTime`, `isClickable`, and `sourceType` fields to `AdInfo`</li></ol> **BugFix** <ol><li>Fixed an intermittent `ConcurrentModificationException` that occurred during ad tracking</li></ol> |
 | 2.9.12 | May 6, 2026 | **Feature** <ol><li>Improved cache refresh on channel entry to be determined by validity time</li></ol> |
 | 2.9.11 | May 4, 2026 | **Feature** <ol><li>Internalized QR code rendering</li><li>Added defensive code for cases where the current playback position exceeds the maximum ad length in direct ad playback mode</li></ol> **BugFix** <ol><li>Fixed an issue where the complete event was intermittently missing from the Google IMA SDK</li></ol> |
 | 2.9.9 | Apr 21, 2026 | **Feature** <ol><li>Added `FlowerSdk.setIgnoreAdBreakInPIPMode` setting to ignore ads in PIP mode</li><li>Handled separate ad player usage when ads are disabled in PIP mode</li><li>Released remaining resources on exit when using direct ad playback mode in Linear TV</li><li>Ignored Up/Down key events when there is only one ad-related button</li></ol> |

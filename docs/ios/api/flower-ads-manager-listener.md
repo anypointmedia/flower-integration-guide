@@ -32,6 +32,27 @@ The following describes the parameters:
 
 The event dispatched when ad playback starts.
 
+### onAdPlay
+
+The event dispatched when each individual ad unit begins playback. Delivers metadata for the ad about to be played.
+
+The following describes the parameters:
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| adInfo | AdInfo | Metadata of the ad that started playing. |
+
+### onAdUserAction
+
+The event dispatched when the user interacts with the ad, such as clicking the learn-more button or pressing the skip button.
+
+The following describes the parameters:
+
+| **Parameter** | **Type** | **Description** |
+| ---| ---| --- |
+| action | String | User action type.<br/>`learn_more`: User clicked the learn-more / click-through area.<br/>`skip`: User pressed the skip button. |
+| adInfo | AdInfo | Metadata of the ad the action was performed on. |
+
 ### onCompleted
 
 The event dispatched when ad playback ends.
@@ -54,7 +75,7 @@ The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| reason | Int32 | Code that describes why the ad is skipped.<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error<br/>4: User skipped |
+| reason | Int32 | Code that describes why the ad is skipped.<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error |
 
 ## Related APIs
 

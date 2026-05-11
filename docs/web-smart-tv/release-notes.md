@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.6 | May 11, 2026 | **Feature** <ol><li>Added `onAdPlay` event to `FlowerAdsManagerListener` for delivering ad metadata when each individual ad unit starts playback</li><li>Added `onAdUserAction` event to `FlowerAdsManagerListener` for delivering user interactions (`learn_more`, `skip`) with the ad</li><li>Added `playTime`, `isClickable`, and `sourceType` fields to `AdInfo`</li></ol> **BugFix** <ol><li>Fixed an intermittent `ConcurrentModificationException` that occurred during ad tracking</li></ol> |
 | 2.3.5 | May 6, 2026 | **Feature** <ol><li>Improved cache refresh on channel entry to be determined by validity time</li><li>Applied compatibility code for Chrome engine 69 and later</li></ol> |
 | 2.3.4 | Apr 21, 2026 | **BugFix** <ol><li>Fixed XMLHttpRequest to use the original URL's query string as-is without URL encoding</li></ol> |
 | 2.3.3 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li></ol> |
