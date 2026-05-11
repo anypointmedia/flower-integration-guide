@@ -7,7 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
-| 2.9.13 | 2026.05.11 | **Feature** <ol><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |
+| 2.9.13 | 2026.05.11 | **Feature** <ol><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li><li>SDK 버전을 조회할 수 있는 `FlowerSdk.getVersion` API 추가</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |
 | 2.9.12 | 2026.05.06 | **Feature** <ol><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li></ol> |
 | 2.9.11 | 2026.05.04 | **Feature** <ol><li>QR 코드 렌더링 내제화</li><li>광고 직접 재생 방식의 경우 현재 재생 시점이 광고의 최대 길이보다 초과되는 경우에 대한 방어 코드 추가</li></ol> **BugFix** <ol><li>Google IMA SDK에서 간헐적으로 complete 이벤트가 누락되는 문제 수정</li></ol> |
 | 2.9.9 | 2026.04.21 | **Feature** <ol><li>PIP 모드일 때 광고 무시 설정 추가 `FlowerSdk.setIgnoreAdBreakInPIPMode`</li><li>PIP 모드일 때 광고 미사용 시 광고 플레이어 별도 사용 처리</li><li>LinearTv에서 광고 직접 재생 방식일 경우 종료 시 잔여 리소스 해제 처리</li><li>광고 관련 버튼이 하나일 때 Up, Down 키 이벤트 처리 무시</li></ol> |
