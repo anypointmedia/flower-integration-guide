@@ -16,7 +16,7 @@ The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| adInfos | NSMutableArray | List of loaded ad metadata. Each Item is [AdInfo](ad-info) object. |
+| adInfos | NSMutableArray | List of loaded ad metadata. Each Item is [AdInfo](./ad-info.md) object. |
 
 ### onPrepare
 
@@ -40,7 +40,7 @@ The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| adInfo | [AdInfo](ad-info) | Metadata of the ad that started playing. |
+| adInfo | [AdInfo](./ad-info.md) | Metadata of the ad that started playing. |
 
 ### onAdUserAction
 
@@ -51,7 +51,7 @@ The following describes the parameters:
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
 | action | String | User action type.<br/>`learn_more`: User clicked the learn-more / click-through area.<br/>`skip`: User pressed the skip button. |
-| adInfo | [AdInfo](ad-info) | Metadata of the ad the action was performed on. |
+| adInfo | [AdInfo](./ad-info.md) | Metadata of the ad the action was performed on. |
 
 ### onCompleted
 
@@ -79,4 +79,4 @@ The following describes the parameters:
 
 ## Related APIs
 
-*   [AdInfo](ad-info)
+*   [AdInfo](./ad-info.md)

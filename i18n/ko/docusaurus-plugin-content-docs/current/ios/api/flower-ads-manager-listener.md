@@ -16,7 +16,7 @@ Flower SDK 동작 중 광고 이벤트를 수신하기 위한 인터페이스입
 
 | **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
-| adInfos | NSMutableArray | 로드된 광고 메타데이터 목록. 각 항목은 [AdInfo](ad-info) 객체입니다. |
+| adInfos | NSMutableArray | 로드된 광고 메타데이터 목록. 각 항목은 [AdInfo](./ad-info.md) 객체입니다. |
 
 ### onPrepare
 
@@ -40,7 +40,7 @@ Flower SDK 동작 중 광고 이벤트를 수신하기 위한 인터페이스입
 
 | **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
-| adInfo | [AdInfo](ad-info) | 재생이 시작된 광고의 메타데이터 |
+| adInfo | [AdInfo](./ad-info.md) | 재생이 시작된 광고의 메타데이터 |
 
 ### onAdUserAction
 
@@ -51,7 +51,7 @@ Flower SDK 동작 중 광고 이벤트를 수신하기 위한 인터페이스입
 | **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
 | action | String | 사용자 액션 유형<br/>`learn_more`: 사용자가 자세히 알아보기 / 클릭 영역을 클릭함<br/>`skip`: 사용자가 건너뛰기 버튼을 누름 |
-| adInfo | [AdInfo](ad-info) | 액션이 발생한 광고의 메타데이터 |
+| adInfo | [AdInfo](./ad-info.md) | 액션이 발생한 광고의 메타데이터 |
 
 ### onCompleted
 
@@ -79,4 +79,4 @@ Flower SDK에서 오류가 발생했을 때 발생하는 이벤트입니다.
 
 ## 관련 API
 
-*   [AdInfo](ad-info)
+*   [AdInfo](./ad-info.md)
