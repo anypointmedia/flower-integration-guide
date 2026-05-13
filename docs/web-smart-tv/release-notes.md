@@ -3,7 +3,7 @@ sidebar_position: 100
 sidebar_label: Release Notes
 ---
 
-# HTML5 SDK
+# HTML5 SDK Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |

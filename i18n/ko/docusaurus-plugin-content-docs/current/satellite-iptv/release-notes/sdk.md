@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# FLOWER SDK
+# FLOWER SDK 릴리즈 노트
 
 Flower SDK에 포함된 주요 모듈의 종류는 다음과 같습니다.
 *   [sdk-ad-ui](https://maven.anypoint.tv/service/rest/repository/browse/public-release/tv/anypoint/sdk-ad-ui/)

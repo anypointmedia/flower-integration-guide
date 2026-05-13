@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# FLOWER Ad Agent
+# FLOWER Ad Agent 릴리즈 노트
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |

@@ -3,7 +3,7 @@ sidebar_position: 100
 sidebar_label: Release Notes
 ---
 
-# iOS SDK
+# iOS SDK Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |

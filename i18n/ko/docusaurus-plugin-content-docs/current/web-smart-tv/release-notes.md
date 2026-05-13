@@ -3,7 +3,7 @@ sidebar_position: 100
 sidebar_label: "릴리즈 노트"
 ---
 
-# HTML5 SDK
+# HTML5 SDK 릴리즈 노트
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |

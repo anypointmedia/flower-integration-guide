@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# FLOWER Ad Agent
+# FLOWER Ad Agent Release Notes
 
 | **Version** | **Date** | **Description** |
 | ---| ---| --- |

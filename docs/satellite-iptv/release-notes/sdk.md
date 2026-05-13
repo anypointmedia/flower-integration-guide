@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# FLOWER SDK
+# FLOWER SDK Release Notes
 
 This release of the Flower SDK includes the following key modules:
 *   [sdk-ad-ui](https://maven.anypoint.tv/service/rest/repository/browse/public-release/tv/anypoint/sdk-ad-ui/)

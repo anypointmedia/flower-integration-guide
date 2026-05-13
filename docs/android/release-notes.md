@@ -3,7 +3,7 @@ sidebar_position: 100
 sidebar_label: Release Notes
 ---
 
-# Android SDK
+# Android SDK Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
