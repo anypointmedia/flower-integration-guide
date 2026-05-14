@@ -7,7 +7,8 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
-| 2.9.14 | May 14, 2026 | **Feature** <ol><li>Enabled Google IMA SDK debug mode when running in env local</li></ol> **BugFix** <ol><li>Fixed a skip button malfunction that occurred when the remaining time of a Google ad was 1 second or less</li></ol> |
+| 2.9.15 | May 14, 2026 | **BugFix** <ol><li>Fixed an ad skip behavior error in the IMA SDK</li></ol> |
+| ~~2.9.14~~<br/>Deprecated | May 14, 2026 | **Feature** <ol><li>Enabled Google IMA SDK debug mode when running in env local</li></ol> **BugFix** <ol><li>Fixed a skip button malfunction that occurred when the remaining time of a Google ad was 1 second or less</li></ol> |
 | 2.9.13 | May 11, 2026 | **Feature** <ol><li>Added `onAdPlay` event to `FlowerAdsManagerListener` for delivering ad metadata when each individual ad unit starts playback</li><li>Added `onAdUserAction` event to `FlowerAdsManagerListener` for delivering user interactions (`learn_more`, `skip`) with the ad</li><li>Added `playTime`, `isClickable`, and `sourceType` fields to `AdInfo`</li><li>Added `FlowerSdk.getVersion` API to retrieve the SDK version</li></ol> **BugFix** <ol><li>Fixed an intermittent `ConcurrentModificationException` that occurred during ad tracking</li></ol> |
 | 2.9.12 | May 6, 2026 | **Feature** <ol><li>Improved cache refresh on channel entry to be determined by validity time</li></ol> |
 | 2.9.11 | May 4, 2026 | **Feature** <ol><li>Internalized QR code rendering</li><li>Added defensive code for cases where the current playback position exceeds the maximum ad length in direct ad playback mode</li></ol> **BugFix** <ol><li>Fixed an issue where the complete event was intermittently missing from the Google IMA SDK</li></ol> |
