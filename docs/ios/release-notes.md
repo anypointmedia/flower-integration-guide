@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.5 | May 21, 2026 | **Feature** <ol><li>Added passing of an ad break identifier value in ad requests</li><li>Added support for ad tracking prevention macros</li></ol> |
 | 2.3.4 | May 11, 2026 | **Feature** <ol><li>Improved cache refresh on channel entry to be determined by validity time</li><li>Added `onAdPlay` event to `FlowerAdsManagerListener` for delivering ad metadata when each individual ad unit starts playback</li><li>Added `onAdUserAction` event to `FlowerAdsManagerListener` for delivering user interactions (`learn_more`, `skip`) with the ad</li><li>Added `playTime`, `isClickable`, and `sourceType` fields to `AdInfo`</li><li>Added `FlowerSdk.getVersion` API to retrieve the SDK version</li></ol> **BugFix** <ol><li>Fixed an intermittent `ConcurrentModificationException` that occurred during ad tracking</li></ol> |
 | 2.3.3 | Apr 21, 2026 | **Feature** <ol><li>Added `FlowerSdk.setIgnoreAdBreakInPIPMode` setting to ignore ads in PIP mode</li><li>Handled separate ad player usage when ads are disabled in PIP mode</li></ol> |
 | 2.3.2 | Apr 15, 2026 | **Feature** <ol><li>Added Linear TV entry ad events</li><li>Renamed `onAdSkipped` to `onAdBreakSkipped` in `FlowerAdsManagerListener`</li></ol> |

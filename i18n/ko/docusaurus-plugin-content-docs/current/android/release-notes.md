@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.16 | 2026.05.20 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li><li>Media3 버전 간 바이너리 호환성 문제를 피하기 위해 Media3 ExoPlayer 어댑터를 Media3 버전별 아티팩트(`sdk-android-ott-media3-*`)로 분리. 자세한 내용은 [Media3 ExoPlayer 사용 시 추가 의존성](./getting-started/setting-up-dev-environment#media3-companion-artifact)을 참고하세요.</li></ol> **BugFix** <ol><li>광고 재생에 `MediaPlayerHook`을 사용하는 경우 null로 인해 앱이 크래시되는 오류 수정</li></ol> |
 | 2.9.15 | 2026.05.14 | **BugFix** <ol><li>IMA SDK 광고 스킵 동작 오류 수정</li></ol> |
 | ~~2.9.14~~<br/>Deprecated | 2026.05.14 | **Feature** <ol><li>env local 환경에서 실행 시 Google IMA SDK 디버그 모드 활성화</li></ol> **BugFix** <ol><li>구글 광고의 잔여 시간이 1초 이하로 남았을 때 스킵 버튼이 오동작하는 문제 수정</li></ol> |
 | 2.9.13 | 2026.05.11 | **Feature** <ol><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li><li>SDK 버전을 조회할 수 있는 `FlowerSdk.getVersion` API 추가</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |

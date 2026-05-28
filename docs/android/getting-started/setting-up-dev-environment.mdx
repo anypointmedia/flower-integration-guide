@@ -23,6 +23,37 @@ dependencies {
 }
 ```
 
+### Additional Dependency for Media3 ExoPlayer (FlowerMedia3ExoPlayer) \{#media3-companion-artifact\}
+
+If your app uses Media3 ExoPlayer via [`FlowerMedia3ExoPlayer`](../api/flower-media3-exo-player), you must add a Media3 version-specific companion artifact in addition to the core `sdk-android-ott` dependency.
+
+Starting from version 2.9.16, the FLOWER SDK separates the Media3 adapter into per-version artifacts to avoid binary compatibility issues caused by Media3 API differences between versions. The companion artifact depends on `sdk-android-ott`, so both must be added together — the companion alone is not sufficient.
+
+**Supported `androidx.media3` versions: 1.6.0 and above.** Choose the artifact that matches the `androidx.media3` version used by your app:
+
+| Your `androidx.media3` version | Artifact to add |
+| --- | --- |
+| 1.6.x ~ 1.7.x | `flower-sdk:sdk-android-ott-media3-1.6.1:X.X.X` |
+| 1.8.x and above | `flower-sdk:sdk-android-ott-media3-1.8.0:X.X.X` |
+
+```plain
+dependencies {
+    implementation("flower-sdk:sdk-android-ott:X.X.X")
+
+    // Required only when using FlowerMedia3ExoPlayer.
+    // Pick the artifact that matches your androidx.media3 version.
+    implementation("flower-sdk:sdk-android-ott-media3-1.8.0:X.X.X")
+}
+```
+
+:::note
+The core `sdk-android-ott` artifact is always required. The `sdk-android-ott-media3-*` artifact is only needed when integrating with Media3 ExoPlayer through `FlowerMedia3ExoPlayer`, and it depends on `sdk-android-ott`. If you use `FlowerExoPlayer2` (legacy ExoPlayer) or `FlowerBitmovinPlayer`, you do not need to add it.
+:::
+
+:::info
+If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.6.0), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
+:::
+
 ## Android Cleartext Traffic Exception Configuration
 When using the FLOWER SDK, a specific domain must be configured as a cleartext traffic exception in order for the SDK to communicate properly over HTTP.
 Starting from Android 9 (API level 28), cleartext (HTTP) traffic is blocked by default.

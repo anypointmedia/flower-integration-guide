@@ -23,6 +23,37 @@ dependencies {
 }
 ```
 
+### Media3 ExoPlayer(FlowerMedia3ExoPlayer) 사용 시 추가 의존성 \{#media3-companion-artifact\}
+
+[`FlowerMedia3ExoPlayer`](../api/flower-media3-exo-player)를 통해 Media3 ExoPlayer를 사용하는 경우, 기본 `sdk-android-ott` 의존성 외에 Media3 버전에 대응하는 추가 아티팩트를 함께 의존성에 추가해야 합니다.
+
+버전 2.9.16부터 FLOWER SDK는 Media3 버전 간 바이너리 호환성 문제를 피하기 위해 Media3 어댑터를 버전별 아티팩트로 분리하여 배포합니다. 추가 아티팩트는 `sdk-android-ott`를 참조(의존)하므로 두 아티팩트를 함께 추가해야 하며, 추가 아티팩트만 단독으로 사용할 수는 없습니다.
+
+**지원하는 `androidx.media3` 버전: 1.6.0 이상.** 사용 중인 `androidx.media3` 버전에 맞는 아티팩트를 선택하세요.
+
+| 사용 중인 `androidx.media3` 버전 | 추가할 아티팩트 |
+| --- | --- |
+| 1.6.x ~ 1.7.x | `flower-sdk:sdk-android-ott-media3-1.6.1:X.X.X` |
+| 1.8.x 이상 | `flower-sdk:sdk-android-ott-media3-1.8.0:X.X.X` |
+
+```plain
+dependencies {
+    implementation("flower-sdk:sdk-android-ott:X.X.X")
+
+    // FlowerMedia3ExoPlayer를 사용할 때만 필요합니다.
+    // 사용 중인 androidx.media3 버전과 일치하는 아티팩트를 선택하세요.
+    implementation("flower-sdk:sdk-android-ott-media3-1.8.0:X.X.X")
+}
+```
+
+:::note
+기본 `sdk-android-ott` 아티팩트는 항상 필요합니다. `sdk-android-ott-media3-*` 아티팩트는 `FlowerMedia3ExoPlayer`를 통해 Media3 ExoPlayer를 사용하는 경우에만 추가하면 되며, 내부적으로 `sdk-android-ott`에 의존합니다. `FlowerExoPlayer2`(레거시 ExoPlayer) 또는 `FlowerBitmovinPlayer`만 사용하는 경우에는 추가할 필요가 없습니다.
+:::
+
+:::info
+위 표에 해당하지 않는 `androidx.media3` 버전(예: 1.6.0 미만)을 사용 중이라면 [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com)으로 문의해 주세요.
+:::
+
 ## Android Cleartext Traffic 예외 설정
 FLOWER SDK를 사용할 때, SDK가 HTTP를 통해 올바르게 통신하려면 특정 도메인을 cleartext traffic 예외로 설정해야 합니다.
 Android 9(API 레벨 28)부터 cleartext(HTTP) 트래픽이 기본적으로 차단됩니다.

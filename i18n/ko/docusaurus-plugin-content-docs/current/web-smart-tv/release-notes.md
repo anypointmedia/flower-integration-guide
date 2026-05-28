@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.7 | 2026.05.21 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li></ol> |
 | 2.3.6 | 2026.05.11 | **Feature** <ol><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li><li>SDK 버전을 조회할 수 있는 `FlowerSdk.getVersion` API 추가</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |
 | 2.3.5 | 2026.05.06 | **Feature** <ol><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li><li>Chrome 엔진 69 이상 대응 코드 적용</li></ol> |
 | 2.3.4 | 2026.04.21 | **BugFix** <ol><li>XMLHttpRequest에서 원본 URL의 Query String을 URL encoding 없이 원본 그대로 사용하도록 수정</li></ol> |

@@ -67,6 +67,15 @@ dependencyResolutionManagement {
 
 dependencies {
     implementation("flower-sdk:sdk-android-ott:{{SDK_VERSION}}")
+
+    // Add ONLY if APPROACH=flower-player and the project uses FlowerMedia3ExoPlayer.
+    // Supported androidx.media3 versions: 1.6.0 and above.
+    // The companion artifact depends on sdk-android-ott, so add both together.
+    // Pick the artifact whose version matches the app's androidx.media3 version:
+    //   androidx.media3 1.6.x ~ 1.7.x -> sdk-android-ott-media3-1.6.1
+    //   androidx.media3 1.8.x or above -> sdk-android-ott-media3-1.8.0
+    // For androidx.media3 versions below 1.6.0, contact dev-support@anypointmedia.com.
+    // implementation("flower-sdk:sdk-android-ott-media3-1.8.0:{{SDK_VERSION}}")
 }
 
 --------------------------------------------------
@@ -78,7 +87,32 @@ repositories {
 
 dependencies {
     implementation "flower-sdk:sdk-android-ott:{{SDK_VERSION}}"
+
+    // Add ONLY if APPROACH=flower-player and the project uses FlowerMedia3ExoPlayer.
+    // Supported androidx.media3 versions: 1.6.0 and above.
+    // The companion artifact depends on sdk-android-ott, so add both together.
+    // Pick the artifact whose version matches the app's androidx.media3 version:
+    //   androidx.media3 1.6.x ~ 1.7.x -> sdk-android-ott-media3-1.6.1
+    //   androidx.media3 1.8.x or above -> sdk-android-ott-media3-1.8.0
+    // For androidx.media3 versions below 1.6.0, contact dev-support@anypointmedia.com.
+    // implementation "flower-sdk:sdk-android-ott-media3-1.8.0:{{SDK_VERSION}}"
 }
+
+NOTE on the Media3 companion artifact (sdk-android-ott-media3-*):
+- The core sdk-android-ott artifact is always required.
+- The sdk-android-ott-media3-* artifact is REQUIRED ONLY when using FlowerMedia3ExoPlayer.
+  It depends on sdk-android-ott, so both artifacts must be added together.
+- It is NOT needed for FlowerExoPlayer2 (legacy ExoPlayer) or FlowerBitmovinPlayer.
+- Supported androidx.media3 versions: 1.6.0 and above.
+- Inspect the project's androidx.media3 version (e.g., in libs.versions.toml or
+  build.gradle dependencies) and pick the matching companion artifact:
+    androidx.media3 1.6.x ~ 1.7.x  ->  flower-sdk:sdk-android-ott-media3-1.6.1
+    androidx.media3 1.8.x or above ->  flower-sdk:sdk-android-ott-media3-1.8.0
+- The companion artifact's version is the FLOWER SDK version ({{SDK_VERSION}}),
+  not the androidx.media3 version.
+- If the project uses an androidx.media3 version not covered above (e.g., below 1.6.0),
+  instruct the user to contact dev-support@anypointmedia.com instead of guessing
+  an artifact to add.
 
 ========================================
 1-2. Configure Cleartext Exception (Conditional)
