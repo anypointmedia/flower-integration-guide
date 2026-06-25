@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.17 | June 20, 2026 | **Feature** <ol><li>Added correction of errors in past periods of the origin DASH manifest</li></ol> |
 | 2.9.16 | May 20, 2026 | **Feature** <ol><li>Added passing of an ad break identifier value in ad requests</li><li>Added support for ad tracking prevention macros</li><li>Separated the Media3 ExoPlayer adapter into per-Media3-version artifacts (`sdk-android-ott-media3-*`) to avoid binary compatibility issues. See [Additional Dependency for Media3 ExoPlayer](./getting-started/setting-up-dev-environment#media3-companion-artifact).</li></ol> **BugFix** <ol><li>Fixed an app crash caused by a null value when using `MediaPlayerHook` for ad playback</li></ol> |
 | 2.9.15 | May 14, 2026 | **BugFix** <ol><li>Fixed an ad skip behavior error in the IMA SDK</li></ol> |
 | ~~2.9.14~~<br/>Deprecated | May 14, 2026 | **Feature** <ol><li>Enabled Google IMA SDK debug mode when running in env local</li></ol> **BugFix** <ol><li>Fixed a skip button malfunction that occurred when the remaining time of a Google ad was 1 second or less</li></ol> |

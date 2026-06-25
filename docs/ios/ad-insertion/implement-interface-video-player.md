@@ -9,7 +9,7 @@ Supported players:
 
 | **Environment** | **Player** |
 | ---| --- |
-| iOS | AVQueuePlayer<br/>VLCMediaListPlayer (MobileVLCKit@3) |
+| iOS | AVPlayer<br/>AVQueuePlayer<br/>VLCMediaListPlayer (MobileVLCKit@3) |
 
 If the player that you are using is supported by the SDK, you can return the player by implementing the MediaPlayerHook interface that is provided by the SDK.
 
@@ -34,7 +34,7 @@ class MediaPlayerHookImpl: MediaPlayerHook {
     }
 }
 struct PlaybackView: View {
-    var player: AVQueuePlayer
+    var player: AVPlayer
     func playLinearTv() {
         let mediaPlayerHook = MediaPlayerHookImpl {
             return player
@@ -58,12 +58,12 @@ class MediaPlayerHookImpl: MediaPlayerHook {
 }
 
 class PlaybackViewController: UIViewController {
-    var player: AVQueuePlayer!
+    var player: AVPlayer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        player = AVQueuePlayer()
+        player = AVPlayer()
     }
 
     func playLinearTv() {

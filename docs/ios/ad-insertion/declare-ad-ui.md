@@ -9,7 +9,7 @@ Before you can display ads, you need to add the `AdView` to your app's layout ac
 ## _SwiftUi_
 ```swift
 struct PlaybackView: View {
-    public let player = AVQueuePlayer()
+    public let player = AVPlayer()
 
     // TODO GUIDE: Create FlowerAdView instance
     public let flowerAdView = FlowerAdView()
@@ -27,7 +27,7 @@ struct PlaybackView: View {
 ## _UIKit_
 ```swift
 class PlaybackViewController: UIViewController {
-    private var player = AVQueuePlayer()
+    private var player = AVPlayer()
 
     // TODO GUIDE: Create FlowerAdView instance
     private var flowerAdViewHostingController = FlowerAdView.HostingController()

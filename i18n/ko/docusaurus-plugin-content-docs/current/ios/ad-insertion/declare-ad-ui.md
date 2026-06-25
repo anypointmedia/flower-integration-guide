@@ -10,7 +10,7 @@ sidebar_label: "광고 UI 선언"
 ## _SwiftUI_
 ```swift
 struct PlaybackView: View {
-    public let player = AVQueuePlayer()
+    public let player = AVPlayer()
 
     // TODO GUIDE: Create FlowerAdView instance
     public let flowerAdView = FlowerAdView()
@@ -28,7 +28,7 @@ struct PlaybackView: View {
 ## _UIKit_
 ```swift
 class PlaybackViewController: UIViewController {
-    private var player = AVQueuePlayer()
+    private var player = AVPlayer()
 
     // TODO GUIDE: Create FlowerAdView instance
     private var flowerAdViewHostingController = FlowerAdView.HostingController()

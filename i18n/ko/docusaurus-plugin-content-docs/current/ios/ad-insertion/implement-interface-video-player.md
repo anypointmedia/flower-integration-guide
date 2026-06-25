@@ -10,7 +10,7 @@ sidebar_label: "비디오 플레이어 전달 인터페이스 구현"
 
 | **환경** | **플레이어** |
 | ---| --- |
-| iOS | AVQueuePlayer<br/>VLCMediaListPlayer (MobileVLCKit@3) |
+| iOS | AVPlayer<br/>AVQueuePlayer<br/>VLCMediaListPlayer (MobileVLCKit@3) |
 
 SDK가 지원하는 플레이어를 사용하는 경우 SDK에서 제공하는 MediaPlayerHook 인터페이스를 구현하여 플레이어를 반환하면 됩니다.
 
@@ -35,7 +35,7 @@ class MediaPlayerHookImpl: MediaPlayerHook {
     }
 }
 struct PlaybackView: View {
-    var player: AVQueuePlayer
+    var player: AVPlayer
     func playLinearTv() {
         let mediaPlayerHook = MediaPlayerHookImpl {
             return player
@@ -59,12 +59,12 @@ class MediaPlayerHookImpl: MediaPlayerHook {
 }
 
 class PlaybackViewController: UIViewController {
-    var player: AVQueuePlayer!
+    var player: AVPlayer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        player = AVQueuePlayer()
+        player = AVPlayer()
     }
 
     func playLinearTv() {
