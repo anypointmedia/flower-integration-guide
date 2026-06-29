@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.18 | 2026.06.29 | **Feature** <ol><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>minSdk 23 이하에서 Media3의 default 선언 오류 대응</li><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |
 | 2.9.17 | 2026.06.20 | **Feature** <ol><li>원본 DASH 매니페스트에서 과거 period의 오류를 보정하는 기능 추가</li></ol> |
 | 2.9.16 | 2026.05.20 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li><li>Media3 버전 간 바이너리 호환성 문제를 피하기 위해 Media3 ExoPlayer 어댑터를 Media3 버전별 아티팩트(`sdk-android-ott-media3-*`)로 분리. 자세한 내용은 [Media3 ExoPlayer 사용 시 추가 의존성](./getting-started/setting-up-dev-environment#media3-companion-artifact)을 참고하세요.</li></ol> **BugFix** <ol><li>광고 재생에 `MediaPlayerHook`을 사용하는 경우 null로 인해 앱이 크래시되는 오류 수정</li></ol> |
 | 2.9.15 | 2026.05.14 | **BugFix** <ol><li>IMA SDK 광고 스킵 동작 오류 수정</li></ol> |
