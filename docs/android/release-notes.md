@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.19 | July 8, 2026 | **BugFix** <ol><li>Fixed a screen casting error that occurred when playing the stream on an external screen</li></ol> |
 | 2.9.18 | June 29, 2026 | **Feature** <ol><li>Added support for reusing the splice event ID across different SCTE-35 events in the stream</li></ol> **BugFix** <ol><li>Fixed a Media3 default declaration error on minSdk 23 and below</li><li>Fixed a resource release error when reusing `FlowerAdView`</li></ol> |
 | 2.9.17 | June 20, 2026 | **Feature** <ol><li>Added correction of errors in past periods of the origin DASH manifest</li></ol> |
 | 2.9.16 | May 20, 2026 | **Feature** <ol><li>Added passing of an ad break identifier value in ad requests</li><li>Added support for ad tracking prevention macros</li><li>Separated the Media3 ExoPlayer adapter into per-Media3-version artifacts (`sdk-android-ott-media3-*`) to avoid binary compatibility issues. See [Additional Dependency for Media3 ExoPlayer](./getting-started/setting-up-dev-environment#media3-companion-artifact).</li></ol> **BugFix** <ol><li>Fixed an app crash caused by a null value when using `MediaPlayerHook` for ad playback</li></ol> |

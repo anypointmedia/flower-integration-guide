@@ -27,6 +27,15 @@ Returns a stream URL suitable for casting to an external screen.
 - On any internal error, the SDK returns the original stream URL so that casting can continue, although ad replacement will not be applied on the remote screen in that case.
 :::
 
+:::caution Do not stop the SDK while casting
+Screen casting is served by the **ad SDK (Proxy Server) running on the local device**, which rewrites the original stream on the fly. While casting is in progress, you must therefore:
+
+- **Do not call `FlowerAdsManager.stop()`.** Stopping the SDK shuts down the Proxy Server, so ad replacement halts on the remote screen and playback may fail.
+- **Keep the SDK running in the background** even when the app leaves the foreground, so that casting continues after the user navigates away from the app.
+
+In other words, the SDK must stay active in the background **until the user explicitly stops casting**.
+:::
+
 ## Example
 
 ```kotlin
