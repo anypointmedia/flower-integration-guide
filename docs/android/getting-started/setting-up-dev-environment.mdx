@@ -29,11 +29,11 @@ If your app uses Media3 ExoPlayer via [`FlowerMedia3ExoPlayer`](../api/flower-me
 
 Starting from version 2.9.16, the FLOWER SDK separates the Media3 adapter into per-version artifacts to avoid binary compatibility issues caused by Media3 API differences between versions. The companion artifact depends on `sdk-android-ott`, so both must be added together — the companion alone is not sufficient.
 
-**Supported `androidx.media3` versions: 1.6.0 and above.** Choose the artifact that matches the `androidx.media3` version used by your app:
+**Supported `androidx.media3` versions: 1.2.1 and above.** Choose the artifact that matches the `androidx.media3` version used by your app:
 
 | Your `androidx.media3` version | Artifact to add |
 | --- | --- |
-| 1.6.0 and above | `flower-sdk:sdk-android-ott-media3-{androidx.media3-version}:X.X.X` |
+| 1.2.1 and above | `flower-sdk:sdk-android-ott-media3-{androidx.media3-version}:X.X.X` |
 
 ```plain
 dependencies {
@@ -50,7 +50,7 @@ The core `sdk-android-ott` artifact is always required. The `sdk-android-ott-med
 :::
 
 :::info
-If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.6.0), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
+If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.2.1), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
 :::
 
 ## Android Cleartext Traffic Exception Configuration

@@ -35,11 +35,11 @@ dependencies {
     implementation("flower-sdk:sdk-android-ott:{{SDK_VERSION}}")
 
     // Add ONLY if the project uses FlowerMedia3ExoPlayer.
-    // Supported androidx.media3 versions: 1.6.0 and above.
+    // Supported androidx.media3 versions: 1.2.1 and above.
     // The companion artifact depends on sdk-android-ott, so add both together.
-    // Pick the artifact whose version exactly matches the app's androidx.media3 version (>= 1.6.0):
+    // Pick the artifact whose version exactly matches the app's androidx.media3 version (>= 1.2.1):
     //   androidx.media3 1.10.1 -> sdk-android-ott-media3-1.10.1
-    // For androidx.media3 versions below 1.6.0, contact dev-support@anypointmedia.com.
+    // For androidx.media3 versions below 1.2.1, contact dev-support@anypointmedia.com.
     // implementation("flower-sdk:sdk-android-ott-media3-1.10.1:{{SDK_VERSION}}")
 }
 
@@ -54,11 +54,11 @@ dependencies {
     implementation "flower-sdk:sdk-android-ott:{{SDK_VERSION}}"
 
     // Add ONLY if the project uses FlowerMedia3ExoPlayer.
-    // Supported androidx.media3 versions: 1.6.0 and above.
+    // Supported androidx.media3 versions: 1.2.1 and above.
     // The companion artifact depends on sdk-android-ott, so add both together.
-    // Pick the artifact whose version exactly matches the app's androidx.media3 version (>= 1.6.0):
+    // Pick the artifact whose version exactly matches the app's androidx.media3 version (>= 1.2.1):
     //   androidx.media3 1.10.1 -> sdk-android-ott-media3-1.10.1
-    // For androidx.media3 versions below 1.6.0, contact dev-support@anypointmedia.com.
+    // For androidx.media3 versions below 1.2.1, contact dev-support@anypointmedia.com.
     // implementation "flower-sdk:sdk-android-ott-media3-1.10.1:{{SDK_VERSION}}"
 }
 
@@ -69,14 +69,14 @@ NOTE on the Media3 companion artifact (sdk-android-ott-media3-*):
 - The sdk-android-ott-media3-* artifact is REQUIRED ONLY when using FlowerMedia3ExoPlayer.
   It depends on sdk-android-ott, so both artifacts must be added together.
 - It is NOT needed for FlowerExoPlayer2 (legacy ExoPlayer) or FlowerBitmovinPlayer.
-- Supported androidx.media3 versions: 1.6.0 and above.
+- Supported androidx.media3 versions: 1.2.1 and above.
 - Inspect the project's androidx.media3 version (e.g., in libs.versions.toml or
   build.gradle dependencies) and pick the exact same companion artifact version
-  for any registered version 1.6.0 or above:
+  for any registered version 1.2.1 or above:
     androidx.media3 1.10.1 -> flower-sdk:sdk-android-ott-media3-1.10.1
 - The companion artifact's version is the FLOWER SDK version ({{SDK_VERSION}}),
   not the androidx.media3 version.
-- If the project uses an androidx.media3 version not covered above (e.g., below 1.6.0),
+- If the project uses an androidx.media3 version not covered above (e.g., below 1.2.1),
   instruct the user to contact dev-support@anypointmedia.com instead of guessing
   an artifact to add.
 
