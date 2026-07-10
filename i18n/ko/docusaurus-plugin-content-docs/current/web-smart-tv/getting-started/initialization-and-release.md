@@ -10,14 +10,15 @@ sidebar_label: 초기화 및 해제
 
 | 지시문(Directive) | 도메인 | 용도 |
 | --- | --- | --- |
-| `img-src` | [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv) | 광고 트래킹 및 리포팅 |
+| `script-src` | `https://*.anypoint.tv` | Flower SDK(`flower-sdk-X.X.X.js`) 로딩 |
 | `script-src` | `https://imasdk.googleapis.com` | Google PAL SDK(`pal.js`) 로딩 |
+| `img-src` | [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv) | 광고 트래킹 및 리포팅 |
 
 예를 들어, 다음 지시문을 포함해야 할 수 있습니다:
 
 ```text
+script-src https://*.anypoint.tv https://imasdk.googleapis.com;
 img-src reds-tr.anypoint.tv;
-script-src https://imasdk.googleapis.com;
 ```
 
 **Google PAL SDK 관련 안내**

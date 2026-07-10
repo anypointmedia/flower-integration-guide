@@ -9,14 +9,15 @@ sidebar_position: 2
 
 | Directive | Domain | Purpose |
 | --- | --- | --- |
-| `img-src` | [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv) | Ad tracking and reporting |
+| `script-src` | `https://*.anypoint.tv` | Flower SDK (`flower-sdk-X.X.X.js`) loading |
 | `script-src` | `https://imasdk.googleapis.com` | Google PAL SDK (`pal.js`) loading |
+| `img-src` | [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv) | Ad tracking and reporting |
 
 For example, you may need to include the following directives:
 
 ```text
+script-src https://*.anypoint.tv https://imasdk.googleapis.com;
 img-src reds-tr.anypoint.tv;
-script-src https://imasdk.googleapis.com;
 ```
 
 **About the Google PAL SDK requirement**

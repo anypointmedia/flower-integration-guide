@@ -65,15 +65,17 @@ STEP 3 — Content Security Policy (if applicable)
 If your website enforces CSP via HTTP headers or <meta> tag,
 you must allow the following domains:
 
+  script-src https://*.anypoint.tv https://imasdk.googleapis.com;
   img-src reds-tr.anypoint.tv;
-  script-src https://imasdk.googleapis.com;
 
-- img-src reds-tr.anypoint.tv is required for ad tracking/reporting.
+- script-src https://*.anypoint.tv is required to load the Flower SDK
+  script itself (served from sdk.anypoint.tv).
 - script-src https://imasdk.googleapis.com is required to load the
   Google PAL SDK (pal.js), which generates the nonce for ad requests.
   Omitting it causes a "violates the following Content Security Policy
   directive: script-src ..." error for pal.js and ads will not serve.
   Note: script-src-elem falls back to script-src when not set explicitly.
+- img-src reds-tr.anypoint.tv is required for ad tracking/reporting.
 
 ========================================
 CONSTRAINTS
