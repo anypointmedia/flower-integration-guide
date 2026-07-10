@@ -5,9 +5,29 @@ sidebar_position: 2
 # Initialization and Release
 
 > Content Security Policy (CSP) Notice  
-> If your website enforces a `Content-Security-Policy (CSP) via HTTP headers` or `<meta http-equiv="Content-Security-Policy">` , you must explicitly allow the domain [reds-tr.anypoint.tv](http://reds-tr.anypoint.tv/) in your policy configuration. This domain is required for proper SDK operation.  
-> For example, you may need to include the following directive:  
-> `img-src` [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv)`;`
+> If your website enforces a `Content-Security-Policy (CSP) via HTTP headers` or `<meta http-equiv="Content-Security-Policy">` , you must explicitly allow the following domains in your policy configuration. These domains are required for proper SDK operation.
+
+| Directive | Domain | Purpose |
+| --- | --- | --- |
+| `img-src` | [`reds-tr.anypoint.tv`](http://reds-tr.anypoint.tv) | Ad tracking and reporting |
+| `script-src` | `https://imasdk.googleapis.com` | Google PAL SDK (`pal.js`) loading |
+
+For example, you may need to include the following directives:
+
+```text
+img-src reds-tr.anypoint.tv;
+script-src https://imasdk.googleapis.com;
+```
+
+**About the Google PAL SDK requirement**
+
+The Flower SDK loads the Google PAL (Programmatic Access Library) SDK from `https://imasdk.googleapis.com/pal/sdkloader/pal.js` to generate the nonce required for ad requests. If `imasdk.googleapis.com` is not allowed under `script-src`, you will see a console error like the following and ads will not be served correctly:
+
+```text
+Loading the script 'https://imasdk.googleapis.com/pal/sdkloader/pal.js' violates the following Content Security Policy directive: "script-src 'self' ...". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.
+```
+
+Because `script-src-elem` falls back to `script-src` when `script-src-elem` is not explicitly set, adding `https://imasdk.googleapis.com` to `script-src` (or to `script-src-elem` if you define it) resolves this error.
 
 Before using any features of the SDK, you must initialize it in your OTT app's startup process. Set the operating environment mode to either _local_, _dev_, or _prod_ as described below.
 *   **_local_:** This mode can be used in a local environment and the default log level is _Verbose_.

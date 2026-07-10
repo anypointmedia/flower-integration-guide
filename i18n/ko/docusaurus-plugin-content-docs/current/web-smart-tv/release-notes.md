@@ -10,7 +10,7 @@ sidebar_label: "릴리즈 노트"
 | 2.3.8 | 2026.06.29 | **Feature** <ol><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |
 | 2.3.7 | 2026.05.21 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li></ol> |
 | 2.3.6 | 2026.05.11 | **Feature** <ol><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li><li>SDK 버전을 조회할 수 있는 `FlowerSdk.getVersion` API 추가</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |
-| 2.3.5 | 2026.05.06 | **Feature** <ol><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li><li>Chrome 엔진 69 이상 대응 코드 적용</li></ol> |
+| 2.3.5 | 2026.05.06 | **Feature** <ol><li>프로그래매틱 광고 요청에 필요한 nonce를 생성하기 위한 Google PAL SDK 지원 추가</li><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li><li>Chrome 엔진 69 이상 대응 코드 적용</li></ol> |
 | 2.3.4 | 2026.04.21 | **BugFix** <ol><li>XMLHttpRequest에서 원본 URL의 Query String을 URL encoding 없이 원본 그대로 사용하도록 수정</li></ol> |
 | 2.3.3 | 2026.04.15 | **Feature** <ol><li>Linear TV 진입 광고 이벤트 추가</li><li>`FlowerAdsManagerListener`의 `onAdSkipped`를 `onAdBreakSkipped`로 변경</li></ol> |
 | 2.3.0 | 2026.02.25 | **BugFix** <ol><li>광고 마커가 있는 라이브 채널 진입 시 시간 불일치 수정</li><li>장시간 재생 시 발생하는 시간 불일치 수정</li></ol> **Feature** <ol><li>긴 윈도우의 플레이리스트 처리 시 성능 개선</li><li>인터랙티브 광고 UI 개선</li><li>TV 환경에서 광고의 "자세히 보기" 선택 시 QR 코드 표시 기능 추가</li></ol> |
