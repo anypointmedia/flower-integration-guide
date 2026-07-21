@@ -8,41 +8,27 @@ When inserting replacement ads into linear TV streams on iOS, the Flower SDK run
 
 Loopback URLs are only reachable from the device that produced them. If you hand that URL to another screen — for example, an external TV via AirPlay, Chromecast, or a Smart TV — the remote screen cannot resolve it and playback will fail.
 
-For these screen casting scenarios, use `FlowerAdsManager.getScreenCastingUrl()` to obtain a URL that the remote screen can play.
+:::caution Screen casting is not supported
+Serving a castable URL from the in-app Proxy Server would require keeping that server — and therefore the app — alive as a **background service** for the entire casting session. Maintaining such a background service reliably is not feasible, so casting the ad-replaced stream to an external screen is unstable and is therefore **not supported**.
 
-## FlowerAdsManager.getScreenCastingUrl
+When you need to cast to an external screen (AirPlay, Chromecast, Smart TV, etc.), do the following instead:
 
-Returns a stream URL suitable for casting to an external screen.
+1. Call `FlowerAdsManager.stop()` to shut down the Proxy Server and end ad replacement.
+2. Cast the **original stream URL** (the CDN URL, not the loopback URL returned by `changeChannelUrl()`) to the external screen.
 
-| **Parameter** | **Type** | **Description** |
-| ---| ---| --- |
-| _(none)_ |  |  |
-
-| **Return** | **Type** | **Description** |
-| ---| ---| --- |
-| screenCastingUrl | String | URL that can be played on an external screen.<br/>Falls back to the original stream URL if a casting URL cannot be produced.<br/>Returns an empty string (`""`) if called before `changeChannelUrl()`. |
-
-:::note Usage requirements
-- `getScreenCastingUrl()` must be called **after** `changeChannelUrl()`. Calling it earlier returns an empty string (`""`) because the Proxy Server has not been initialized yet.
-- On any internal error, the SDK returns the original stream URL so that casting can continue, although ad replacement will not be applied on the remote screen in that case.
-:::
-
-:::caution Do not stop the SDK while casting
-Screen casting is served by the **ad SDK (Proxy Server) running on the local device**, which rewrites the original stream on the fly. While casting is in progress, you must therefore:
-
-- **Do not call `FlowerAdsManager.stop()`.** Stopping the SDK shuts down the Proxy Server, so ad replacement halts on the remote screen and playback may fail.
-- **Keep the SDK running in the background** even when the app leaves the foreground, so that casting continues after the user navigates away from the app.
-
-In other words, the SDK must stay active in the background **until the user explicitly stops casting**.
+Note that ad replacement is not applied on the external screen in this case, because the stream is played directly from the original CDN without going through the Proxy Server.
 :::
 
 ## Example
 
 ```swift
+// Keep a reference to the original stream URL so it can be reused when casting.
+private let originalStreamUrl = "https://XXX"
+
 private func playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
     let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-        videoUrl: "https://XXX",
+        videoUrl: originalStreamUrl,
         adTagUrl: "https://ad_request",
         channelId: "100",
         extraParams: ["custom-param": "custom-param-value"],
@@ -57,13 +43,14 @@ private func playLinearTv() {
     player.play()
 }
 
-// TODO GUIDE: Use getScreenCastingUrl when sending the stream to another screen (e.g., TV)
+// TODO GUIDE: When casting to another screen (e.g., TV),
+// stop the SDK and cast the original stream URL instead of the loopback URL.
 func startCastingToTv() {
-    // Must be called after changeChannelUrl().
-    // Returns the original stream URL on error, so it is always safe to use.
-    let castingUrl = flowerAdView.adsManager.getScreenCastingUrl()
+    // Shut down the Proxy Server. Ad replacement is no longer applied.
+    flowerAdView.adsManager.stop()
 
-    castSession.loadMedia(url: castingUrl)
+    // Cast the original stream URL (not the URL returned by changeChannelUrl()).
+    castSession.loadMedia(url: originalStreamUrl)
 }
 ```
 
@@ -72,4 +59,4 @@ func startCastingToTv() {
 | Scenario | URL to Use |
 | ---| --- |
 | Local in-app playback | URL returned by `changeChannelUrl()` |
-| Casting to an external screen (AirPlay receiver, Chromecast, Smart TV, etc.) | URL returned by `getScreenCastingUrl()` |
+| Casting to an external screen (AirPlay receiver, Chromecast, Smart TV, etc.) | Original stream URL, after calling `FlowerAdsManager.stop()` |

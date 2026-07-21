@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.20 | July 21, 2026 | **Feature** <ol><li>Discontinued support for screen casting to an external screen. To cast, call `FlowerAdsManager.stop()` and use the original stream URL instead.</li></ol> |
 | 2.9.19 | July 8, 2026 | **BugFix** <ol><li>Fixed a screen casting error that occurred when playing the stream on an external screen</li></ol> |
 | 2.9.18 | June 29, 2026 | **Feature** <ol><li>Added support for reusing the splice event ID across different SCTE-35 events in the stream</li></ol> **BugFix** <ol><li>Fixed a Media3 default declaration error on minSdk 23 and below</li><li>Fixed a resource release error when reusing `FlowerAdView`</li></ol> |
 | 2.9.17 | June 20, 2026 | **Feature** <ol><li>Added correction of errors in past periods of the origin DASH manifest</li></ol> |

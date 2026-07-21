@@ -8,41 +8,27 @@ Android 환경에서 실시간 TV 스트림에 대체 광고를 삽입할 때, F
 
 LoopBack 주소는 해당 URL을 생성한 기기 내부에서만 접근 가능합니다. 이 URL을 다른 화면(예: Chromecast, AirPlay, Smart TV 등 외부 TV)으로 그대로 전달하면 외부 화면에서 주소를 해석할 수 없어 재생이 실패합니다.
 
-이러한 외부 화면 송출(Screen Casting) 시나리오에서는 `FlowerAdsManager.getScreenCastingUrl()`을 사용하여 외부 화면에서도 재생 가능한 URL을 받아 사용해야 합니다.
+:::caution 외부 화면 송출은 지원하지 않습니다
+앱 내부 Proxy Server에서 송출 가능한 URL을 제공하려면, 송출이 진행되는 동안 해당 Proxy Server(즉 앱)를 **백그라운드 서비스**로 계속 유지해야 합니다. 이러한 백그라운드 서비스를 안정적으로 유지하는 것은 어렵기 때문에, 광고가 대체된 스트림을 외부 화면으로 송출하는 것은 안정적이지 않아 **지원하지 않습니다.**
 
-## FlowerAdsManager.getScreenCastingUrl
+외부 화면(Chromecast, AirPlay, Smart TV 등)으로 송출해야 하는 경우에는 다음과 같이 처리하세요.
 
-외부 화면 송출에 사용 가능한 스트림 URL을 반환합니다.
+1. `FlowerAdsManager.stop()`을 호출하여 Proxy Server를 종료하고 광고 대체를 중단합니다.
+2. 외부 화면에는 **원본 스트림 URL**(`changeChannelUrl()`이 반환한 LoopBack URL이 아닌 원본 CDN URL)을 송출합니다.
 
-| **매개변수** | **유형** | **설명** |
-| ---| ---| --- |
-| _(없음)_ |  |  |
-
-| **반환값** | **유형** | **설명** |
-| ---| ---| --- |
-| screenCastingUrl | string | 외부 화면에서 재생 가능한 URL.<br/>송출용 URL을 생성할 수 없는 경우 원본 스트림 URL을 반환합니다.<br/>`changeChannelUrl()` 호출 이전에 호출된 경우에는 빈 문자열(`""`)을 반환합니다. |
-
-:::note 사용 조건
-- `getScreenCastingUrl()`은 반드시 `changeChannelUrl()`을 **호출한 이후에** 호출해야 합니다. 그 이전에 호출하면 Proxy Server가 아직 초기화되지 않았기 때문에 빈 문자열(`""`)이 반환됩니다.
-- 내부 오류가 발생한 경우 SDK는 원본 스트림 URL을 그대로 반환하므로 호출 자체는 항상 안전하지만, 이 경우 외부 화면에서는 광고 대체가 적용되지 않습니다.
-:::
-
-:::caution 송출 중에는 SDK를 중지하지 마세요
-외부 화면 송출은 원본 스트림을 실시간으로 재작성하는 **본 기기의 광고 SDK(Proxy Server)** 를 통해 수행됩니다. 따라서 송출이 진행되는 동안에는 다음을 반드시 지켜야 합니다.
-
-- **`FlowerAdsManager.stop()`을 호출하지 마세요.** SDK를 중지하면 Proxy Server가 종료되어 외부 화면에서 광고 대체가 중단되고 재생이 실패할 수 있습니다.
-- **앱이 백그라운드로 전환되더라도 SDK가 계속 동작하도록 백그라운드 실행을 설정하세요.** 사용자가 앱을 이탈하더라도 송출이 유지되어야 합니다.
-
-즉, **사용자가 명시적으로 송출을 중지하기 전까지는** SDK를 백그라운드에서 활성 상태로 유지해야 한다는 점이 중요합니다.
+이 경우 스트림은 Proxy Server를 거치지 않고 원본 CDN에서 직접 재생되므로, 외부 화면에서는 광고 대체가 적용되지 않습니다.
 :::
 
 ## 예시
 
 ```kotlin
+// 송출 시 재사용할 수 있도록 원본 스트림 URL을 보관합니다.
+private val originalStreamUrl = "https://XXX"
+
 private fun playLinearTv() {
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
-        "https://XXX",
+        originalStreamUrl,
         "https://ad_request",
         "100",
         mapOf("custom-param" to "custom-param-value"),
@@ -58,13 +44,14 @@ private fun playLinearTv() {
     player.play()
 }
 
-// TODO GUIDE: 외부 화면(예: TV)으로 송출할 때는 getScreenCastingUrl을 사용
+// TODO GUIDE: 외부 화면(예: TV)으로 송출할 때는 SDK를 중지하고
+// LoopBack URL이 아닌 원본 스트림 URL을 송출합니다.
 fun startCastingToTv() {
-    // 반드시 changeChannelUrl() 이후에 호출해야 합니다.
-    // 오류 시 원본 스트림 URL을 반환하므로 호출 자체는 항상 안전합니다.
-    val castingUrl = flowerAdView.adsManager.getScreenCastingUrl()
+    // Proxy Server를 종료합니다. 이후로는 광고 대체가 적용되지 않습니다.
+    flowerAdView.adsManager.stop()
 
-    castSession.loadMedia(castingUrl)
+    // 원본 스트림 URL을 송출합니다. (changeChannelUrl()이 반환한 URL이 아님)
+    castSession.loadMedia(originalStreamUrl)
 }
 ```
 
@@ -73,4 +60,4 @@ fun startCastingToTv() {
 | 상황 | 사용할 URL |
 | ---| --- |
 | 앱 내부 로컬 재생 | `changeChannelUrl()`이 반환한 URL |
-| 외부 화면으로 송출 (Chromecast, AirPlay 수신기, Smart TV 등) | `getScreenCastingUrl()`이 반환한 URL |
+| 외부 화면으로 송출 (Chromecast, AirPlay 수신기, Smart TV 등) | `FlowerAdsManager.stop()` 호출 후 원본 스트림 URL |

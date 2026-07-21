@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.8 | 2026.07.21 | **Feature** <ol><li>외부 화면 송출 기능 지원 중단. 송출이 필요한 경우 `FlowerAdsManager.stop()`을 호출하고 원본 스트림 URL을 사용하도록 변경</li></ol> |
 | 2.3.7 | 2026.07.08 | **BugFix** <ol><li>외부 화면에서 스트림을 재생할 때 발생하는 외부 화면 송출 오류 수정</li></ol> |
 | ~~2.3.6~~<br/>Deprecated | 2026.06.29 | **Feature** <ol><li>프로그래매틱 광고 요청에 필요한 nonce를 생성하기 위한 Google PAL SDK 지원 추가</li><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |
 | 2.3.5 | 2026.05.21 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li><li>채널 진입 시 캐시 갱신을 유효시간으로 판단하도록 개선</li><li>`FlowerAdsManagerListener`에 개별 광고 단위의 재생 시작 시 광고 메타데이터를 전달하는 `onAdPlay` 이벤트 추가</li><li>`FlowerAdsManagerListener`에 사용자의 광고 상호작용(`learn_more`, `skip`)을 전달하는 `onAdUserAction` 이벤트 추가</li><li>`AdInfo`에 `playTime`, `isClickable`, `sourceType` 필드 추가</li><li>SDK 버전을 조회할 수 있는 `FlowerSdk.getVersion` API 추가</li><li>HLS Manipulation 시 원본 m3u8이 타임아웃 또는 오류가 발생하는 경우 SDK에서 방어 처리</li></ol> **BugFix** <ol><li>광고 트래킹 시 간헐적으로 발생하는 `ConcurrentModificationException` 오류 수정</li></ol> |

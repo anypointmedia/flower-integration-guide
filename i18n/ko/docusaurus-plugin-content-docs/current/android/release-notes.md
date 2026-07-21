@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.20 | 2026.07.21 | **Feature** <ol><li>외부 화면 송출 기능 지원 중단. 송출이 필요한 경우 `FlowerAdsManager.stop()`을 호출하고 원본 스트림 URL을 사용하도록 변경</li></ol> |
 | 2.9.19 | 2026.07.08 | **BugFix** <ol><li>외부 화면에서 스트림을 재생할 때 발생하는 외부 화면 송출 오류 수정</li></ol> |
 | 2.9.18 | 2026.06.29 | **Feature** <ol><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>minSdk 23 이하에서 Media3의 default 선언 오류 대응</li><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |
 | 2.9.17 | 2026.06.20 | **Feature** <ol><li>원본 DASH 매니페스트에서 과거 period의 오류를 보정하는 기능 추가</li></ol> |
