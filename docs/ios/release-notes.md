@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.9 | July 28, 2026 | **Feature** <ol><li>Added Swift 6 support</li><li>Added support for controlling ad playback directly in Linear TV. See [Direct Ad Playback Control](./ad-insertion/linear-tv-fast/direct-ad-playback-control).</li></ol> |
 | 2.3.8 | July 21, 2026 | **Feature** <ol><li>Discontinued support for screen casting to an external screen. To cast, call `FlowerAdsManager.stop()` and use the original stream URL instead.</li></ol> |
 | 2.3.7 | July 8, 2026 | **BugFix** <ol><li>Fixed a screen casting error that occurred when playing the stream on an external screen</li></ol> |
 | ~~2.3.6~~<br/>Deprecated | June 29, 2026 | **Feature** <ol><li>Added support for the Google PAL SDK to generate the nonce required for programmatic ad requests</li><li>Added support for reusing the splice event ID across different SCTE-35 events in the stream</li></ol> **BugFix** <ol><li>Fixed a resource release error when reusing `FlowerAdView`</li></ol> |

@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.9 | 2026.07.28 | **Feature** <ol><li>Swift 6 지원 추가</li><li>Linear TV에서 광고 재생을 직접 제어하는 방식 지원 추가. [광고 재생 직접 제어](./ad-insertion/linear-tv-fast/direct-ad-playback-control) 문서를 참고하세요.</li></ol> |
 | 2.3.8 | 2026.07.21 | **Feature** <ol><li>외부 화면 송출 기능 지원 중단. 송출이 필요한 경우 `FlowerAdsManager.stop()`을 호출하고 원본 스트림 URL을 사용하도록 변경</li></ol> |
 | 2.3.7 | 2026.07.08 | **BugFix** <ol><li>외부 화면에서 스트림을 재생할 때 발생하는 외부 화면 송출 오류 수정</li></ol> |
 | ~~2.3.6~~<br/>Deprecated | 2026.06.29 | **Feature** <ol><li>프로그래매틱 광고 요청에 필요한 nonce를 생성하기 위한 Google PAL SDK 지원 추가</li><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |

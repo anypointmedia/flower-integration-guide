@@ -239,8 +239,8 @@ The `MediaPlayerAdapter` interface requires the following methods:
 | playNextItem() | void | Seeks to the next media item in the queue |
 | seekToPosition(...) | void | Seeks to the specified position |
 | getCurrentAbsoluteTime(isPrintDetails) | number \| null | Returns the current absolute playback time in ms |
-| getPlayerType() | string \| null | Returns the player type identifier (for Google PAL SDK) |
-| getPlayerVersion() | string \| null | Returns the player version string (for Google PAL SDK) |
+| getPlayerType() | string \| null | Returns an identifier for the player implementation. The SDK uses it to apply player specific behavior and includes it in ad requests. |
+| getPlayerVersion() | string \| null | Returns the player version string. The SDK includes it in ad requests. |
 
 ### Example
 

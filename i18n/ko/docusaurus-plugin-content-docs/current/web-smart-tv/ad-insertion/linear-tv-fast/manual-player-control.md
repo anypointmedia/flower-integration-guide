@@ -240,8 +240,8 @@ SDK가 공식적으로 지원하지 않는 플레이어를 사용하는 경우, 
 | playNextItem() | void | 큐의 다음 미디어 항목으로 이동합니다 |
 | seekToPosition(...) | void | 지정된 위치로 이동합니다 |
 | getCurrentAbsoluteTime(isPrintDetails) | number \| null | 현재 절대 재생 시간(ms)을 반환합니다 |
-| getPlayerType() | string \| null | 플레이어 유형 식별자를 반환합니다 (Google PAL SDK용) |
-| getPlayerVersion() | string \| null | 플레이어 버전 문자열을 반환합니다 (Google PAL SDK용) |
+| getPlayerType() | string \| null | 플레이어 구현을 식별하는 문자열을 반환합니다. SDK가 플레이어별 동작을 적용하고 광고 요청에 포함하는 데 사용합니다. |
+| getPlayerVersion() | string \| null | 플레이어 버전 문자열을 반환합니다. SDK가 광고 요청에 포함합니다. |
 
 ### 예시
 
