@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const config: Config = {
   title: 'FLOWER Integration Guide',
   tagline:
-    'Ad integration SDK documentation for Android, Satellite/IPTV, Web/Smart TV, and iOS platforms',
+    'Ad integration SDK documentation for Android, Satellite/IPTV, Web/Smart TV, iOS, and React Native platforms',
   favicon: 'img/favicon.png',
 
   future: {

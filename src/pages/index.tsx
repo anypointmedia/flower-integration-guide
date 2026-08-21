@@ -36,6 +36,7 @@ const contentTypeGroups: ReadonlyArray<ContentTypeGroup> = [
           {platform: 'Android', link: '/docs/android-linear-tv-fast'},
           {platform: 'iOS', link: '/docs/ios-linear-tv-fast'},
           {platform: 'Web / Smart TV', link: '/docs/web-linear-tv-fast'},
+          {platform: 'React Native', link: '/docs/react-native-linear-tv-fast'},
         ],
       },
       {
@@ -58,6 +59,7 @@ const contentTypeGroups: ReadonlyArray<ContentTypeGroup> = [
           {platform: 'Android', link: '/docs/android-vod'},
           {platform: 'iOS', link: '/docs/ios-vod'},
           {platform: 'Web / Smart TV', link: '/docs/web-vod'},
+          {platform: 'React Native', link: '/docs/react-native-vod'},
         ],
       },
     ],
@@ -73,6 +75,7 @@ const contentTypeGroups: ReadonlyArray<ContentTypeGroup> = [
           {platform: 'Android', link: '/docs/android-advanced-ad-formats'},
           {platform: 'iOS', link: '/docs/ios-advanced-ad-formats'},
           {platform: 'Web / Smart TV', link: '/docs/web-advanced-ad-formats'},
+          {platform: 'React Native', link: '/docs/react-native-advanced-ad-formats'},
         ],
       },
     ],
@@ -105,6 +108,17 @@ const WebTvLogo = () => (
   </svg>
 );
 
+const ReactLogo = () => (
+  <svg viewBox="-11.5 -10.23 23 20.46" width="40" height="40" fill="none">
+    <circle r="2.05" fill="#61DAFB" />
+    <g stroke="#61DAFB" strokeWidth="1">
+      <ellipse rx="11" ry="4.2" />
+      <ellipse rx="11" ry="4.2" transform="rotate(60)" />
+      <ellipse rx="11" ry="4.2" transform="rotate(120)" />
+    </g>
+  </svg>
+);
+
 const platformCards: ReadonlyArray<PlatformCard> = [
   {
     id: 'android',
@@ -127,6 +141,13 @@ const platformCards: ReadonlyArray<PlatformCard> = [
     description: '',
     link: '/docs/category/web--smart-tv',
   },
+  {
+    id: 'reactNative',
+    title: translate({id: 'homepage.platform.reactNative.title', message: 'React Native'}),
+    icon: <ReactLogo />,
+    description: '',
+    link: '/docs/category/react-native',
+  },
 ];
 
 interface FeatureItem {
@@ -146,7 +167,7 @@ const features: ReadonlyArray<FeatureItem> = [
     title: translate({id: 'homepage.feature.multiPlatform.title', message: 'Multi-Platform Support'}),
     description: translate({
       id: 'homepage.feature.multiPlatform.description',
-      message: 'Single SDK architecture across Android, iOS, and Web/Smart TV with platform-native player integrations.',
+      message: 'Single SDK architecture across Android, iOS, Web/Smart TV, and React Native with platform-native player integrations.',
     }),
   },
   {

@@ -1,0 +1,10 @@
+{
+  "label": "VOD (Video On Demand)",
+  "position": 3,
+  "collapsed": true,
+  "key": "react-native-vod",
+  "link": {
+    "type": "generated-index",
+    "slug": "react-native-vod"
+  }
+}

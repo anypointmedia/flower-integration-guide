@@ -31,6 +31,14 @@
     "message": "iOS 및 tvOS 앱에 FLOWER SDK를 연동합니다.",
     "description": "The generated-index page description for category 'iOS' in sidebar 'tutorialSidebar'"
   },
+  "sidebar.tutorialSidebar.category.React Native": {
+    "message": "React Native",
+    "description": "The label for category 'React Native' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.React Native.link.generated-index.description": {
+    "message": "React Native 앱에 FLOWER SDK를 연동합니다. 하나의 npm 패키지가 JavaScript API와 Android/iOS 네이티브 바인딩을 함께 제공하므로, 한 번의 연동으로 두 플랫폼을 모두 지원합니다.",
+    "description": "The generated-index page description for category 'React Native' in sidebar 'tutorialSidebar'"
+  },
   "sidebar.tutorialSidebar.category.android-getting-started": {
     "message": "시작하기",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
@@ -166,5 +174,37 @@
   "sidebar.tutorialSidebar.category.satellite-iptv-release-notes": {
     "message": "릴리즈 노트",
     "description": "The label for category 'Release Notes' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-getting-started": {
+    "message": "시작하기",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-ad-insertion": {
+    "message": "광고 삽입",
+    "description": "The label for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-linear-tv-fast": {
+    "message": "Linear TV (incl. FAST)",
+    "description": "The label for category 'Linear TV (incl. FAST)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-vod": {
+    "message": "VOD (Video On Demand)",
+    "description": "The label for category 'VOD (Video On Demand)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-advanced-ad-formats": {
+    "message": "Advanced Ad Formats",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-api": {
+    "message": "API 레퍼런스",
+    "description": "The label for category 'API Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts": {
+    "message": "LLM 프롬프트",
+    "description": "The label for category 'Prompts' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-ad-insertion.link.generated-index.description": {
+    "message": "React Native 앱에 FLOWER 광고를 삽입합니다. 플레이어 인계 절차, 콘텐츠 유형별 광고 삽입, 선택적인 Bitmovin 플레이어 연동을 다룹니다.",
+    "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
   }
 }

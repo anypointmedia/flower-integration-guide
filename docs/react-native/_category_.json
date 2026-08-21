@@ -1,0 +1,9 @@
+{
+  "label": "React Native",
+  "position": 4,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "description": "Integrate the FLOWER SDK into React Native applications. A single npm package carries the JavaScript API and drives the Android and iOS SDKs underneath, so one integration covers both platforms."
+  }
+}

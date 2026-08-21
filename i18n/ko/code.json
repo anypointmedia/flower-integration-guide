@@ -70,6 +70,14 @@
   "homepage.platform.ios.description": {
     "message": "AVPlayer 기반 iOS 및 tvOS 광고 연동"
   },
+  "homepage.platform.reactNative.title": {
+    "message": "React Native",
+    "description": "The title of the React Native platform card on the homepage"
+  },
+  "homepage.platform.reactNative.description": {
+    "message": "react-native-video 기반 Android/iOS 통합 광고 연동",
+    "description": "The description of the React Native platform card on the homepage"
+  },
   "homepage.feature.cspm.title": {
     "message": "클라이언트 사이드 플레이리스트 조작"
   },
@@ -80,7 +88,7 @@
     "message": "멀티 플랫폼 지원"
   },
   "homepage.feature.multiPlatform.description": {
-    "message": "Android, iOS, Web/Smart TV를 아우르는 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 제공합니다."
+    "message": "Android, iOS, Web/Smart TV, React Native를 아우르는 단일 SDK 아키텍처와 플랫폼 네이티브 플레이어 연동을 제공합니다."
   },
   "homepage.feature.prompts.title": {
     "message": "AI 지원 연동"

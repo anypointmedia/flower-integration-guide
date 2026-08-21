@@ -1,0 +1,10 @@
+{
+  "label": "Ad Insertion",
+  "position": 2,
+  "collapsed": true,
+  "key": "react-native-ad-insertion",
+  "link": {
+    "type": "generated-index",
+    "description": "Insert FLOWER ads into your React Native application. Covers the player handover flow, ad insertion by content type, and the optional Bitmovin player path."
+  }
+}
