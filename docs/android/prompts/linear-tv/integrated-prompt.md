@@ -47,10 +47,13 @@ STEP 1 — PROJECT SETUP & SDK INITIALIZATION
 STEP 1.1 — Add Dependencies (build.gradle)
 ========================================
 
-First, add the AnypointMedia Maven repository:
+First, add the AnypointMedia Maven repository together with the Google Maven repository
+and JitPack (part of the SDK's transitive dependencies are resolved from them):
 
 repositories {
+    google()
     maven { url "https://maven.anypoint.tv/repository/public-release/" }
+    maven { url "https://jitpack.io" }
 }
 
 Then choose ONE dependency path based on your ad player strategy:

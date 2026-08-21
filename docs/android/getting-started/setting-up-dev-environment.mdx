@@ -11,17 +11,25 @@ For LLM-assisted SDK integration, see the [Android Prompts section](../prompts/v
 ## Dependency Setting
 To use the FLOWER SDK in your Android project, add the library to Gradle dependencies through AnypointMedia's Maven repository.
 
+The SDK also resolves part of its transitive dependencies from Google's Maven repository and JitPack, so `google()` and `https://jitpack.io` must be declared together with the AnypointMedia repository.
+
 ```plain
 repositories {
-   maven(url = "https://maven.anypoint.tv/repository/public-release")
+    google()
+    maven(url = "https://maven.anypoint.tv/repository/public-release")
+    maven(url = "https://jitpack.io")
 }
 
 ...
 
 dependencies {
-    implementation("flower-sdk:sdk-android-ott:X.X.X")
+    implementation("flower-sdk:sdk-android-ott:X.X.X")
 }
 ```
+
+:::caution
+If `google()` or `https://jitpack.io` is missing from the repository list, the build fails while resolving the SDK's transitive dependencies. If your project declares repositories in `settings.gradle(.kts)` under `dependencyResolutionManagement`, add them there instead of in the module-level `build.gradle(.kts)`.
+:::
 
 ### Additional Dependency for Media3 ExoPlayer (FlowerMedia3ExoPlayer) \{#media3-companion-artifact\}
 

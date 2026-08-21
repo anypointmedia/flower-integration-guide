@@ -11,9 +11,13 @@ LLM 기반 SDK 정합을 위해서는 [Android 프롬프트 섹션](../prompts/v
 ## Dependency 설정
 FLOWER SDK를 Android 프로젝트에서 사용하려면 AnypointMedia의 Maven repository를 통해 Gradle dependencies에 라이브러리를 추가합니다.
 
+또한 SDK의 일부 전이 의존성(transitive dependency)은 Google Maven repository와 JitPack에서 받아오므로, AnypointMedia repository와 함께 `google()`과 `https://jitpack.io`도 반드시 선언해야 합니다.
+
 ```plain
 repositories {
-   maven(url = "https://maven.anypoint.tv/repository/public-release")
+    google()
+    maven(url = "https://maven.anypoint.tv/repository/public-release")
+    maven(url = "https://jitpack.io")
 }
 
 ...
@@ -22,6 +26,10 @@ dependencies {
     implementation("flower-sdk:sdk-android-ott:X.X.X")
 }
 ```
+
+:::caution
+`google()` 또는 `https://jitpack.io`가 repository 목록에 없으면 SDK의 전이 의존성을 해석하는 단계에서 빌드가 실패합니다. 프로젝트가 `settings.gradle(.kts)`의 `dependencyResolutionManagement`에서 repository를 선언하는 구조라면, 모듈 수준 `build.gradle(.kts)` 대신 해당 위치에 추가하세요.
+:::
 
 ### Media3 ExoPlayer(FlowerMedia3ExoPlayer) 사용 시 추가 의존성 \{#media3-companion-artifact\}
 

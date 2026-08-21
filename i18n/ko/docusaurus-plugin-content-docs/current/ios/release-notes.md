@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.11 | 2026.08.21 | **Feature** <ol><li>DASH 스트림의 원본 스트림 오류 보정 기능 추가</li><li>Linear TV 환경에서 광고 스킵 기능 개선</li><li>DASH 세그먼트 타임라인 추출 로직 개선</li><li>Linear TV 광고 브레이크 구간에서 스트림 variant 변경 시 HLS 조작 안정화</li></ol> |
 | 2.3.9 | 2026.07.28 | **Feature** <ol><li>Swift 6 지원 추가</li><li>Linear TV에서 광고 재생을 직접 제어하는 방식 지원 추가. [광고 재생 직접 제어](./ad-insertion/linear-tv-fast/direct-ad-playback-control) 문서를 참고하세요.</li></ol> |
 | 2.3.8 | 2026.07.21 | **Feature** <ol><li>외부 화면 송출 기능 지원 중단. 송출이 필요한 경우 `FlowerAdsManager.stop()`을 호출하고 원본 스트림 URL을 사용하도록 변경</li></ol> |
 | 2.3.7 | 2026.07.08 | **BugFix** <ol><li>외부 화면에서 스트림을 재생할 때 발생하는 외부 화면 송출 오류 수정</li></ol> |

@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.9.22 | Aug 23, 2026 | **Feature** <ol><li>Added correction of errors in the origin DASH stream</li><li>Improved the ad skip feature in Linear TV</li><li>Improved the DASH segment timeline extraction logic</li><li>Stabilized HLS manipulation when the stream variant changes during an ad break in Linear TV</li><li>Added reuse of the remaining time of a DASH ad break when entering Linear TV (when 23 seconds or more remain)</li><li>Added the ad skip feature for DASH streams in Linear TV</li></ol> |
 | 2.9.21 | July 28, 2026 | **BugFix** <ol><li>Fixed a bug where filler ads were not added when controlling ad playback directly in Linear TV</li></ol> |
 | 2.9.20 | July 21, 2026 | **Feature** <ol><li>Discontinued support for screen casting to an external screen. To cast, call `FlowerAdsManager.stop()` and use the original stream URL instead.</li></ol> |
 | 2.9.19 | July 8, 2026 | **BugFix** <ol><li>Fixed a screen casting error that occurred when playing the stream on an external screen</li></ol> |

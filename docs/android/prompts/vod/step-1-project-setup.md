@@ -15,10 +15,13 @@ We are integrating the FLOWER SDK into our Android project.
 STEP 1 — Add FLOWER SDK Dependency
 ========================================
 
-Use AnypointMedia's Maven repository:
+Use AnypointMedia's Maven repository. Google's Maven repository and JitPack are also required,
+because part of the SDK's transitive dependencies are resolved from them.
 
-Repository URL:
+Repository URLs:
 https://maven.anypoint.tv/repository/public-release
+https://jitpack.io
+google() (Google Maven repository)
 
 Support both Kotlin DSL and Groovy DSL.
 
@@ -27,7 +30,9 @@ If using Kotlin DSL (AGP 8+ preferred in settings.gradle.kts):
 
 dependencyResolutionManagement {
     repositories {
+        google()
         maven("https://maven.anypoint.tv/repository/public-release")
+        maven("https://jitpack.io")
     }
 }
 
@@ -47,7 +52,9 @@ dependencies {
 If using Groovy DSL:
 
 repositories {
+    google()
     maven { url "https://maven.anypoint.tv/repository/public-release" }
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
