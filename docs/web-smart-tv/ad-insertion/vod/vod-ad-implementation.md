@@ -21,7 +21,11 @@ This guide walks you through the complete process of inserting ads into VOD cont
 ### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To control VOD content playback in response to ad events, implement the `FlowerAdsManagerListener` interface.  
-> This allows you to pause or resume the main content during ad playback, and handle playback errors or skip events. This can be implemented as follows:
+> This allows you to resume the main content after an ad break, and handle playback errors or skip events. This can be implemented as follows:
+
+:::caution Do not pause the player in `onPlay`
+The SDK reuses the player it received through `MediaPlayerHook` when it plays an ad. Because `onPlay` means the ad has started playing, pausing the player in that event stops the ad itself — do not call `yourPlayer.pause()` inside `onPlay`. Resuming the main content is handled in `onCompleted` (see below).
+:::
 
 ```javascript
 const adsManagerListener = {
@@ -40,8 +44,11 @@ const adsManagerListener = {
     },
 
     onPlay() {
-        // TODO GUIDE: pause VOD content
-        yourPlayer.pause();
+        // NOTE: Do NOT pause the player here.
+        //       The SDK reuses the player passed through MediaPlayerHook to play the ad,
+        //       so pausing the player on onPlay stops the ad.
+        // OPTIONAL GUIDE: UI-only actions when ad playback starts
+        //                 (e.g., hide player controls, show an ad indicator)
     },
 
     onCompleted() {

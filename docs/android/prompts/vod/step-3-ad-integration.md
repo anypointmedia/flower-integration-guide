@@ -112,9 +112,10 @@ For FlowerPlayer:
   player.addAdListener(flowerAdsManagerListener)
 
 For MediaPlayerHook:
-  VOD requires active content pause/resume in the listener.
+  VOD requires the listener to resume the content after each ad break.
   - onPrepare: Call flowerAdView.adsManager.play() to start the ad.
-  - onPlay: Pause content player (player.playWhenReady = false).
+  - onPlay: Do NOT pause the content player. The SDK reuses the player passed through
+    MediaPlayerHook to play the ad, so pausing it here stops the ad.
   - onCompleted: Resume content player (player.playWhenReady = true) if content not ended.
   - onError: Resume content player if content not ended.
 
@@ -137,9 +138,8 @@ For MediaPlayerHook:
           }
       }
       override fun onPlay() {
-          CoroutineScope(Dispatchers.Main).launch {
-              player.playWhenReady = false
-          }
+          // Do NOT pause the player here - the SDK reuses this same player to play the ad,
+          // so pausing it stops the ad.
       }
       override fun onCompleted() {
           CoroutineScope(Dispatchers.Main).launch {

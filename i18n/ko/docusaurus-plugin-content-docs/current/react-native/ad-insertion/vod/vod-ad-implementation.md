@@ -130,6 +130,10 @@ const styles = StyleSheet.create({
 `requestVodAd()`는 `changeChannelUrl()`과 마찬가지로 플레이어가 먼저 존재해야 합니다. 마운트 시점이 아니라 `onLoad` 이후에 호출하세요. Linear TV와 달리 이후 소스 교체가 없어 `onLoad`가 한 번만 발생하므로 재진입 가드가 반드시 필요하지는 않지만, 위 예제의 ref는 컴포넌트 재마운트 상황에서 안전을 확보해 줍니다.
 :::
 
+:::caution 콘텐츠 일시정지는 `prepare`에서만, `play`에서는 하지 마세요
+SDK는 광고 브레이크를 위해 별도의 플레이어를 만들지 않고, `<Video nativeID={nativeId}>`에서 인계받은 player를 재사용합니다. 위 예제처럼 `prepare` 이벤트에서 콘텐츠를 일시정지하고, `play` 이벤트에서는 player를 건드리지 마세요. 광고 재생을 의미하는 `play` 이벤트에서 player를 pause 시킬 경우 광고가 중지되게 됩니다.
+:::
+
 ## Pre-roll, Mid-roll, Post-roll
 
 브레이크 위치는 광고 응답에서 결정되며, 전달한 `durationMs`를 기준으로 배치됩니다. 따라서 이 값은 콘텐츠의 실제 총 재생 시간(밀리초)이어야 합니다.

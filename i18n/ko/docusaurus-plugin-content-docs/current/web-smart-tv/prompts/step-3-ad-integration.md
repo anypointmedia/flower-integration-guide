@@ -68,7 +68,8 @@ If AD_TYPE is "vod" (media-player-hook only):
           }
       },
       onPlay() {
-          videoElement.pause();
+          // Do NOT pause the player here - the SDK reuses this same player to play the ad,
+          // so pausing it stops the ad.
       },
       onCompleted() {
           if (!isContentEnd) { videoElement.play(); }

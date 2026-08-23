@@ -22,7 +22,11 @@ sidebar_label: "VOD Pre-roll, Mid-roll, Post-roll 광고 적용"
 ### 2. 광고 이벤트 수신 -- `FlowerAdsManagerListener`
 
 > VOD 콘텐츠의 광고 이벤트에 대응하여 재생을 제어하려면 `FlowerAdsManagerListener` 인터페이스를 구현합니다.
-> 이를 통해 광고 재생 중 메인 콘텐츠를 일시정지하거나 재개하고, 재생 오류나 스킵 이벤트를 처리할 수 있습니다. 아래와 같이 구현할 수 있습니다.
+> 이를 통해 광고 종료 후 메인 콘텐츠 재생을 재개하고, 재생 오류나 스킵 이벤트를 처리할 수 있습니다. 아래와 같이 구현할 수 있습니다.
+
+:::caution `onPlay`에서 player를 pause하지 마세요
+SDK는 광고 재생 시 `MediaPlayerHook`을 통해 전달받은 player를 재사용합니다. 따라서 광고 재생을 의미하는 `onPlay` 이벤트에서 player를 pause 시킬 경우 광고가 중지되게 됩니다. `onPlay`에서는 `player.pause()`와 같은 일시정지 호출을 하지 마세요. 본편 재생 재개는 아래 `onCompleted`에서 처리합니다.
+:::
 
 #### _SwiftUI_
 ```swift
@@ -53,10 +57,11 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
     }
 
     func onPlay() {
-        DispatchQueue.main.async {
-            // TODO GUIDE: pause VOD content
-            self.playbackView.player.pause()
-        }
+        // NOTE: 이 시점에 player를 pause하지 마세요.
+        //       SDK는 광고 재생 시 MediaPlayerHook으로 전달받은 player를 재사용하므로,
+        //       onPlay에서 player를 pause 시키면 광고가 중지됩니다.
+        // OPTIONAL GUIDE: 광고 재생 시작 시 필요한 UI 작업만 수행하세요
+        //                 (예: 플레이어 컨트롤 숨기기, 광고 표시자 노출)
     }
 
     func onCompleted() {
@@ -122,10 +127,11 @@ extension PlayerViewController: FlowerAdsManagerListener {
     }
 
     func onPlay() {
-        DispatchQueue.main.async {
-            // TODO GUIDE: pause VOD content
-            self.player.pause()
-        }
+        // NOTE: 이 시점에 player를 pause하지 마세요.
+        //       SDK는 광고 재생 시 MediaPlayerHook으로 전달받은 player를 재사용하므로,
+        //       onPlay에서 player를 pause 시키면 광고가 중지됩니다.
+        // OPTIONAL GUIDE: 광고 재생 시작 시 필요한 UI 작업만 수행하세요
+        //                 (예: 플레이어 컨트롤 숨기기, 광고 표시자 노출)
     }
 
     func onCompleted() {

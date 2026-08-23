@@ -21,7 +21,11 @@ sidebar_label: VOD Pre-roll, Mid-roll, Post-roll 광고 적용
 
 ### 2. 광고 이벤트 수신 – `FlowerAdsManagerListener`
 
-> **VOD 콘텐츠에 광고를 삽입하는 경우**, 광고 재생 시점에 맞춰 본편을 일시정지하거나, 광고 종료 후 본편을 재개하는 등 **비즈니스 로직이 필요할 수 있습니다.** 이를 위해 Flower SDK는 **광고 이벤트를 수신하는 리스너 인터페이스**를 제공하며, 아래와 같이 구현할 수 있습니다.
+> **VOD 콘텐츠에 광고를 삽입하는 경우**, 광고 종료 후 본편을 재개하는 등 **비즈니스 로직이 필요할 수 있습니다.** 이를 위해 Flower SDK는 **광고 이벤트를 수신하는 리스너 인터페이스**를 제공하며, 아래와 같이 구현할 수 있습니다.
+
+:::caution `onPlay`에서 player를 pause하지 마세요
+SDK는 광고 재생 시 `MediaPlayerHook`을 통해 전달받은 player를 재사용합니다. 따라서 광고 재생을 의미하는 `onPlay` 이벤트에서 player를 pause 시킬 경우 광고가 중지되게 됩니다. `onPlay`에서는 `yourPlayer.pause()`와 같은 일시정지 호출을 하지 마세요. 본편 재생 재개는 아래 `onCompleted`에서 처리합니다.
+:::
 
 ```javascript
 const adsManagerListener = {
@@ -40,8 +44,11 @@ const adsManagerListener = {
     },
 
     onPlay() {
-        // TODO GUIDE: pause VOD content
-        yourPlayer.pause();
+        // NOTE: 이 시점에 player를 pause하지 마세요.
+        //       SDK는 광고 재생 시 MediaPlayerHook으로 전달받은 player를 재사용하므로,
+        //       onPlay에서 player를 pause 시키면 광고가 중지됩니다.
+        // OPTIONAL GUIDE: 광고 재생 시작 시 필요한 UI 작업만 수행하세요
+        //                 (예: 플레이어 컨트롤 숨기기, 광고 표시자 노출)
     },
 
     onCompleted() {

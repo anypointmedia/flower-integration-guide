@@ -282,9 +282,10 @@ For FlowerPlayer:
   Same as linear-tv — listener is optional for UI control only.
 
 For MediaPlayerHook:
-  VOD requires active content pause/resume.
+  VOD requires the listener to resume the content after each ad break.
   - onPrepare: Call flowerAdView.adsManager.play()
-  - onPlay: Pause content (player.pause())
+  - onPlay: Do NOT pause the content. The SDK reuses the player passed through
+    MediaPlayerHook to play the ad, so pausing it here stops the ad.
   - onCompleted: Resume content (player.play()) if not ended
   - onError: Resume content if not ended
 
@@ -306,7 +307,8 @@ For MediaPlayerHook:
           }
       }
       func onPlay() {
-          DispatchQueue.main.async { self.view.player.pause() }
+          // Do NOT pause the player here - the SDK reuses this same player to play the ad,
+          // so pausing it stops the ad.
       }
       func onCompleted() {
           DispatchQueue.main.async {

@@ -130,6 +130,10 @@ const styles = StyleSheet.create({
 `requestVodAd()` needs the player to exist, exactly like `changeChannelUrl()` — call it after `onLoad`, not while mounting. Unlike the linear case there is no source swap afterwards, so `onLoad` fires only once and no re-entry guard would be strictly necessary; the ref above simply keeps the component safe against remounts.
 :::
 
+:::caution Pause the content on `prepare`, never on `play`
+The SDK does not build its own player for the break — it reuses the player it took over from `<Video nativeID={nativeId}>`. Pause the content when `prepare` arrives, as above, and leave the player untouched on `play`: because `play` means the ad has started playing, pausing the player there stops the ad itself.
+:::
+
 ## Pre-roll, Mid-roll and Post-roll
 
 The break positions come from the ad response, placed against the `durationMs` you supply — so the value must be the real total duration of the content, in milliseconds.
