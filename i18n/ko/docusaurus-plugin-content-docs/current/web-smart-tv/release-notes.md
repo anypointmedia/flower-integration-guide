@@ -7,7 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
-| 2.3.11 | 2026.08.23 | **Feature** <ol><li>DASH 스트림의 원본 스트림 오류 보정 기능 추가</li><li>Linear TV 환경에서 광고 스킵 기능 개선</li><li>DASH 세그먼트 타임라인 추출 로직 개선</li><li>Linear TV 광고 브레이크 구간에서 스트림 variant 변경 시 HLS 조작 안정화</li><li>Linear TV 진입 시 DASH 광고 구간의 잔여 시간 재활용 기능 추가(23초 이상 남은 경우)</li><li>Linear TV DASH 스트림의 광고 스킵 기능 추가</li><li>Shaka Player 지원 추가</li></ol> |
+| 2.3.11 | 2026.08.27 | **Feature** <ol><li>DASH 스트림의 원본 스트림 오류 보정 기능 추가</li><li>Linear TV 환경에서 광고 스킵 기능 개선</li><li>DASH 세그먼트 타임라인 추출 로직 개선</li><li>Linear TV 광고 브레이크 구간에서 스트림 variant 변경 시 HLS 조작 안정화</li><li>Linear TV 진입 시 DASH 광고 구간의 잔여 시간 재활용 기능 추가(23초 이상 남은 경우)</li><li>Linear TV DASH 스트림의 광고 스킵 기능 추가</li><li>Shaka Player 지원 추가</li></ol> |
 | 2.3.10 | 2026.08.05 | **BugFix** <ol><li>m3u8 플레이리스트 URL이 리다이렉트될 때 광고가 삽입되지 않는 문제 수정</li></ol> |
 | 2.3.8 | 2026.06.29 | **Feature** <ol><li>스트림 내 서로 다른 SCTE-35 이벤트의 splice event id 재사용 지원</li></ol> **BugFix** <ol><li>`FlowerAdView` 재사용 시 자원 해제 오류 수정</li></ol> |
 | 2.3.7 | 2026.05.21 | **Feature** <ol><li>광고 요청 시 애드 브레이크 구분 값 추가 전달</li><li>광고 추적 방지 매크로 지원 추가</li></ol> |
