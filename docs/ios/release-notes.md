@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.12 | Aug 27, 2026 | **BugFix** <ol><li>Fixed an issue where ad tracking intermittently failed when skipping an ad in Linear TV</li></ol> |
 | 2.3.11 | Aug 21, 2026 | **Feature** <ol><li>Added correction of errors in the origin DASH stream</li><li>Improved the ad skip feature in Linear TV</li><li>Improved the DASH segment timeline extraction logic</li><li>Stabilized HLS manipulation when the stream variant changes during an ad break in Linear TV</li></ol> |
 | 2.3.9 | July 28, 2026 | **Feature** <ol><li>Added Swift 6 support</li><li>Added support for controlling ad playback directly in Linear TV. See [Direct Ad Playback Control](./ad-insertion/linear-tv-fast/direct-ad-playback-control).</li></ol> |
 | 2.3.8 | July 21, 2026 | **Feature** <ol><li>Discontinued support for screen casting to an external screen. To cast, call `FlowerAdsManager.stop()` and use the original stream URL instead.</li></ol> |

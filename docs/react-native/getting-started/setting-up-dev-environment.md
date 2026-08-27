@@ -47,7 +47,7 @@ npm install @anypoint/flower-sdk-react-native react-native-video
 To pin a specific version:
 
 ```bash
-npm install @anypoint/flower-sdk-react-native@1.0.0
+npm install @anypoint/flower-sdk-react-native@1.0.1
 ```
 
 ## Android Configuration

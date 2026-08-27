@@ -47,7 +47,7 @@ npm install @anypoint/flower-sdk-react-native react-native-video
 특정 버전을 고정하려면:
 
 ```bash
-npm install @anypoint/flower-sdk-react-native@1.0.0
+npm install @anypoint/flower-sdk-react-native@1.0.1
 ```
 
 ## Android 설정

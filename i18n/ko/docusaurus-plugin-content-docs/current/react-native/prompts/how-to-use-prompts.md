@@ -44,7 +44,7 @@ sidebar_position: 0
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | 광고 콘텐츠 유형 |
 | `PLAYER_TYPE` | `react-native-video` \| `bitmovin` | 뷰를 소유한 플레이어 라이브러리 |
-| `SDK_VERSION` | 예: `1.0.0` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
+| `SDK_VERSION` | 예: `1.0.1` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
 
 ## AD_TYPE 선택
 
