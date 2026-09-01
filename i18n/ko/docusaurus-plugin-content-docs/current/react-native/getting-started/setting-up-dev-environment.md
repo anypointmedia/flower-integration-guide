@@ -47,7 +47,7 @@ npm install @anypoint/flower-sdk-react-native react-native-video
 특정 버전을 고정하려면:
 
 ```bash
-npm install @anypoint/flower-sdk-react-native@1.0.1
+npm install @anypoint/flower-sdk-react-native@1.0.2
 ```
 
 ## Android 설정
@@ -110,7 +110,7 @@ buildscript {
         // react-native-video와 Flower media3 어댑터가 같은 버전을 사용해야 합니다.
         media3Version = "1.8.0"
         // (선택) 내부적으로 사용할 Android SDK 버전을 고정합니다.
-        flowerSdkVersion = "2.9.22"
+        flowerSdkVersion = "2.9.23"
     }
 }
 ```

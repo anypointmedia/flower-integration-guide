@@ -44,7 +44,7 @@ Before using any prompt, replace the `{{...}}` placeholders:
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | Type of ad content |
 | `PLAYER_TYPE` | `react-native-video` \| `bitmovin` | Which player library owns the view |
-| `SDK_VERSION` | e.g. `1.0.1` | Version of `@anypoint/flower-sdk-react-native` to install |
+| `SDK_VERSION` | e.g. `1.0.2` | Version of `@anypoint/flower-sdk-react-native` to install |
 
 ## Choosing AD_TYPE
 

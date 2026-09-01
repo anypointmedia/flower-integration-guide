@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.13 | 2026.09.01 | **BugFix** <ol><li>DRM이 적용된 HLS 라이브 스트림에서 세그먼트 키 설정이 누락되는 케이스 수정</li></ol> |
 | 2.3.12 | 2026.08.27 | **BugFix** <ol><li>Linear TV에서 광고 스킵 시 간헐적으로 광고 트래킹이 실패하는 오류 수정</li></ol> |
 | 2.3.11 | 2026.08.21 | **Feature** <ol><li>DASH 스트림의 원본 스트림 오류 보정 기능 추가</li><li>Linear TV 환경에서 광고 스킵 기능 개선</li><li>DASH 세그먼트 타임라인 추출 로직 개선</li><li>Linear TV 광고 브레이크 구간에서 스트림 variant 변경 시 HLS 조작 안정화</li></ol> |
 | 2.3.9 | 2026.07.28 | **Feature** <ol><li>Swift 6 지원 추가</li><li>Linear TV에서 광고 재생을 직접 제어하는 방식 지원 추가. [광고 재생 직접 제어](./ad-insertion/linear-tv-fast/direct-ad-playback-control) 문서를 참고하세요.</li></ol> |

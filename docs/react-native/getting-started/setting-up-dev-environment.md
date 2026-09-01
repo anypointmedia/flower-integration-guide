@@ -47,7 +47,7 @@ npm install @anypoint/flower-sdk-react-native react-native-video
 To pin a specific version:
 
 ```bash
-npm install @anypoint/flower-sdk-react-native@1.0.1
+npm install @anypoint/flower-sdk-react-native@1.0.2
 ```
 
 ## Android Configuration
@@ -110,7 +110,7 @@ buildscript {
         // react-native-video and the Flower media3 adapter must agree on this.
         media3Version = "1.8.0"
         // Optional: pins the underlying Android SDK version.
-        flowerSdkVersion = "2.9.22"
+        flowerSdkVersion = "2.9.23"
     }
 }
 ```

@@ -59,7 +59,7 @@ STEP 3 — Android configuration
           media3Version = "1.8.0"
 
           // Optional: pins the underlying Android SDK version.
-          flowerSdkVersion = "2.9.22"
+          flowerSdkVersion = "2.9.23"
       }
   }
 
