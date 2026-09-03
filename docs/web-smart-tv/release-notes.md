@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.13 | Sep 03, 2026 | **BugFix** <ol><li>Fixed a case where the HLS playlist window grows instead of sliding in Linear TV</li></ol> |
 | 2.3.12 | Sep 01, 2026 | **BugFix** <ol><li>Fixed a case where the segment key was not set for DRM-protected HLS live streams</li></ol> |
 | 2.3.11 | Aug 27, 2026 | **Feature** <ol><li>Added correction of errors in the origin DASH stream</li><li>Improved the ad skip feature in Linear TV</li><li>Improved the DASH segment timeline extraction logic</li><li>Stabilized HLS manipulation when the stream variant changes during an ad break in Linear TV</li><li>Added reuse of the remaining time of a DASH ad break when entering Linear TV (when 23 seconds or more remain)</li><li>Added the ad skip feature for DASH streams in Linear TV</li><li>Added support for Shaka Player</li></ol> |
 | 2.3.10 | Aug 05, 2026 | **BugFix** <ol><li>Fixed an issue where ads could not be inserted when the m3u8 playlist URL was redirected</li></ol> |
