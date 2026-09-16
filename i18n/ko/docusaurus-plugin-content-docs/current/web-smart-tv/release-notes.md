@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.14 | 2026.09.16 | **BugFix** <ol><li>Manifest Manipulation을 사용하지 않는 경우 `FlowerAdsManager` 종료 처리 후 다음 광고 요청 시 발생하는 NPE 문제 수정</li></ol> |
 | 2.3.13 | 2026.09.03 | **BugFix** <ol><li>Linear TV HLS에서 재생목록 윈도우가 슬라이딩되지 않고 증가하는 케이스 대응</li></ol> |
 | 2.3.12 | 2026.09.01 | **BugFix** <ol><li>DRM이 적용된 HLS 라이브 스트림에서 세그먼트 키 설정이 누락되는 케이스 수정</li></ol> |
 | 2.3.11 | 2026.08.27 | **Feature** <ol><li>DASH 스트림의 원본 스트림 오류 보정 기능 추가</li><li>Linear TV 환경에서 광고 스킵 기능 개선</li><li>DASH 세그먼트 타임라인 추출 로직 개선</li><li>Linear TV 광고 브레이크 구간에서 스트림 variant 변경 시 HLS 조작 안정화</li><li>Linear TV 진입 시 DASH 광고 구간의 잔여 시간 재활용 기능 추가(23초 이상 남은 경우)</li><li>Linear TV DASH 스트림의 광고 스킵 기능 추가</li><li>Shaka Player 지원 추가</li></ol> |
