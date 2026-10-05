@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.9.27 | 2026.10.05 | **Feature** <ol><li>동일 광고 브레이크 내 광고 중복 허용 옵션 추가</li></ol> **BugFix** <ol><li>HLS에서 cue-in 태그가 일찍 들어오는 경우 광고 브레이크 종료 이벤트가 늦게 전달되는 오류 수정</li></ol> |
 | 2.9.26 | 2026.09.29 | **BugFix** <ol><li>DASH DRM 스트림에서 `ContentProtection` 값이 누락되는 오류 수정</li></ol> |
 | 2.9.25 | 2026.09.16 | **BugFix** <ol><li>Manifest Manipulation을 사용하지 않는 경우 `FlowerAdsManager` 종료 처리 후 다음 광고 요청 시 발생하는 NPE 문제 수정</li></ol> |
 | 2.9.24 | 2026.09.03 | **BugFix** <ol><li>Linear TV HLS에서 재생목록 윈도우가 슬라이딩되지 않고 증가하는 케이스 대응</li></ol> |

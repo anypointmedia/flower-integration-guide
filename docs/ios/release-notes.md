@@ -7,6 +7,7 @@ sidebar_label: Release Notes
 
 | **Version** | **Date** | **Changes** |
 | ---| ---| --- |
+| 2.3.16 | Oct 05, 2026 | **Feature** <ol><li>Added an option to allow duplicate ads within the same ad break</li></ol> **BugFix** <ol><li>Fixed an issue where the ad break end event was delayed when the cue-in tag arrived early in HLS streams</li></ol> |
 | 2.3.15 | Sep 16, 2026 | **BugFix** <ol><li>Fixed a `NullPointerException` that occurred on the next ad request after `FlowerAdsManager` was terminated when manifest manipulation is not used</li></ol> |
 | 2.3.14 | Sep 03, 2026 | **BugFix** <ol><li>Fixed a case where the HLS playlist window grows instead of sliding in Linear TV</li></ol> |
 | 2.3.13 | Sep 01, 2026 | **BugFix** <ol><li>Fixed a case where the segment key was not set for DRM-protected HLS live streams</li></ol> |
