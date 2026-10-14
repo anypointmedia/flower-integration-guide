@@ -39,9 +39,12 @@ const adsManagerListener = {
     },
 
     onError(error) {
-        // TODO GUIDE: restart to play Linear TV on ad error
-        releasePlayer();
-        playLinearTv();
+        // TODO GUIDE: on error, stop the ads manager, release the player, and restart the channel
+        // (Optional) Count restarts and stop retrying after a few attempts so a broken channel does not loop.
+        flowerAdView.adsManager.stop();
+        releasePlayer(); // e.g. hls.destroy() for HLS.js, player.unload() for Bitmovin
+        // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+        playLinearTv({ withPreroll: false });  // new changeChannelUrl() -> load the returned URL -> play right away
     },
 
     onAdBreakSkipped(reason) {
@@ -51,6 +54,14 @@ const adsManagerListener = {
 flowerAdView.adsManager.addListener(adsManagerListener);
 ```
 
+:::info Recovering from `onError()`
+When `onError()` is called, stop the ads manager with `flowerAdView.adsManager.stop()`, release the player, and start the channel again: call `changeChannelUrl()` again, load the URL it returns, and play it. Do not reuse the URL returned before the error. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Pass the same parameters as the first start except `prerollAdTagUrl` (`null`), and load and play the returned URL right away, with the original listener kept registered; there is no pre-roll to wait for.
+
+`onError()` is also called once per incident when the channel stream stops on a fatal player error (for example, a fatal `hlsError` from HLS.js), with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`. Restart the channel in the same way, ideally with a fresh channel URL.
+
+`stop()` ends any ad break in progress, and the SDK can still call `onCompleted()` for that break after the restart has begun. Keep `onCompleted()` limited to UI work such as showing the player controls, and never start or reload playback from it, so this late call cannot start a second restart.
+:::
+
 ### 3. Passing the Player – `MediaPlayerHook`
 
 > For linear channels, you must pass the player that plays the main content to the SDK.
@@ -58,8 +69,9 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 #### Supported Players
 
 *   HLS.js
-*   Video.js
 *   Bitmovin Player
+*   dash.js
+*   Shaka Player
 
 These players pass the current player to the SDK by implementing the `MediaPlayerHook` interface.
 
@@ -108,20 +120,44 @@ Function used to change extraParams, the additional targeting information, durin
 
 API used to stop live broadcasts. No parameters.
 
+## Pre-roll Ads
+
+A channel pre-roll is an ad that plays once when the viewer enters a channel, before the channel stream starts. It is separate from the linear ads that replace the stream at ad markers.
+
+**Enabling it:** Pass the pre-roll ad tag URL issued by Anypoint Media as the `prerollAdTagUrl` argument of `changeChannelUrl()`. Pass `null` (or omit it) for no pre-roll. With FlowerHls, set `prerollAdTagUrl` in `FlowerLinearTvAdConfig` instead; see [Using Extended HLS.js](./using-extended-hlsjs.md#pre-roll-ads). `enterChannel()` with `MediaPlayerAdapter` has no pre-roll parameter.
+
+**How it plays:**
+
+1. `changeChannelUrl()` returns the stream URL right away, and the SDK requests the pre-roll in the background.
+2. When the pre-roll is ready, the SDK calls `onPrepare()`, plays the pre-roll in a video element of its own over the player, pauses the player, and calls `onPlay()`.
+3. When the pre-roll ends, the SDK calls `onCompleted()` and resumes the player.
+
+**Holding the stream:** When `prerollAdTagUrl` is set, do not load the returned URL right away. Store it, remove the main `FlowerAdsManagerListener`, and register a temporary listener. On the temporary listener's first `onCompleted()` (or `onError()`), load and play the stored URL, remove the temporary listener, and register the main listener again. This keeps the stream from flashing on screen before the pre-roll and from loading at the same time as the ad. Without `prerollAdTagUrl`, load the returned URL and call `play()` right away. The [example below](#linear-channel-ad-request-example) shows both paths.
+
+**No ad and failures:** The SDK also calls `onCompleted()` when there is no pre-roll ad, the ad request fails, or the pre-roll fails to play; a failed pre-roll is not reported through `onError()`. So the stream always starts. The temporary listener's `onError()` only starts the stream and restores the main listener; it does not call `stop()`, because there is no channel stream or linear ad break to stop yet.
+
+**Restart after `onError()`:** A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. The restart loads the returned URL and plays right away, keeping the main listener registered, and registers no temporary listener.
+
+**Channel change:** The first start of a channel and a switch to another channel use the pre-roll as configured. `changeChannelUrl()` for the next channel stops the current session, including a pre-roll still in progress, and requests the new channel's pre-roll. The stopped pre-roll does not call the temporary listener, so remove the previous temporary listener (and register the main listener again) before the new call, as the example does. Remove it as well before `stop()` when the viewer leaves the channel screen.
+
+**PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the app enters PIP and resumed when it returns, like VOD ads. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
+
 ## Linear Channel Ad Request Example
-
-:::tip Pre-roll Ads and Playback Start
-When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. The playback start behavior differs depending on whether `prerollAdTagUrl` is set.
-
-- **If `prerollAdTagUrl` is not set:** Set the returned URL on the player and call `videoElement.play()` directly to start content playback.
-- **If `prerollAdTagUrl` is set:** Do not load the returned URL on the player immediately. Instead, remove the existing `FlowerAdsManagerListener` and register a temporary listener. When the temporary listener's `onCompleted()` is called, load the returned URL on the player and start playback, then remove the temporary listener and re-register the original listener.
-
-This approach prevents the main content from briefly flashing on screen before the pre-roll ad starts, and avoids unnecessary network resource consumption caused by the ad and main content loading simultaneously.
-:::
 
 ### _HLS.js_
 ```javascript
-function playLinearTv() {
+let prerollListener = null;  // temporary listener while a channel pre-roll is pending
+
+// withPreroll: true for the first start of a channel, false for a restart after onError()
+function playLinearTv({ withPreroll = true } = {}) {
+    // A channel change stops a pending pre-roll without calling its listener:
+    // remove the temporary listener and restore the main one.
+    if (prerollListener) {
+        flowerAdView.adsManager.removeListener(prerollListener);
+        flowerAdView.adsManager.addListener(adsManagerListener);
+        prerollListener = null;
+    }
+
     const player = new Hls();
     const videoElement = document.querySelector('video');
     player.attachMedia(videoElement);
@@ -144,7 +180,8 @@ function playLinearTv() {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    const prerollAdTagUrl = 'https://ad_request?target=preroll';
+    // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+    const prerollAdTagUrl = withPreroll ? 'https://ad_request?target=preroll' : null;
 
     const changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         'https://XXX',
@@ -168,11 +205,12 @@ function playLinearTv() {
         // Load the stream URL and start playback after the pre-roll ad completes (onCompleted).
         flowerAdView.adsManager.removeListener(adsManagerListener);
 
-        const prerollListener = {
+        prerollListener = {
             onPrepare(adDurationMs) {},
             onPlay() {},
             onCompleted() {
                 // Load stream URL and start playback after pre-roll ad completes
+                // (also called when there is no pre-roll ad or it fails)
                 player.loadSource(changedChannelUrl);
                 player.on(Hls.Events.MANIFEST_PARSED, function() {
                     videoElement.play();
@@ -181,6 +219,7 @@ function playLinearTv() {
                 // Remove temporary listener and restore the original listener
                 flowerAdView.adsManager.removeListener(prerollListener);
                 flowerAdView.adsManager.addListener(adsManagerListener);
+                prerollListener = null;
             },
             onError(error) {
                 // Start stream playback and restore listener even on pre-roll ad error
@@ -191,6 +230,7 @@ function playLinearTv() {
 
                 flowerAdView.adsManager.removeListener(prerollListener);
                 flowerAdView.adsManager.addListener(adsManagerListener);
+                prerollListener = null;
             },
             onAdBreakSkipped(reason) {}
         };
@@ -208,7 +248,7 @@ function onStreamProgramChanged(targetingInfo) {
 
 If you are using a player that is not officially supported by the SDK, you can implement the `MediaPlayerAdapter` interface to directly control the player.
 
-Instead of using `changeChannelUrl()` with `MediaPlayerHook`, you use the `enterChannel()` API with a `MediaPlayerAdapter` implementation.
+Instead of using `changeChannelUrl()` with `MediaPlayerHook`, you use the `enterChannel()` API with a `MediaPlayerAdapter` implementation. `enterChannel()` has no `prerollAdTagUrl` parameter, so this path has no [channel pre-roll](#pre-roll-ads).
 
 ### FlowerAdsManager.enterChannel(...)
 

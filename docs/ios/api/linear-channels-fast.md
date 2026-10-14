@@ -21,6 +21,8 @@ The function above allows you to dynamically change the stream URL of a live bro
 | channelStreamHeaders | map | (Optional) HTTP header information to be added when requesting the original media stream |
 | prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll ads |
 
+When `prerollAdTagUrl` is set, the SDK requests a channel pre-roll that plays once before the live stream, in the SDK's own ad player. The method still returns the stream URL right away; load it on the player only after the pre-roll ends (the first `onCompleted` or `onError` of a temporary listener). If there is no pre-roll ad, the request fails, or the pre-roll cannot be played, the SDK still calls `onCompleted`. Each call stops the previous session, including a pre-roll that is still playing, so a channel switch requests the new channel's pre-roll. A restart after `onError` passes `nil`. See [Pre-roll Ads](../ad-insertion/linear-tv-fast/manual-player-control#pre-roll-ads).
+
 ### FlowerAdsManager.changeChannelExtraParams
 
 This function above allows you to change extraParams, which is additional targeting information, during a live broadcast. The parameter is described below:
@@ -50,6 +52,7 @@ This method stops the playback of linear channels. There are no parameters.
 // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
 // arg5: adTagHeaders, (Optional) values included in headers for ad request
 // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
+// arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads (nil if not needed)
 let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
     videoUrl: "https://XXX",
     adTagUrl: "https://ad_request",
@@ -60,6 +63,9 @@ let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
     channelStreamHeaders: ["custom-stream-header": "custom-stream-header-value"],
     prerollAdTagUrl: "https://preroll_ad_request"
 )
+// With prerollAdTagUrl, do not load changedChannelUrl yet: load it when the pre-roll ends
+// (first onCompleted/onError of a temporary listener, on the main thread).
+// Without prerollAdTagUrl, load it right away.
 player.insert(AVPlayerItem(url: URL(string: changedChannelUrl)!), after: nil)
 ...
 // TODO GUIDE: change extraParams during stream playback

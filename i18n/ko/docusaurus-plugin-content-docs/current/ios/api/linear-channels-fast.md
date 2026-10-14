@@ -22,6 +22,8 @@ sidebar_label: "실시간 채널 / FAST"
 | channelStreamHeaders | map | (Optional) 원본 스트림 요청 시 추가할 HTTP 헤더 정보 |
 | prerollAdTagUrl | string | (Optional) 광고 서버에서 발급된 프리롤용 광고 태그 URL |
 
+`prerollAdTagUrl`을 설정하면 SDK는 라이브 스트림보다 먼저 한 번 재생되는 채널 프리롤을 요청하고, SDK 자체 광고 플레이어에서 재생합니다. 이 메서드는 그래도 스트림 URL을 바로 반환하므로, 반환된 URL은 프리롤이 끝난 뒤(임시 리스너의 첫 번째 `onCompleted` 또는 `onError`)에 플레이어에 로드하세요. 프리롤 광고가 없거나, 요청이 실패하거나, 프리롤을 재생할 수 없는 경우에도 SDK는 `onCompleted`를 호출합니다. 호출할 때마다 아직 재생 중인 프리롤을 포함해 이전 세션이 중지되므로, 채널을 전환하면 새 채널의 프리롤이 요청됩니다. `onError` 후 재시작할 때는 `nil`을 전달합니다. [프리롤 광고](../ad-insertion/linear-tv-fast/manual-player-control#프리롤-광고)를 참고하세요.
+
 ### FlowerAdsManager.changeChannelExtraParams
 
 추가 타겟팅 정보인 extraParams를 실시간 방송 도중에 변경할 수 있는 함수입니다. 매개변수는 아래와 같습니다:
@@ -51,6 +53,7 @@ sidebar_label: "실시간 채널 / FAST"
 // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
 // arg5: adTagHeaders, (Optional) values included in headers for ad request
 // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
+// arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads (nil if not needed)
 let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
     videoUrl: "https://XXX",
     adTagUrl: "https://ad_request",
@@ -61,6 +64,9 @@ let changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
     channelStreamHeaders: ["custom-stream-header": "custom-stream-header-value"],
     prerollAdTagUrl: "https://preroll_ad_request"
 )
+// With prerollAdTagUrl, do not load changedChannelUrl yet: load it when the pre-roll ends
+// (first onCompleted/onError of a temporary listener, on the main thread).
+// Without prerollAdTagUrl, load it right away.
 player.insert(AVPlayerItem(url: URL(string: changedChannelUrl)!), after: nil)
 ...
 // TODO GUIDE: change extraParams during stream playback

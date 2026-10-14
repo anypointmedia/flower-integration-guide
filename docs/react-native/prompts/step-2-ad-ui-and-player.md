@@ -64,6 +64,10 @@ If PLAYER_TYPE is "react-native-video":
     />
   </View>
 
+If AD_TYPE is "vod", also mount the <Video> paused (paused={!contentStarted}, wired up in
+Step 3): the SDK does not hold the content for a pre-roll. onLoad still fires while
+paused, so the handover is unaffected.
+
   const styles = StyleSheet.create({
     player: {width: '100%', aspectRatio: 16 / 9, backgroundColor: '#000'},
   });

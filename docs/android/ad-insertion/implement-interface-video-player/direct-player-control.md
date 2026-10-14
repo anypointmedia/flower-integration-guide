@@ -350,6 +350,14 @@ override fun getPlayerVersion(): String? {
 }
 ```
 
+## Linear TV Pre-roll Ads
+
+The `changeChannelUrl()` overload that takes a `MediaPlayerAdapter` also accepts `prerollAdTagUrl`. With a pre-roll, start the channel in the same way as with `MediaPlayerHook`: hold the returned URL, and load and play it when the pre-roll ends (first `onCompleted()` or `onError()` of a temporary listener). See [Pre-roll Ads](../linear-tv-fast/manual-player-control#pre-roll-ads).
+
+The SDK calls the adapter's `pause()` when the pre-roll starts and `resume()` when it ends, before the app loads the stream. Make both safe to call while nothing is loaded.
+
+`enterChannel()` (Direct Ad Playback Control) has no pre-roll parameter, so a channel pre-roll is not available in that flow.
+
 ## Supporting Models
 
 The following models are required when implementing MediaPlayerAdapter.

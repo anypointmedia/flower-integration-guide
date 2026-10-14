@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# VOD Pre-roll, Mid-roll, Post-roll 광고 적용
+# VOD 프리롤, Mid-roll, Post-roll 광고 적용
 
 본 가이드는 Flower SDK를 사용하여 VOD 콘텐츠에 광고를 삽입하는 전체 과정을 안내합니다. 광고 연동은 다음 단계를 따릅니다:
 1. **광고 UI 선언:** 광고를 표시하기 위해 화면에 `FlowerAdView`를 배치합니다.
@@ -21,34 +21,56 @@ sidebar_position: 2
 ### 2. 광고 이벤트 수신 -- `FlowerAdsManagerListener`
 
 > VOD 콘텐츠 재생 중 광고 이벤트에 대응하여 재생을 제어하려면 `FlowerAdsManagerListener` 인터페이스를 구현합니다.
-> 이를 통해 광고 종료 후 본편 재생을 재개하고, 재생 오류 또는 스킵 이벤트를 처리할 수 있습니다. 아래와 같이 구현할 수 있습니다:
+> 이를 통해 프리롤 광고 종료 후 본편 재생을 시작하고, 재생 오류 또는 스킵 이벤트를 처리할 수 있습니다. 아래와 같이 구현할 수 있습니다:
 
-:::caution `onPlay`에서 player를 pause하지 마세요
-SDK는 광고 재생 시 `MediaPlayerHook`을 통해 전달받은 player를 재사용합니다. 따라서 광고 재생을 의미하는 `onPlay` 이벤트에서 player를 pause 시킬 경우 광고가 중지되게 됩니다. `onPlay`에서는 `player.playWhenReady = false`와 같은 일시정지 호출을 하지 마세요. 본편 재생 재개는 아래 `onCompleted`에서 처리합니다.
+:::caution VOD Ad Break 전후로 본편 플레이어를 일시정지, 탐색, 재로드하지 마세요
+기본 설정(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`)에서 SDK는 VOD 광고를 별도 광고 플레이어에서 재생하며 본편 위에 표시합니다. Mid-roll의 경우 SDK는 Mid-roll 위치에서 `onPrepare`가 호출될 때 본편을 일시정지하고, Ad Break가 끝나면 본편을 `rewindDuration`(기본 5초)만큼 되돌린 뒤 재개합니다. Post-roll 이후에는 본편이 이미 끝났으므로 재개하지 않습니다. VOD Ad Break 전후로 앱에서 본편을 일시정지, 탐색(seek), 재로드하지 마세요. `onPlay`와 `onError`에서도 마찬가지입니다.
+
+`setIgnoreAdBreakInPIPMode(false)`인 경우 SDK는 `MediaPlayerHook`을 통해 전달받은 player 안에서 광고를 재생하므로, player를 pause 시키면 광고가 중지됩니다. 이 모드에 대해서는 [PIP 모드 지원](./pip-mode-support) 페이지를 참고하세요.
+:::
+
+:::info Mid-roll의 `onPrepare` 호출 시점
+SDK는 Mid-roll 광고를 미리 요청해 두고, 본편이 Mid-roll 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play()`를 호출하세요.
+:::
+
+:::info `onError`가 호출되는 경우
+VOD에서 SDK는 다음 경우에 `onError`를 호출합니다.
+- **광고 재생 실패**: 프리롤, Mid-roll, Post-roll의 광고가 로드 또는 재생에 실패한 경우(예: 광고 미디어 디코딩 오류, 광고 미디어에 접근 불가).
+- **SDK가 복구하지 않는 본편 재생 중단**: 아래 "본편을 재생할 수 없는 경우"를 참고하세요.
+- **SDK 로컬 프록시 서버 응답 실패**: VOD 광고 미디어는 이 서버를 거쳐 캐시됩니다.
+
+VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 아닙니다. 이때 SDK는 `onCompleted`를 호출합니다(광고가 없으면 `onAdBreakSkipped(1)` 후 `onCompleted`).
+:::
+
+:::info 실패한 Ad Break의 `onError` 처리
+Ad Break가 실패하면 SDK는 `onError`를 호출하기 **전에** 본편을 되돌려 놓습니다. 따라서 핸들러가 실행되는 시점에는 본편이 이미 다시 재생 중입니다.
+- **프리롤 오류** (`!isContentPrepared`): 본편이 아직 시작되지 않았습니다. 프리롤이 정상 종료된 경우와 같이 VOD 소스를 로드하고 재생을 시작합니다.
+- **Mid-roll 오류**: SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. `setIgnoreAdBreakInPIPMode(false)`인 경우에는 광고 플레이어가 실패한 광고를 버리고, 앱의 원래 `MediaItem`(또는 소스)으로 플레이리스트를 다시 구성해 그 위치에서 본편을 재생합니다. 본편을 정지, 탐색(seek), 재로드, 재개하지 말고 오류를 로그로만 남기세요.
+- **Post-roll 오류** (`isContentEnd`): 본편은 이미 끝났습니다. Post-roll이 정상 종료된 경우와 같이 재생 종료 시나리오를 실행합니다.
+
+실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며, `onError`보다 먼저 올 수도 나중에 올 수도 있습니다. 아래 예시처럼 `isContentPrepared`를 확인하는 등, 같은 Ad Break에 두 핸들러가 모두 실행되어도 문제가 없도록 구현하세요.
+:::
+
+:::info 본편을 재생할 수 없는 경우
+본편 재생이 중단되었고 SDK가 이를 복구하지 않을 때, 플레이어 어댑터가 장애 1건당 한 번 `onError`를 호출합니다. 메시지는 `playback unrecoverable (<reason>) - url: <url>`이며, `cause`에는 플레이어의 오류가 담깁니다. 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다.
+- **Media3 ExoPlayer / ExoPlayer2**: SDK가 자동 복구하지 않는 치명적 플레이어 오류, Flower 설정에서 SDK의 `BehindLiveWindow` 자동 복구가 꺼져 있을 때의 `BehindLiveWindow`, 3회 복구를 시도한 뒤에도 멈춰 있는 라이브 플레이리스트.
+- **Bitmovin Player**: 3회 재로드를 시도한 뒤에도 실패한 재생, 또는 재로드할 소스가 없는 경우.
+
+VOD에서는 본편을 다시 로드하거나 사용자에게 오류를 표시하세요. `setIgnoreAdBreakInPIPMode(false)`인 경우 광고 플레이어와 본편 플레이어 어댑터가 앱의 player를 함께 사용하므로, 광고 실패 1건이 두 번 보고될 수 있습니다.
 :::
 
 ```kotlin
 val adsManagerListener = object : FlowerAdsManagerListener {
     override fun onPrepare(adDurationMs: Int) {
         CoroutineScope(Dispatchers.Main).launch {
-            if (player.isPlaying) {
-                // OPTIONAL GUIDE: additional actions before ad playback
-                showNotification("Ads will start in a moment.")
-                delay(5000)
-
-                // TODO GUIDE: play midroll ad
-                flowerAdView.adsManager.play()
-            } else {
-                // TODO GUIDE: play preroll ad
-                flowerAdView.adsManager.play()
-            }
+            // TODO GUIDE: 광고 재생 (pre-roll, mid-roll, post-roll)
+            flowerAdView.adsManager.play()
         }
     }
 
     override fun onPlay() {
         // NOTE: 이 시점에 player를 pause하지 마세요.
-        //       SDK는 광고 재생 시 MediaPlayerHook으로 전달받은 player를 재사용하므로,
-        //       onPlay에서 player를 pause 시키면 광고가 중지됩니다.
+        //       mid-roll 전후의 본편 일시정지와 재개는 SDK가 직접 처리합니다.
         // OPTIONAL GUIDE: 광고 재생 시작 시 필요한 UI 작업만 수행하세요
         //                 (예: 플레이어 컨트롤 숨기기, 광고 표시자 노출)
     }
@@ -61,8 +83,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
                 prepareContentSource()
                 isContentPrepared = true
             } else if (!isContentEnd) {
-                // TODO GUIDE: mid-roll 광고가 종료된 시점 - 본편 VOD 재생을 재개합니다.
-                player.playWhenReady = true
+                // NOTE: mid-roll 광고가 종료된 시점입니다.
+                //       본편 VOD는 SDK가 rewindDuration만큼 되돌려 직접 재개합니다.
             } else {
                 // TODO GUIDE: post-roll 광고가 종료된 시점 - VOD 재생이 완전히 종료되었습니다.
                 //             재생 종료 이후 수행해야 할 작업을 여기에 구현하세요
@@ -72,15 +94,23 @@ val adsManagerListener = object : FlowerAdsManagerListener {
     }
 
     override fun onError(error: FlowerError?) {
+        // NOTE: Ad Break가 실패하면 SDK는 onError 호출 전에 본편을 되돌려 놓습니다.
+        //       광고 오류에 대해 본편을 정지, 탐색(seek), 재로드하지 마세요.
+        logger.warn { "onError: ${error?.message}" }
         CoroutineScope(Dispatchers.Main).launch {
             if (!isContentPrepared) {
-                // TODO GUIDE: pre-roll 광고 실패 시에도 VOD 소스를 로드합니다.
+                // TODO GUIDE: pre-roll 광고 실패 - VOD 소스를 로드하고 재생을 시작합니다.
+                //             같은 Ad Break에 대해 onCompleted도 호출될 수 있습니다.
                 prepareContentSource()
                 isContentPrepared = true
-            } else if (!isContentEnd) {
-                // TODO GUIDE: resume VOD content on ad error
-                player.playWhenReady = true
+            } else if (error?.message?.startsWith("playback unrecoverable") == true) {
+                // TODO GUIDE: 본편 재생이 중단되었고 SDK가 복구하지 않습니다.
+                //             본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
+            } else if (isContentEnd) {
+                // TODO GUIDE: post-roll 광고가 실패한 시점 - VOD 재생이 완전히 종료되었습니다.
+                //             onCompleted와 동일한 재생 종료 이후 작업을 수행하세요.
             }
+            // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했으므로 할 일이 없습니다.
         }
     }
 
@@ -153,6 +183,10 @@ player.addListener(object : Player.Listener {
 })
 ```
 
+:::note
+`FlowerSdk.setIgnoreAdBreakInPIPMode(false)`인 경우 광고가 본편 플레이어의 미디어 아이템으로 재생되므로 Ad Break 전후에도 `STATE_ENDED`가 발생합니다. `notifyContentEnded()`를 호출하기 전에 현재 미디어 아이템이 본편인지 확인하세요. [PIP 모드 지원](./pip-mode-support#플레이어-이벤트-처리) 페이지를 참고하세요.
+:::
+
 #### FlowerAdsManager.stop()
 
 VOD 콘텐츠를 나갈 때 이 API를 호출합니다. 매개변수는 없습니다.
@@ -167,11 +201,11 @@ VOD 콘텐츠를 재개할 때 사용하는 API입니다. 매개변수는 없습
 
 ## VOD 광고 요청 예시
 
-:::tip pre-roll 광고가 끝난 뒤에 VOD 소스를 로드하세요
+:::tip 프리롤 광고가 끝난 뒤에 VOD 소스를 로드하세요
 `requestVodAd(...)` 호출 직후에 본편 VOD 소스를 플레이어에 바로 로드하지 마세요.
 `FlowerAdsManagerListener.onCompleted()`(또는 `onError()`)가 호출된 시점에 본편이 아직 준비되지 않았는지(예: `isContentPrepared == false`) 판단한 뒤, 그때 VOD 소스를 로드하고 재생을 시작해야 합니다.
 
-`requestVodAd(...)` 직후에 VOD 소스를 로드하면 pre-roll 광고가 재생되기 전에 본편의 첫 프레임이 잠깐 노출될 수 있습니다.
+`requestVodAd(...)` 직후에 VOD 소스를 로드하면 프리롤 광고가 재생되기 전에 본편의 첫 프레임이 잠깐 노출될 수 있습니다.
 :::
 
 ```kotlin

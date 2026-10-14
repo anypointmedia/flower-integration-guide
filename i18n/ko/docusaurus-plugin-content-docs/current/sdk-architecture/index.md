@@ -9,5 +9,5 @@ FLOWER SDK가 콘텐츠 유형에 따라 동작하는 방식과 구조에 대해
 ## 콘텐츠 유형
 
 - [OTT Linear TV (incl. FAST) 광고](./ott-linear-tv-fast-ads) — 실시간 채널 및 FAST 광고 삽입
-- [VOD 광고](./vod-ads) — pre-roll, mid-roll, post-roll
+- [VOD 광고](./vod-ads) — 프리롤, mid-roll, post-roll
 - [Advanced Ad Formats](./advanced-ad-formats) — 전면(인터스티셜) 광고

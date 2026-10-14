@@ -21,10 +21,37 @@ This guide walks you through the complete process of inserting ads into VOD cont
 ### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To control VOD content playback in response to ad events, implement the `FlowerAdsManagerListener` interface.  
-> This allows you to resume the main content after an ad break, and handle playback errors or skip events. This can be implemented as follows:
+> This allows you to start the main content after the pre-roll, and handle playback errors or skip events. This can be implemented as follows:
 
-:::caution Do not pause the player in `onPlay`
-The SDK reuses the player it received through `MediaPlayerHook` when it plays an ad. Because `onPlay` means the ad has started playing, pausing the player in that event stops the ad itself — do not call `player.pause()` inside `onPlay`. Resuming the main content is handled in `onCompleted` (see below).
+:::caution Do not pause, seek, or reload the content player around a VOD ad break
+By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK plays VOD ads in its own ad player, shown over the content. For a mid-roll, the SDK pauses the content when `onPrepare` is called at the mid-roll's position, and when the ad break ends, seeks the content back by 5 seconds (`rewindDuration`; configurable through `FlowerVodAdConfig` only when using `FlowerAVPlayer`) and resumes it. The SDK does not pause the content for a pre-roll, because the content is not loaded yet. After a post-roll, the content has already ended, so it is not resumed. Do not pause, seek, or reload the content yourself around a VOD ad break, including in `onPlay` and `onError` (see [below](#when-onerror-is-called)).
+
+With `setIgnoreAdBreakInPIPMode(false)`, the SDK plays the ads inside the player it received through `MediaPlayerHook`, so pausing the player stops the ad itself. See [PIP Mode Support](./pip-mode-support) for this mode.
+:::
+
+:::info When `onPrepare` is called for a mid-roll
+The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
+:::
+
+#### When `onError` is called
+
+For VOD, `onError` is called when:
+
+- **An ad fails to play** in a pre-roll, mid-roll, or post-roll (for example, the ad media cannot be decoded or cannot be reached).
+- **The content stops playing and the SDK will not recover it.** After 3 recovery attempts, the SDK calls `onError` once per incident with the message `playback unrecoverable after 3 recovery attempts (<trigger>) - url: <url>`. A new incident starts once playback runs again. Reload the content or show an error to the user.
+
+A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error: the SDK calls `onCompleted` (for no ads, `onAdBreakSkipped(reason: 1)` and then `onCompleted`).
+
+When an ad break fails, the SDK brings the content back **before** it calls `onError`, so the content is already playing again when your handler runs. Handle the error according to where the content is:
+
+- **Pre-roll error** (`isContentPrepared == false`): the content has not started yet. Load the VOD source and start playback, the same as for the pre-roll's `onCompleted`.
+- **Mid-roll error** (`isContentEnd == false`): nothing to do. The SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad, re-inserts the content into your player as `AVPlayerItem`s built from the content URL at that position, and plays it. Do not stop, seek, reload, or resume the content. Only log the error.
+- **Post-roll error** (`isContentEnd == true`): the content has already ended. Do not resume it; handle it as the end of playback.
+
+`onCompleted` may also be called for the failed break, before or after `onError`. Make the two handlers safe to run for the same break, for example by checking `isContentPrepared` as below.
+
+:::note Known issue
+When an ad's media URL cannot be reached inside a break with several ads, the ad player currently does not report it as an error and the break stalls. A fix is in progress.
 :::
 
 #### _SwiftUI_
@@ -39,26 +66,14 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
 
     func onPrepare(adDurationMs: Int32) {
         DispatchQueue.main.async {
-            if (self.playbackView.player.rate != 0.0) {
-                Task {
-                    // OPTIONAL GUIDE: additional actions before ad playback
-                    self.playbackView.showNotification("Ads will start in a moment.")
-                    try await Task.sleep(nanoseconds: 5_000_000_000)
-
-                    // TODO GUIDE: play midroll ad
-                    self.playbackView.flowerAdView.adsManager.play()
-                }
-            } else {
-                // TODO GUIDE: play preroll ad
-                self.playbackView.flowerAdView.adsManager.play()
-            }
+            // TODO GUIDE: play the ad (pre-roll, mid-roll, post-roll)
+            self.playbackView.flowerAdView.adsManager.play()
         }
     }
 
     func onPlay() {
         // NOTE: Do NOT pause the player here.
-        //       The SDK reuses the player passed through MediaPlayerHook to play the ad,
-        //       so pausing the player on onPlay stops the ad.
+        //       The SDK pauses and resumes the content around a mid-roll by itself.
         // OPTIONAL GUIDE: UI-only actions when ad playback starts
         //                 (e.g., hide player controls, show an ad indicator)
     }
@@ -71,8 +86,8 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
                 self.playbackView.prepareContentSource()
                 self.playbackView.isContentPrepared = true
             } else if !self.playbackView.isContentEnd {
-                // TODO GUIDE: a mid-roll ad has finished - resume the main VOD content
-                self.playbackView.player.play()
+                // NOTE: a mid-roll ad has finished.
+                //       The SDK resumes the main VOD content by itself, rewound by rewindDuration.
             } else {
                 // TODO GUIDE: a post-roll ad has finished - VOD playback is fully done.
                 //             Run any post-playback actions here
@@ -82,15 +97,23 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
     }
 
     func onError(error: FlowerError?) {
+        // NOTE: When an ad break fails, the SDK brings the content back before calling onError.
+        //       Do NOT stop, seek, or reload the content for an ad error.
+        os_log(OSLogType.error, log: .default, "onError: %@", error?.message ?? "")
         DispatchQueue.main.async {
             if !self.playbackView.isContentPrepared {
-                // TODO GUIDE: load VOD source when pre-roll ad fails
+                // TODO GUIDE: the pre-roll ad failed - load VOD source and start playback.
+                //             onCompleted may also be called for the same break.
                 self.playbackView.prepareContentSource()
                 self.playbackView.isContentPrepared = true
-            } else if !self.playbackView.isContentEnd {
-                // TODO GUIDE: resume VOD content on ad error
-                self.playbackView.player.play()
+            } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+                // TODO GUIDE: the content stopped and the SDK will not recover it.
+                //             Reload the content or show an error to the user.
+            } else if self.playbackView.isContentEnd {
+                // NOTE: a post-roll ad failed - the content has already ended.
+                //       Do not resume it; run your post-playback actions as in onCompleted.
             }
+            // NOTE: a mid-roll ad failed - the SDK has already resumed the content. Nothing to do.
         }
     }
 
@@ -109,26 +132,14 @@ flowerAdView.adsManager.addListener(adsManagerListener: adsManagerListener)
 extension PlayerViewController: FlowerAdsManagerListener {
     func onPrepare(adDurationMs: Int32) {
         DispatchQueue.main.async {
-            if (self.player.rate != 0.0) {
-                Task {
-                    // OPTIONAL GUIDE: additional actions before ad playback
-                    self.showNotification("Ads will start in a moment.")
-                    try await Task.sleep(nanoseconds: 5_000_000_000)
-
-                    // TODO GUIDE: play midroll ad
-                    self.flowerAdView.adsManager.play()
-                }
-            } else {
-                // TODO GUIDE: play preroll ad
-                self.flowerAdView.adsManager.play()
-            }
+            // TODO GUIDE: play the ad (pre-roll, mid-roll, post-roll)
+            self.flowerAdView.adsManager.play()
         }
     }
 
     func onPlay() {
         // NOTE: Do NOT pause the player here.
-        //       The SDK reuses the player passed through MediaPlayerHook to play the ad,
-        //       so pausing the player on onPlay stops the ad.
+        //       The SDK pauses and resumes the content around a mid-roll by itself.
         // OPTIONAL GUIDE: UI-only actions when ad playback starts
         //                 (e.g., hide player controls, show an ad indicator)
     }
@@ -141,8 +152,8 @@ extension PlayerViewController: FlowerAdsManagerListener {
                 self.prepareContentSource()
                 self.isContentPrepared = true
             } else if !self.isContentEnd {
-                // TODO GUIDE: a mid-roll ad has finished - resume the main VOD content
-                self.player.play()
+                // NOTE: a mid-roll ad has finished.
+                //       The SDK resumes the main VOD content by itself, rewound by rewindDuration.
             } else {
                 // TODO GUIDE: a post-roll ad has finished - VOD playback is fully done.
                 //             Run any post-playback actions here
@@ -152,15 +163,23 @@ extension PlayerViewController: FlowerAdsManagerListener {
     }
 
     func onError(error: FlowerError?) {
+        // NOTE: When an ad break fails, the SDK brings the content back before calling onError.
+        //       Do NOT stop, seek, or reload the content for an ad error.
+        os_log(OSLogType.error, log: .default, "onError: %@", error?.message ?? "")
         DispatchQueue.main.async {
             if !self.isContentPrepared {
-                // TODO GUIDE: load VOD source when pre-roll ad fails
+                // TODO GUIDE: the pre-roll ad failed - load VOD source and start playback.
+                //             onCompleted may also be called for the same break.
                 self.prepareContentSource()
                 self.isContentPrepared = true
-            } else if !self.isContentEnd {
-                // TODO GUIDE: resume VOD content on ad error
-                self.player.play()
+            } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+                // TODO GUIDE: the content stopped and the SDK will not recover it.
+                //             Reload the content or show an error to the user.
+            } else if self.isContentEnd {
+                // NOTE: a post-roll ad failed - the content has already ended.
+                //       Do not resume it; run your post-playback actions as in onCompleted.
             }
+            // NOTE: a mid-roll ad failed - the SDK has already resumed the content. Nothing to do.
         }
     }
 
@@ -232,6 +251,10 @@ NotificationCenter.default.addObserver(self, selector: #selector(onEnded), name:
     flowerAdView.adsManager.notifyContentEnded()
 }
 ```
+
+:::note
+With `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`, the SDK puts the content back as a new `AVPlayerItem` after each ad break, so an observer registered with `object: playerItem` stops firing. Register the observer with `object: nil` and check the URL of the item that ended. See [PIP Mode Support](./pip-mode-support#handling-player-events).
+:::
 ####  FlowerAdsManager.stop()
 
 Call this API when exiting VOD content. No parameters required.

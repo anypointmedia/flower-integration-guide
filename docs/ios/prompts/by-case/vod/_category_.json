@@ -1,0 +1,11 @@
+{
+  "label": "VOD",
+  "position": 2,
+  "collapsed": true,
+  "key": "ios-prompts-by-case-vod",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-prompts-by-case-vod",
+    "description": "Prompts for pre-roll, mid-roll and post-roll ads in VOD content on iOS."
+  }
+}

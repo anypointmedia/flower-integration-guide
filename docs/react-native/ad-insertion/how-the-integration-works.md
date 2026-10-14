@@ -74,14 +74,14 @@ Who triggers ad playback differs by content type. This is the SDK's model rather
 | VOD | `requestVodAd()` | Your app — the break is prepared and then waits for `play()` |
 | Inline / Interstitial | `requestAd()` | Your app — the break is prepared and then waits for `play()` |
 
-For VOD and inline breaks, the `prepare` event is where you pause your content and call `play()`, and `completed` is where you resume. See [Ad Events](../api/ad-event.md).
+For VOD breaks, the `prepare` event is where you call `play()`. The SDK does not pause the content for a pre-roll, so hold the content paused until the first `completed` (or `error`); after that, leave it alone — the SDK pauses the content for a mid-roll and resumes it after the break. That holds for a mid-roll `error` too: the SDK brings the content back before it sends the event; see [Handling `error`](./vod/vod-ad-implementation.md#handling-error). For inline breaks, the `prepare` event is where you pause your content and call `play()`, and `completed` is where you resume. See [Ad Events](../api/ad-event.md).
 
 ## URL Rewriting vs. Overlay Playback
 
 | Content type | Content URL | Where ads play |
 | ---| ---| --- |
 | Linear TV / FAST | Rewritten to a local proxy URL | Spliced into the stream, plus the SDK's ad player for Google/IMA ads |
-| VOD | **Not** rewritten — the content keeps playing from its own URL | The SDK's own ad player in the overlay |
+| VOD | **Not** rewritten — the content keeps playing from its own URL | The SDK's own ad player in the overlay (by default; see [PIP Mode Support](../getting-started/pip-mode-support.md)) |
 | Inline / Interstitial | Not involved | The SDK's own ad player in the overlay |
 
 ## Error Handling
@@ -94,4 +94,4 @@ All SDK functions return promises.
 | `play`, `notifyContentEnded` | Rejects — no channel, VOD or inline request was started for that id |
 | `stop`, `release` | Resolves silently, so teardown paths can call them without tracking session state |
 
-Runtime ad errors do not reject a promise. They arrive as an `error` ad event instead — see [Ad Events](../api/ad-event.md).
+Runtime ad errors do not reject a promise. They arrive as an `error` ad event instead — see [Ad Events](../api/ad-event.md#error). For a Linear TV / FAST channel, the recovery is to `stop()` and start the channel over with a new `changeChannelUrl()`; for VOD, it is to start the content if a pre-roll failed before it started — the SDK has already brought it back after a failed mid-roll — or to reload it when the message starts with `playback unrecoverable`.

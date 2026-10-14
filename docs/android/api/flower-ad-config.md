@@ -37,7 +37,7 @@ The following describes the constructor parameters:
 | contentId | String | Unique content ID.<br/>Must be registered in Flower backend system. |
 | contentDuration | Long | Duration of VOD content in milliseconds. |
 | requestTimeout | Long | (Optional) Minimum timeout duration in milliseconds for requesting VOD ads.<br/>Default is 5000. |
-| minPrepareDuration | Long | (Optional) Minimum wait time in milliseconds from the onPrepare event until ad playback starts.<br/>Default is 5000. |
-| rewindDuration | Long | (Optional) Duration in milliseconds to rewind the content when ad break ends.<br/>Default is 3000. |
+| minPrepareDuration | Long | (Optional) Preparation lead time in milliseconds. A mid-roll ad is requested `requestTimeout + minPrepareDuration` before the mid-roll's position, and `onPrepare` is called when the content reaches that position.<br/>Default is 5000. |
+| rewindDuration | Long | (Optional) Duration in milliseconds to rewind the content when a mid-roll ad break ends. The content resumes this much earlier than the point where it was interrupted. Rewinding does not make the same mid-roll play again.<br/>Default is 5000. |
 | extraParams | Map<String, String> | (Optional) Additional information pre-agreed for targeting. |
 | adTagHeaders | Map<String, String> | (Optional) HTTP header information to add for ad requests. |

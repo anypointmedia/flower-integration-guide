@@ -6,6 +6,30 @@ sidebar_position: 0
 
 This section contains prompts designed for LLM-assisted SDK integration. Each prompt can be copied and pasted into an AI coding assistant (Claude, ChatGPT, Copilot, etc.) along with your existing code.
 
+## Prompts by Case
+
+Each prompt under **Prompts by Case** covers one integration case only. It states how the SDK behaves in that case, the exact code to add, what not to do, and a test checklist, so the LLM does not have to choose between branches. Find the row that matches your app, open the page, fill in its few parameters, and paste the prompt together with your existing code.
+
+| Your situation | Prompt |
+|----------------|--------|
+| Linear channel / FAST stream, and you can replace `AVPlayer` with the SDK's `FlowerAVPlayer` | [Linear TV / FAST with FlowerAVPlayer](./by-case/linear-tv/flower-avplayer.md) |
+| Linear channel / FAST stream played with your own `AVPlayer` or `AVQueuePlayer` (`changeChannelUrl`) | [Linear TV / FAST with MediaPlayerHook](./by-case/linear-tv/media-player-hook.md) |
+| Your app plays the original stream, detects ad markers itself, and plays the ads in its own second player | [Direct Ad Playback Control](./by-case/linear-tv/direct-ad-playback-control.md) |
+| Linear channel in a player the SDK does not support through `MediaPlayerHook` (not AVPlayer, AVQueuePlayer or MobileVLCKit) | [Custom Player Adapter](./by-case/linear-tv/custom-player-adapter.md) |
+| Your linear TV app also casts to AirPlay, Chromecast or a Smart TV | [Screen Casting](./by-case/linear-tv/screen-casting.md) |
+| VOD with pre-roll, mid-roll and post-roll ads, and you can replace `AVPlayer` with `FlowerAVPlayer` (also to set `requestTimeout`, `minPrepareDuration`, `rewindDuration`) | [VOD with FlowerAVPlayer](./by-case/vod/flower-avplayer.md) |
+| VOD with pre-roll, mid-roll and post-roll ads, played with your own `AVPlayer` or `AVQueuePlayer` (default ad mode) | [VOD with MediaPlayerHook](./by-case/vod/media-player-hook.md) |
+| VOD ads must keep playing in PIP mode, so they play inside your player | [VOD Ads in PIP Mode](./by-case/vod/ads-in-pip-mode.md) |
+| Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Migrate to SDK-Managed Content](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| Standalone video ad in a screen area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
+| Your app lets the user put the video into Picture-in-Picture | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
+
+You can combine cases: for example, use a VOD prompt first, then the PIP prompt on its output.
+
+## Full Integration Prompts
+
+The prompts below cover every case in one branching prompt, selected with the `{{AD_TYPE}}`, `{{APPROACH}}` and `{{UI_FRAMEWORK}}` parameters. Use them when you prefer a single prompt for the whole integration.
+
 ## Choose Your Approach
 
 ### Integrated Prompt (Recommended for new projects)

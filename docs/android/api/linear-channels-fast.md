@@ -19,7 +19,7 @@ The function above allows you to dynamically change the stream URL of a live bro
 | mediaPlayerHook | MediaPlayerHook | An object implementing an interface that returns a video player |
 | adTagHeaders | map | (Optional) HTTP header information to be added when requesting an ad |
 | channelStreamHeaders | map | (Optional) HTTP header information to be added when requesting the original media stream |
-| prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll ads |
+| prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for the channel pre-roll, an ad played once before the live stream starts (`null` for no pre-roll). See [Pre-roll Ads](#pre-roll-ads). |
 
 ### FlowerAdsManager.changeChannelExtraParams
 
@@ -32,6 +32,10 @@ This function above allows you to change extraParams, which is additional target
 ### FlowerAdsManager.stop
 
 This method stops the playback of linear channels. There are no parameters.
+
+## Pre-roll Ads {#pre-roll-ads}
+
+When `prerollAdTagUrl` is set, `changeChannelUrl()` returns the stream URL right away and the SDK requests the pre-roll and plays it in its own ad player. Do not load the returned URL until the pre-roll ends: register a temporary listener and start the stream on its first `onCompleted()` (or `onError()`). The SDK reports `onCompleted()` also when there is no pre-roll ad or the pre-roll fails. A restart after `onError` leaves the pre-roll out, and each `changeChannelUrl()` call for another channel requests that channel's pre-roll. `enterChannel()` has no pre-roll parameter. For the full flow and example, see [Manual Player Control](../ad-insertion/linear-tv-fast/manual-player-control#pre-roll-ads).
 
 ## Work Process
 
@@ -52,6 +56,8 @@ private void playLinearTv() {
     // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
+    // arg7: prerollAdTagUrl, (Optional) null for no pre-roll. With a pre-roll, load the returned URL
+    //       only after the pre-roll ends (see Pre-roll Ads).
     String changedChannelUrl = flowerAdView.getAdsManager().changeChannelUrl(
         "https://XXX",
         "https://ad_request",
@@ -60,7 +66,7 @@ private void playLinearTv() {
         mediaPlayerHook,
         createMap("custom-ad-header", "custom-ad-header-value"),
         createMap("custom-stream-header", "custom-stream-header-value"),
-        "https://ad_request?target=preroll"
+        null
     );
     player.setMediaItem(MediaItem.fromUri(changedChannelUrl));
 }
@@ -89,6 +95,8 @@ private fun playLinearTv() {
     // arg4: mediaPlayerHook, interface that provides currently playing segment information for ad tracking
     // arg5: adTagHeaders, (Optional) values included in headers for ad request
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
+    // arg7: prerollAdTagUrl, (Optional) null for no pre-roll. With a pre-roll, load the returned URL
+    //       only after the pre-roll ends (see Pre-roll Ads).
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",
         "https://ad_request",
@@ -97,7 +105,7 @@ private fun playLinearTv() {
         mediaPlayerHook,
         mapOf("custom-ad-header" to "custom-ad-header-value"),
         mapOf("custom-stream-header" to "custom-stream-header-value"),
-        "https://preroll_ad_request"
+        null
     )
     player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
 }

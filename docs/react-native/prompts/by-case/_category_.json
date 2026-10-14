@@ -1,0 +1,10 @@
+{
+  "label": "Prompts by Case",
+  "position": 0.5,
+  "collapsed": false,
+  "key": "react-native-prompts-by-case",
+  "link": {
+    "type": "generated-index",
+    "description": "One self-contained LLM prompt per integration case: pick the content type and player your app uses, copy the prompt, and paste it into your AI coding assistant together with your existing code."
+  }
+}

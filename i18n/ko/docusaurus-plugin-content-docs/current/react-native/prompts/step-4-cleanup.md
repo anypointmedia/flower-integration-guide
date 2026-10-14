@@ -67,11 +67,14 @@ Keep this in its own effect, separate from the release effect above. The listene
 be attached before the ad request is made and removed on unmount.
 
 ========================================
-PART 4 — Stopping a break without ending the session
+PART 4 — stop() vs release()
 ========================================
 
-  stop(nativeId)     -> ends the ad break in progress. The content keeps playing and the
-                        session stays alive, so a later break will still play.
+  stop(nativeId)     -> stops the ads manager: ends the break in progress AND the ad
+                        session. No later break plays until a new changeChannelUrl() /
+                        requestVodAd() / requestAd(). For linear-tv the local proxy is shut
+                        down, so the proxy url stops serving. The overlay and the event
+                        subscription stay in place.
   release(nativeId)  -> detaches the SDK from that <Video> entirely.
 
 Both ignore an unknown nativeId rather than rejecting, so teardown paths can call them
@@ -83,8 +86,13 @@ If AD_TYPE is "linear-tv":
   // leaving the channel
   await release(nativeId);
 
-  // stopping only the current break (rare — the SDK schedules them)
+  // Do NOT call stop() alone while staying on the channel: it shuts down the proxy the
+  // <Video> is playing. stop() is only used as the first half of a restart:
+
+  // after an 'error': stop, then start the channel over (see Step 3). Not release().
   await stop(nativeId);
+  const proxyUrl = await changeChannelUrl(nativeId, {/* same params as the first start */});
+  setSourceUri(proxyUrl);
 
 --------------------------------------------------
 If AD_TYPE is "vod":
@@ -92,9 +100,12 @@ If AD_TYPE is "vod":
   // exiting the content
   await release(nativeId);
 
-Make sure the content is not left paused. If your last state change was setPaused(true)
-from a 'prepare' event and the user navigates away mid-break, the paused state goes with
-the unmounted component — but if the same <Video> is reused, reset it explicitly.
+The only content state the app owns for VOD is the contentStarted latch from Step 3,
+which holds the content before its first start, and the contentEnded ref set from onEnd,
+which keeps a post-roll 'error' from resuming it. Both go with the unmounted component.
+To play another content in the same place, give the player component a key per content
+(for example key={contentId}) so a new content mounts a fresh, held component instead of
+reusing a started one.
 
 --------------------------------------------------
 If AD_TYPE is "interstitial":
@@ -112,6 +123,8 @@ PART 5 — Full component skeleton
   function AdPlayer({nativeId, config}) {
     const [paused, setPaused] = useState(false);
     const started = useRef(false);
+    const videoRef = useRef<VideoRef>(null);   // vod — see Step 3
+    const contentEnded = useRef(false);        // vod — see Step 3
 
     // 1. events
     useEffect(() => {
@@ -148,8 +161,13 @@ PART 5 — Full component skeleton
           nativeID={nativeId}
           source={{uri: sourceUri}}
           style={StyleSheet.absoluteFill}
-          paused={paused}
+          ref={videoRef}    // vod: resume() after a mid-roll 'error' — see Step 3
+          paused={paused}   // vod: paused={!contentStarted} — see Step 3
           onLoad={start}
+          onEnd={() => {
+            contentEnded.current = true;   // vod: no resume after a post-roll 'error'
+            notifyContentEnded(nativeId).catch(() => {});
+          }}
         />
       </View>
     );

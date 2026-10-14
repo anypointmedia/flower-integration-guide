@@ -33,50 +33,50 @@ A flowchart showing the entire process — from registering an ad event listener
 flowchart TD
   A["FlowerAdView.FlowerAdsManager.addListener"]:::appCall
   B["FlowerAdView.FlowerAdsManager.requestVodAd"]:::appCall
-  C["FlowerAdsManagerListener.onPrepare"]:::sdkEvent
-  D{"VOD is playing?"}
-  N1["Show ad notification ⭐ (*1)"]:::info
+  C["FlowerAdsManagerListener.onPrepare (*1)"]:::sdkEvent
+  S["Pause the content"]:::sdkAction
   E["FlowerAdView.FlowerAdsManager.play"]:::appCall
   F["Start AD"]
   G["FlowerAdsManagerListener.onPlay"]:::sdkEvent
-  H{"VOD is playing?"}
-  P["contentPlayer.pause"]:::appCall
   I["End AD"]
   J["FlowerAdsManagerListener.onCompleted"]:::sdkEvent
-  K{"VOD is finished?"}
+  K{"Which ad break?"}
   N2["Perform VOD End Scenario ⭐ (*2)"]:::info
-  L["contentPlayer.play or resume"]:::appCall
+  L["contentPlayer.play"]:::appCall
+  R["Rewind the content by rewindDuration and resume it"]:::sdkAction
   M["VOD finished"]
   Z["FlowerAdView.FlowerAdsManager.notifyContentEnded"]:::appCall
 
   A --> B --> C
-  C --> D
-  D -- "Yes\n(Mid-roll)" --> N1 --> E
-  D -- "No\n(Pre-roll/Post-roll)" --> E
-  E --> F --> G
-  G --> H
-  H -- "Yes\n(Mid-roll)" --> P --> I
-  H -- "No\n(Pre-roll/Post-roll)" --> I
-  I --> J --> K
-  K -- "Yes" --> N2
-  K -- "No" --> L
-  L --> M --> Z
+  C -- "Mid-roll" --> S --> E
+  C -- "Pre-roll/Post-roll" --> E
+  E --> F --> G --> I --> J --> K
+  K -- "Post-roll" --> N2
+  K -- "Pre-roll" --> L
+  K -- "Mid-roll" --> R
+  L --> M
+  R --> M
+  M --> Z
   L -- Preparing Mid-roll --> C
+  R -- Preparing Mid-roll --> C
   Z -- Preparing Post-roll --> C
 
   classDef appCall fill:#d0e8ff,stroke:#5b9bd5,color:#000
   classDef sdkEvent fill:#ffd0d0,stroke:#e06060,color:#000
+  classDef sdkAction fill:#e0f2e0,stroke:#5ba55b,color:#000
   classDef info fill:#fff9c4,stroke:#f9a825,color:#000
 ```
 
 > **Legend**  
 > <span style="background-color:#d0e8ff;padding:2px 8px;border:1px solid #5b9bd5"> </span>&nbsp;Function call made by you
 > <span style="background-color:#ffd0d0;padding:2px 8px;border:1px solid #e06060"></span>&nbsp;Event fired by SDK
+> <span style="background-color:#e0f2e0;padding:2px 8px;border:1px solid #5ba55b"></span>&nbsp;Done by SDK on the content player
 > ⭐ Optional
 
-> (\*1) Show ad notification
-> - To enhance the user experience, you can display an ad notification before a mid-roll ad plays in accordance with your service policy.
-> - e.g. An ad will start in 5 seconds.
+> (\*1) Mid-roll timing and content control
+> - The SDK requests a mid-roll ad `requestTimeout + minPrepareDuration` before the mid-roll's position, and calls `onPrepare` when the content reaches that position. Call `play` right away in `onPrepare`.
+> - By default (`setIgnoreAdBreakInPIPMode(true)`), ads play in the SDK's own ad player over the content. For a mid-roll, the SDK pauses the content and, after the ad break, resumes it `rewindDuration` (5 seconds by default) before the point where it was interrupted. Do not pause, seek, or reload the content yourself around a VOD ad break.
+> - With `setIgnoreAdBreakInPIPMode(false)`, supported players play the ads inside the content player, and the SDK puts the content back at the resume point after the ad break. How the content comes back (for example, as a new playlist item) depends on the player. See the PIP Mode Support page of each platform.
 
 > (\*2) Perform VOD end scenario
 > - This SDK provides a way to handle specific scenarios at the end of VOD playback, after any post-roll ads have finished. This allows you to implement custom actions or transitions based on your service's requirements.

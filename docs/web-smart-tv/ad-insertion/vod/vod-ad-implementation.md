@@ -21,32 +21,28 @@ This guide walks you through the complete process of inserting ads into VOD cont
 ### 2. Receiving Ad Events – `FlowerAdsManagerListener`
 
 > To control VOD content playback in response to ad events, implement the `FlowerAdsManagerListener` interface.  
-> This allows you to resume the main content after an ad break, and handle playback errors or skip events. This can be implemented as follows:
+> This allows you to start the main content after the pre-roll, and handle playback errors or skip events. This can be implemented as follows:
 
-:::caution Do not pause the player in `onPlay`
-The SDK reuses the player it received through `MediaPlayerHook` when it plays an ad. Because `onPlay` means the ad has started playing, pausing the player in that event stops the ad itself — do not call `yourPlayer.pause()` inside `onPlay`. Resuming the main content is handled in `onCompleted` (see below).
+:::caution Do not pause, seek, or reload the content player around a VOD ad break
+By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK plays VOD ads in its own video element, shown over the content. For a mid-roll, the SDK pauses the content when the ad break starts, and when the ad break ends, seeks the content back by `rewindDuration` (5 seconds by default) and resumes it. After a post-roll, the content has already ended, so it is not resumed. Do not pause, seek, or reload the content yourself around a VOD ad break, including in `onPlay` and `onError()` (see `onError()` below).
+
+With `setIgnoreAdBreakInPIPMode(false)`, the SDK plays the ads inside the HLS.js or Bitmovin player it received through `MediaPlayerHook`, so pausing the player stops the ad itself. See [PIP Mode Support](../../getting-started/pip-mode-support) for this mode.
+:::
+
+:::info When `onPrepare` is called for a mid-roll
+The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
 :::
 
 ```javascript
 const adsManagerListener = {
     onPrepare(adDurationMs) {
-        if (yourPlayer.paused === false) {
-            // OPTIONAL GUIDE: additional actions before ad playback
-            showNotification("Ads will start in a moment.");
-            setTimeout(() => {
-                // TODO GUIDE: play midroll ad
-                flowerAdView.adsManager.play();
-            }, 5000);
-        } else {
-            // TODO GUIDE: play preroll ad
-            flowerAdView.adsManager.play();
-        }
+        // TODO GUIDE: play the ad (pre-roll, mid-roll, post-roll)
+        flowerAdView.adsManager.play();
     },
 
     onPlay() {
         // NOTE: Do NOT pause the player here.
-        //       The SDK reuses the player passed through MediaPlayerHook to play the ad,
-        //       so pausing the player on onPlay stops the ad.
+        //       The SDK pauses and resumes the content around a mid-roll by itself.
         // OPTIONAL GUIDE: UI-only actions when ad playback starts
         //                 (e.g., hide player controls, show an ad indicator)
     },
@@ -58,8 +54,8 @@ const adsManagerListener = {
             prepareContentSource();
             isContentPrepared = true;
         } else if (!isContentEnd) {
-            // TODO GUIDE: a mid-roll ad has finished - resume the main VOD content
-            yourPlayer.play();
+            // NOTE: a mid-roll ad has finished.
+            //       The SDK resumes the main VOD content by itself, rewound by rewindDuration.
         } else {
             // TODO GUIDE: a post-roll ad has finished - VOD playback is fully done.
             //             Run any post-playback actions here
@@ -68,14 +64,20 @@ const adsManagerListener = {
     },
 
     onError(error) {
+        // NOTE: When an ad break fails, the SDK brings the content back before calling onError().
+        //       Do NOT stop, seek, or reload the content for an ad error.
+        console.warn(`onError: ${error?.message}`);
         if (!isContentPrepared) {
             // TODO GUIDE: load VOD source when pre-roll ad fails
+            //             (onCompleted() may also be called; isContentPrepared keeps the content from loading twice)
             prepareContentSource();
             isContentPrepared = true;
-        } else if (!isContentEnd) {
-            // TODO GUIDE: resume VOD content on ad error
-            yourPlayer.play();
+        } else if (error?.message?.startsWith('playback unrecoverable')) {
+            // TODO GUIDE: the content stopped and the SDK will not recover it.
+            //             Reload the content or show an error to the user.
         }
+        // NOTE: on a mid-roll ad error, the SDK has already resumed the content - nothing to do.
+        //       On a post-roll ad error (isContentEnd), VOD playback is over - nothing to resume.
     },
 
     onAdBreakSkipped(reason) {
@@ -85,6 +87,23 @@ const adsManagerListener = {
 flowerAdView.adsManager.addListener(adsManagerListener);
 ```
 
+:::info When `onError()` is called
+For VOD, the SDK calls `onError()` when:
+- **An ad fails to play** in a pre-roll, mid-roll, or post-roll (for example, the ad media cannot be decoded or cannot be reached).
+- **The content stops playing on a fatal player error.** The player adapter calls `onError()` once per incident with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`: a fatal `hlsError` from HLS.js or FlowerHls, a CRITICAL `error` from Shaka Player, an `error` from dash.js, or an `error` from Bitmovin Player. A new incident starts once playback runs again. Reload the content or show an error to the user.
+
+A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error: the SDK calls `onCompleted()` (for no ads, `onAdBreakSkipped(1)` and then `onCompleted()`).
+:::
+
+:::info The content is already playing when `onError()` is called
+When an ad break fails, the SDK brings the content back **before** it calls `onError()`:
+- **Pre-roll error**: the content has not started yet. Load and start it, as after a completed pre-roll.
+- **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad, reloads the original content source into your player at that position, and plays it. Do not stop, seek, reload, or resume the content. Only log the error.
+- **Post-roll error**: the content has already ended.
+
+`onCompleted()` may also be called for the same ad break, before or after `onError()`. Keep the `isContentPrepared` and `isContentEnd` checks so the content is never loaded twice. With `setIgnoreAdBreakInPIPMode(false)`, the ad player and the content player adapter share your player, so one ad failure can be reported twice.
+:::
+
 ### 3. Passing the Player – `MediaPlayerHook`
 
 > To enable ad tracking based on playback status, you must provide the current player instance to the SDK.  
@@ -93,14 +112,15 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 #### Supported Players
 
 *   HLS.js
-*   Video.js
 *   Bitmovin Player
+*   dash.js
+*   Shaka Player
 
 These players pass the current player to the SDK by implementing the `MediaPlayerHook` interface.
 
 #### When Using Unsupported Players
 
-If you are using an unsupported player, please contact [Helpdesk](mailto:dev-support@anypointmedia.com).
+Other players, such as Video.js, are not supported. With an unsupported player, the SDK does not insert VOD ads and does not call `FlowerAdsManagerListener`. If you are using an unsupported player, please contact [Helpdesk](mailto:dev-support@anypointmedia.com).
 
 ### 4. Additional Parameters for Ad Requests – `extraParams`
 
@@ -130,6 +150,11 @@ The following describes the parameters:
 | extraParams | map | Additional pre-agreed information for targeting (_null_ if none) |
 | mediaPlayerHook | MediaPlayerHook | Interface implementation object that returns the video player |
 | adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
+| requestTimeout | number | (Optional) Timeout for requesting a VOD ad (ms). Default is 5000. |
+| minPrepareDuration | number | (Optional) Preparation lead time (ms). A mid-roll ad is requested `requestTimeout + minPrepareDuration` before the mid-roll's position, and `onPrepare` is called when the content reaches that position. Default is 5000. |
+| rewindDuration | number | (Optional) Duration to rewind the content when a mid-roll ad break ends (ms). The content resumes this much earlier than the point where it was interrupted. Rewinding does not make the same mid-roll play again. Default is 5000. |
+
+`requestTimeout`, `minPrepareDuration` and `rewindDuration` are optional trailing parameters. Omitting them or passing `null` keeps the default.
 
 #### FlowerAdsManager.notifyContentEnded()
 
@@ -141,6 +166,10 @@ videoElement.addEventListener('ended', () => {
     flowerAdView.adsManager.notifyContentEnded();
 });
 ```
+
+:::note
+With `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`, ads are played in the content player, so the `ended` event also occurs when each ad ends. Check that the current source is the content before calling `notifyContentEnded()`. See [PIP Mode Support](../../getting-started/pip-mode-support#handling-player-events).
+:::
 
 #### FlowerAdsManager.stop()
 
@@ -158,9 +187,11 @@ Call this API used when resuming VOD content. No parameters required.
 
 :::tip Defer loading the VOD source until the pre-roll completes
 Do not load the main VOD source on the player immediately after calling `requestVodAd(...)`.
-Instead, wait for `FlowerAdsManagerListener.onCompleted()` (or `onError()`), check whether the content has not yet been prepared (e.g., `isContentPrepared === false`), and only then load the VOD source and start playback.
+Instead, wait for the first `FlowerAdsManagerListener.onCompleted()` (or `onError()`), check whether the content has not yet been prepared (e.g., `isContentPrepared === false`), and only then load the VOD source and start playback.
 
-If the VOD source is loaded right after `requestVodAd(...)`, the first frame of the main content may briefly appear before the pre-roll ad starts.
+By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK does not pause the content for a pre-roll. If the VOD source is loaded right after `requestVodAd(...)`, the main content actually plays, with its audio, under the pre-roll ad.
+
+The SDK calls `onCompleted()` even when there is no pre-roll, no ad is served, or the ad request fails, so the content always starts from this callback. After the content has been prepared, do not load, play, pause, or seek the content in `onCompleted()`, because the SDK resumes the content by itself after a mid-roll. In `onError()`, do not load, pause, or seek it either: the SDK has already brought the content back. The exception is `playback unrecoverable`, where you reload the content or show an error.
 :::
 
 ### _HLS.js_

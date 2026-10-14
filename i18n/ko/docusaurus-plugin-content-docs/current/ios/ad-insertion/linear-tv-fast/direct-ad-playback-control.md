@@ -31,6 +31,10 @@ SDK에 실시간 방송 진입을 알리는 함수입니다. 다음은 매개변
 | platformMediaPlayerAdapter | MediaPlayerAdapter | **광고 플레이어**의 `MediaPlayerAdapter` 프로토콜 구현 객체<br/>자세한 내용은 아래 [광고 재생 시간 감지](#광고-재생-시간-감지----mediaplayeradapter) 항목을 참고하세요. |
 | adTagHeaders | \[String: String\] | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |
 
+:::note 채널 프리롤
+`enterChannel(...)`에는 `prerollAdTagUrl` 매개변수가 없으므로, 이 방식에서는 SDK가 채널 프리롤을 재생하지 않습니다. 채널 프리롤은 `changeChannelUrl(...)`과 `FlowerAVPlayer`에서만 사용할 수 있습니다([프리롤 광고](./manual-player-control#프리롤-광고) 참고).
+:::
+
 #### 예시
 
 ```swift
@@ -265,7 +269,10 @@ extension PlaybackViewController: FlowerAdsManagerListener {
 
     nonisolated func onError(error: FlowerError?) {
         Task { @MainActor in
+            // TODO GUIDE: 광고 에러 시 브레이크를 끝내고, 광고 매니저를 중지한 뒤
+            //             채널을 다시 시작합니다(아래 restartLinearTvAfterError() 참고).
             self.finishAdBreak()
+            self.restartLinearTvAfterError()
         }
     }
 
@@ -274,6 +281,33 @@ extension PlaybackViewController: FlowerAdsManagerListener {
             self.finishAdBreak()
         }
     }
+}
+```
+
+`onError`가 호출되면 `adsManager.stop()`으로 광고 매니저를 중지하고, 콘텐츠 플레이어 아이템을 해제한 뒤, 처음 시작했을 때와 같은 방식(`enterChannel(...)`, 새 `AVPlayerItem`, `play()`)으로 채널을 다시 시작합니다:
+
+```swift
+// PlaybackViewController에 선언: 계속 실패하는 채널이 끝없이 재시작되지 않도록 하는
+// 간단한 재시도 제한입니다. 사용자가 채널을 바꾸면 0으로 초기화하세요.
+private var errorRestartCount = 0
+
+// TODO GUIDE: 광고 에러 후 채널 재시작 (main actor에서 호출)
+private func restartLinearTvAfterError() {
+    guard errorRestartCount < 3 else { return }
+    errorRestartCount += 1
+
+    // 1. 열려 있는 광고 요청을 취소하고 광고 매니저를 중지합니다.
+    channelAdRequest?.cancel()
+    channelAdRequest = nil
+    flowerAdView.adsManager.stop()
+
+    // 2. 콘텐츠 아이템을 해제합니다.
+    contentPlayer.pause()
+    contentPlayer.replaceCurrentItem(with: nil)
+
+    // 3. 처음 시작했을 때와 같은 방식으로 채널을 다시 시작합니다:
+    //    enterChannel(...) -> 새 AVPlayerItem -> play().
+    playLinearTv()
 }
 ```
 

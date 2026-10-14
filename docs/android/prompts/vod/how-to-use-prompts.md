@@ -6,7 +6,31 @@ sidebar_position: 0
 
 This section contains prompts designed for LLM-assisted SDK integration. Each prompt can be copied and pasted into an AI coding assistant (Claude, ChatGPT, Copilot, etc.) along with your existing code.
 
-## Choose Your Approach
+There are two kinds of prompts:
+- **Prompts by Case**: one self-contained prompt per integration case. Use these when you know your case; they cover more cases and need fewer parameters.
+- **Full integration prompts**: one prompt (or four step prompts) that branches by `AD_TYPE` and `APPROACH`.
+
+## Prompts by Case
+
+Pick the row that matches your app. Each prompt generates Kotlin code.
+
+| Situation | Prompt |
+|-----------|--------|
+| Live channel / FAST, simplest setup: wrap Media3 ExoPlayer, ExoPlayer2, or Bitmovin in a Flower Player | [Linear TV with Flower Player](../by-case/linear-tv/flower-player.md) |
+| Live channel / FAST, keep your own supported player and play the URL from `changeChannelUrl()` | [Linear TV with Your Own Player](../by-case/linear-tv/media-player-hook.md) |
+| Live channel, your app detects ad markers and plays ads on its own second player (`enterChannel`, `requestChannelAd`) | [Linear TV with Your Own Ad Player](../by-case/linear-tv/direct-ad-playback-control.md) |
+| Live channel / FAST with a player the SDK does not support (`MediaPlayerAdapter`) | [Linear TV with a Custom Player](../by-case/linear-tv/custom-player-adapter.md) |
+| Live channel with a cast feature (Chromecast, AirPlay, Smart TV) | [Screen Casting to TV](../by-case/linear-tv/screen-casting.md) |
+| VOD, simplest setup: wrap the player in a Flower Player with `FlowerVodAdConfig` | [VOD with Flower Player](../by-case/vod/flower-player.md) |
+| VOD, keep your own player and request ads with `requestVodAd()` (default ad mode) | [VOD with Your Own Player](../by-case/vod/media-player-hook.md) |
+| VOD ads must keep playing in PIP mode (`setIgnoreAdBreakInPIPMode(false)`) | [VOD Ads in PIP Mode](../by-case/vod/ads-in-pip-mode.md) |
+| Existing VOD integration that pauses/resumes the content or delays `play()` itself, upgrading the SDK | [Migrate to SDK-Managed Content](../by-case/vod/migrate-to-sdk-managed-content.md) |
+| Standalone inline or interstitial video ad (`requestAd()`) | [Inline / Interstitial Ads](../by-case/advanced/inline-interstitial.md) |
+| Any of the above, and the app supports Picture-in-Picture | [PIP Mode Support](../by-case/common/pip-mode-support.md) |
+
+## Full Integration Prompts
+
+The rest of this page describes the full integration prompts in this section, which branch by `AD_TYPE` and `APPROACH`.
 
 ### Integrated Prompt (Recommended for new projects)
 

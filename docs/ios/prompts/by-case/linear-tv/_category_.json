@@ -1,0 +1,11 @@
+{
+  "label": "Linear TV / FAST",
+  "position": 1,
+  "collapsed": true,
+  "key": "ios-prompts-by-case-linear-tv",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-prompts-by-case-linear-tv",
+    "description": "Prompts for inserting ads into linear channels and FAST streams on iOS."
+  }
+}

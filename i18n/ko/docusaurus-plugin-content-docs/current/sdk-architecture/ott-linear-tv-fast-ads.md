@@ -43,6 +43,38 @@ flowchart LR
   CDN -- "chunked ts/mp4" --> Player
 ```
 
+## 프리롤 광고
+
+채널 프리롤은 위에서 설명한 [채널 진입 광고](#채널-진입-광고)입니다. `changeChannelUrl`에 `prerollAdTagUrl`을 전달하면 활성화되며, 본 스트림 대체 광고와는 독립적으로 동작합니다. SDK는 별도의 광고 태그로 프리롤을 요청하고, 매니페스트를 가공하는 대신 *AdView* 안의 SDK 자체 광고 플레이어에서 재생합니다.
+
+```mermaid
+flowchart TD
+  A["FlowerAdsManager.changeChannelUrl\n(with prerollAdTagUrl)"]:::appCall
+  B["Request Pre-roll AD"]
+  C{"Ad available?"}
+  D["FlowerAdsManagerListener.onPrepare & onPlay"]:::sdkEvent
+  E["Play Pre-roll AD on the SDK ad player\n(content player paused)"]
+  F["FlowerAdsManagerListener.onCompleted"]:::sdkEvent
+  G["Content player resumed"]
+  H["Original Stream In Progress\n(main stream replacement ads)"]
+
+  A --> B --> C
+  C -- "Yes" --> D --> E
+  E -- "Finished or failed" --> F
+  C -- "No ad / request failed" --> F
+  F --> G --> H
+
+  classDef appCall fill:#d0e8ff,stroke:#5b9bd5,color:#000
+  classDef sdkEvent fill:#ffd0d0,stroke:#e06060,color:#000
+```
+
+- **흐름**: `changeChannelUrl`은 채널과 함께 프리롤을 요청하고, 평소처럼 미디어 스트림 주소를 반환합니다. 프리롤이 준비되면 SDK가 직접 재생을 시작하며(앱은 프리롤을 위해 `play`를 호출하지 않습니다), 재생되는 동안 콘텐츠 플레이어를 일시정지합니다. 프리롤이 끝나면 SDK는 `onCompleted`를 발생시키고 콘텐츠 플레이어를 재개합니다.
+- **광고가 없거나 실패한 경우**: 프리롤 태그가 광고를 반환하지 않거나 요청이 실패하면 SDK는 `onCompleted`를 발생시키고 채널이 평소처럼 시작됩니다. `changeChannelUrl`에서는 재생에 실패한 프리롤도 `onError`가 아니라 `onCompleted`로 끝납니다. 일부 플레이어 연동은 재생 실패를 다르게 보고하므로 플랫폼별 Linear TV 가이드를 참고하세요.
+- **앱이 재생을 시작하는 시점**: 앱이 `changeChannelUrl`을 직접 호출하는 경우, 반환된 주소를 보관했다가 `onCompleted`에서 플레이어에 설정합니다. 그래야 프리롤 전에 본 콘텐츠가 잠깐 노출되지 않습니다. SDK의 플레이어 연동이 채널을 관리하는 경우(예: SDK가 제공하는 플레이어)에는 플레이어가 채널을 직접 붙잡아 둡니다. 플랫폼별 Linear TV 가이드를 따르세요.
+- **채널 전환**: `changeChannelUrl`을 호출할 때마다 진행 중인 프리롤을 포함해 현재 세션을 먼저 중지한 뒤, 새 호출의 프리롤을 요청합니다. 새 채널의 프리롤을 재생하려면 그 채널의 `prerollAdTagUrl`을 전달하세요.
+- **`onError` 이후 재시작**: 시청자가 이미 프리롤을 봤으므로 재시작할 때는 프리롤을 넣지 않습니다(`prerollAdTagUrl` 생략).
+- **PIP 모드**: 기본 설정에서 프리롤은 앱이 PIP에 진입하면 일시정지되고, 앱으로 돌아오면 재개됩니다. VOD 광고와 같은 방식입니다. 본 스트림 대체 광고는 PIP에서도 계속 재생됩니다.
+
 ## Lifecycle
 
 광고 이벤트 리스너를 등록하여 본 콘텐츠를 재생하면서 광고가 대체되는 모든 과정을 표현하는 순서도입니다.

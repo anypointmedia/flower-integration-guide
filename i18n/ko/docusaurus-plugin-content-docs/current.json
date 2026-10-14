@@ -206,5 +206,133 @@
   "sidebar.tutorialSidebar.category.react-native-ad-insertion.link.generated-index.description": {
     "message": "React Native 앱에 FLOWER 광고를 삽입합니다. 플레이어 인계 절차, 콘텐츠 유형별 광고 삽입, 선택적인 Bitmovin 플레이어 연동을 다룹니다.",
     "description": "The generated-index page description for category 'Ad Insertion' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case": {
+    "message": "케이스별 프롬프트 (Unicast)",
+    "description": "The label for category 'Prompts by Case (Unicast)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case.link.generated-index.description": {
+    "message": "Android Unicast(HLS/DASH) 연동 케이스마다 독립된 LLM 프롬프트를 제공합니다: Linear TV / FAST, VOD, 고급 광고 형식, PIP 모드. 앱에 맞는 케이스를 고르고 매개변수를 입력한 뒤 기존 코드와 함께 붙여넣으세요.",
+    "description": "The generated-index page description for category 'Prompts by Case (Unicast)' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case-linear-tv": {
+    "message": "Linear TV / FAST",
+    "description": "The label for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case-vod": {
+    "message": "VOD",
+    "description": "The label for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case-advanced": {
+    "message": "고급 광고 형식",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.android-prompts-by-case-common": {
+    "message": "공통",
+    "description": "The label for category 'Common' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case": {
+    "message": "케이스별 프롬프트",
+    "description": "The label for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case.link.generated-index.description": {
+    "message": "iOS 연동 케이스마다 독립된 LLM 프롬프트를 제공합니다. 앱에 맞는 케이스를 고르고 몇 가지 매개변수를 입력한 뒤 기존 코드와 함께 붙여넣으세요.",
+    "description": "The generated-index page description for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-linear-tv": {
+    "message": "Linear TV / FAST",
+    "description": "The label for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-linear-tv.link.generated-index.description": {
+    "message": "iOS에서 Linear 채널과 FAST 스트림에 광고를 삽입하기 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-vod": {
+    "message": "VOD",
+    "description": "The label for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-vod.link.generated-index.description": {
+    "message": "iOS에서 VOD 콘텐츠의 프리롤, Mid-roll, Post-roll 광고를 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-advanced": {
+    "message": "고급 광고 형식",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-advanced.link.generated-index.description": {
+    "message": "iOS에서 인라인 광고와 전면 광고처럼 본편 플레이어와 연결되지 않는 광고 형식을 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-common": {
+    "message": "공통",
+    "description": "The label for category 'Common' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.ios-prompts-by-case-common.link.generated-index.description": {
+    "message": "iOS에서 PIP 모드 지원처럼 모든 광고 유형에 공통으로 적용되는 기능을 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Common' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case": {
+    "message": "케이스별 프롬프트",
+    "description": "The label for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case.link.generated-index.description": {
+    "message": "연동 케이스마다 독립된 LLM 프롬프트를 제공합니다. 앱의 콘텐츠 유형과 플레이어에 맞는 프롬프트를 복사해 기존 코드와 함께 AI 코딩 어시스턴트에 붙여넣으세요.",
+    "description": "The generated-index page description for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case-linear-tv": {
+    "message": "Linear TV / FAST",
+    "description": "The label for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case-vod": {
+    "message": "VOD",
+    "description": "The label for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case-advanced": {
+    "message": "고급 광고 형식",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.react-native-prompts-by-case-common": {
+    "message": "공통",
+    "description": "The label for category 'Common' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case": {
+    "message": "케이스별 프롬프트",
+    "description": "The label for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case.link.generated-index.description": {
+    "message": "연동 케이스마다 독립된 LLM 프롬프트를 제공합니다. 앱에 맞는 케이스를 고르고 몇 가지 매개변수를 입력한 뒤 기존 코드와 함께 붙여넣으세요.",
+    "description": "The generated-index page description for category 'Prompts by Case' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-linear-tv": {
+    "message": "Linear TV / FAST",
+    "description": "The label for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-linear-tv.link.generated-index.description": {
+    "message": "Linear 채널과 FAST 스트림에 광고를 삽입하기 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Linear TV / FAST' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-vod": {
+    "message": "VOD",
+    "description": "The label for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-vod.link.generated-index.description": {
+    "message": "VOD 콘텐츠의 프리롤, Mid-roll, Post-roll 광고를 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'VOD' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-advanced": {
+    "message": "고급 광고 형식",
+    "description": "The label for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-advanced.link.generated-index.description": {
+    "message": "인라인 광고와 전면 광고처럼 본편 플레이어와 연결되지 않는 광고 형식을 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-common": {
+    "message": "공통",
+    "description": "The label for category 'Common' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.web-prompts-by-case-common.link.generated-index.description": {
+    "message": "PIP 모드 지원처럼 모든 광고 유형에 공통으로 적용되는 기능을 위한 프롬프트입니다.",
+    "description": "The generated-index page description for category 'Common' in sidebar 'tutorialSidebar'"
   }
 }

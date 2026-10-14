@@ -21,6 +21,25 @@ VOD 콘텐츠 진입 전 사용하는 함수입니다.
 | extraParams | map | 타겟팅을 위해 사전 협의된 추가 정보(없을 경우 _null_) |
 | mediaPlayerHook | MediaPlayerHook | 비디오 플레이어를 반환하는 인터페이스 구현 객체 |
 | adTagHeaders | map | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |
+| requestTimeout | number | (Optional) VOD 광고 요청 타임아웃(밀리세컨즈). 기본값은 5000입니다. |
+| minPrepareDuration | number | (Optional) 광고 준비를 위한 사전 시간(밀리세컨즈). Mid-roll 광고는 Mid-roll 위치보다 `requestTimeout + minPrepareDuration`만큼 먼저 요청되며, `onPrepare`는 본편이 해당 위치에 도달했을 때 호출됩니다. 기본값은 5000입니다. |
+| rewindDuration | number | (Optional) Mid-roll 광고 구간 종료 시 콘텐츠를 되감는 시간(밀리세컨즈). 본편은 중단된 위치보다 이 시간만큼 앞에서 재개됩니다. 기본값은 5000입니다. |
+
+`requestTimeout`, `minPrepareDuration`, `rewindDuration`은 마지막에 추가로 전달할 수 있는 선택 매개변수입니다. 생략하거나 `null`을 전달하면 기본값이 적용되므로, 기존의 6개 인자 호출도 그대로 동작합니다.
+
+```javascript
+flowerAdView.adsManager.requestVodAd(
+    'https://ad_request',
+    '100',
+    3600000,
+    null,
+    mediaPlayerHook,
+    null,
+    5000,   // requestTimeout
+    5000,   // minPrepareDuration
+    5000    // rewindDuration
+);
+```
 
 ### FlowerAdsManager.stop
 

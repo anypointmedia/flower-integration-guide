@@ -14,7 +14,9 @@ function requestVodAd(nativeId: string, params: VodAdParams): Promise<void>;
 
 `<Video nativeID={nativeId}>`에서 재생 중인 VOD 콘텐츠의 광고 브레이크를 요청합니다.
 
-여기서는 아무것도 재작성되지 않습니다 — 콘텐츠는 원래 URL로 계속 재생되고, 각 브레이크는 `prepare` 이벤트로 전달됩니다. 앱은 그 시점에 콘텐츠를 일시정지하고 [`play`](./flower-sdk.md#play)를 호출하며, 브레이크는 `completed`로 끝나고 그때 콘텐츠를 재개합니다.
+여기서는 아무것도 재작성되지 않습니다 — 콘텐츠는 원래 URL로 계속 재생되고, 각 브레이크는 `prepare` 이벤트로 전달되며(mid-roll은 콘텐츠가 해당 위치에 도달했을 때), 앱은 그 시점에 [`play`](./flower-sdk.md#play)를 호출합니다.
+
+SDK는 프리롤을 위해 콘텐츠를 붙잡아 두지 않으므로, `<Video>`를 일시정지 상태로 마운트하고 첫 `completed` 또는 `error`에서 콘텐츠를 시작하세요. 프리롤이 없거나, 광고 응답이 비어 있거나, 요청이 실패해도 `completed`가 전달됩니다. 그 이후에는 콘텐츠를 건드리지 마세요. 기본 설정에서 브레이크는 SDK 자체 광고 플레이어에서 재생되며, mid-roll의 경우 SDK가 콘텐츠를 일시정지하고 `completed` 시점에 되감기 시간(5초)만큼 되돌려 재개합니다. 콘텐츠가 시작된 뒤에는 일시정지, 탐색, 재로드하지 마세요. 콘텐츠가 시작된 뒤의 `error`도 마찬가지입니다. 브레이크가 실패하면 SDK가 `error`를 보내기 전에 콘텐츠를 되돌려 놓으므로, mid-roll 실패 후 콘텐츠는 이미 다시 재생 중이며, post-roll `error` 이후에는 콘텐츠가 끝난 상태입니다. 메시지가 `playback unrecoverable`로 시작하는 `error`(콘텐츠 자체가 멈춤)일 때만 콘텐츠를 다시 로드하거나 오류를 표시하세요. [VOD 광고 구현](../ad-insertion/vod/vod-ad-implementation.md#handling-error)을 참고하세요.
 
 [`changeChannelUrl`](./linear-channels-fast.md#changechannelurl)과 동일한 조건이 적용됩니다 — `<Video>`의 플레이어가 이미 존재해야 합니다.
 
@@ -61,12 +63,13 @@ export type VodAdParams = {
 
 ## 작업 절차
 
-1. 콘텐츠 URL로 `<Video nativeID="…">`를 마운트합니다. VOD에서는 URL이 재작성되지 않습니다.
+1. 콘텐츠 URL로 `<Video nativeID="…" paused>`를 마운트하고, 프리롤이 끝날 때까지 붙잡아 둡니다. VOD에서는 URL이 재작성되지 않습니다.
 2. [`addAdEventListenerFor`](./ad-event.md#addadeventlistenerfor)로 광고 이벤트를 구독합니다.
 3. `onLoad`가 발생하면 해당 `nativeID`로 `requestVodAd()`를 호출합니다.
-4. `prepare`에서 콘텐츠를 일시정지하고 [`play`](./flower-sdk.md#play)를 호출합니다. `completed`에서 재개합니다.
-5. post-roll이 재생될 수 있도록 `<Video>` 컴포넌트의 `onEnd` prop에서 [`notifyContentEnded`](./flower-sdk.md#notifycontentended)를 호출합니다.
-6. `<Video>`가 unmount될 때 [`release`](./flower-sdk.md#release)를 호출합니다.
+4. `prepare`에서 [`play`](./flower-sdk.md#play)를 호출합니다.
+5. 첫 `completed` 또는 `error`에서 콘텐츠를 시작합니다. 그 이후에는 콘텐츠를 건드리지 마세요 — mid-roll 전후의 일시정지와 재개는 SDK가 처리합니다. 이후의 `error`에서도 할 일은 없습니다 — SDK가 이벤트를 보내기 전에 콘텐츠를 되돌려 놓습니다. 단, 메시지가 `playback unrecoverable`로 시작하면 콘텐츠를 다시 로드하거나 오류를 표시합니다.
+6. post-roll이 재생될 수 있도록 `<Video>` 컴포넌트의 `onEnd` prop에서 [`notifyContentEnded`](./flower-sdk.md#notifycontentended)를 호출합니다. 그 전에 콘텐츠 종료를 ref로 표시해 두어, post-roll `error`가 콘텐츠를 재개하지 않게 합니다.
+7. `<Video>`가 unmount될 때 [`release`](./flower-sdk.md#release)를 호출합니다.
 
 ```tsx
 // arg0: nativeId, 콘텐츠를 재생 중인 <Video>의 nativeID

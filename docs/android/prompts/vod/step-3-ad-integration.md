@@ -27,8 +27,12 @@ IMPORTS — Required packages
 FlowerAdsManagerListener and FlowerError are in the sdk-core package:
 
   import tv.anypoint.flower.sdk.core.api.FlowerAdsManagerListener
-  import tv.anypoint.flower.sdk.core.api.FlowerAdInfo
   import tv.anypoint.flower.sdk.core.api.FlowerError
+
+All FlowerAdsManagerListener methods have default empty bodies — override only the ones you need.
+If you override onAdBreakPrepare, its Kotlin signature is
+  override fun onAdBreakPrepare(adInfos: ArrayList<AdInfo>)
+with import tv.anypoint.flower.sdk.core.api.AdInfo. There is NO FlowerAdInfo type.
 
 FlowerLinearTvAdConfig, FlowerVodAdConfig, FlowerAdView, FlowerSdk are in the android-sdk package:
 
@@ -52,7 +56,13 @@ If AD_TYPE is "linear-tv":
 For FlowerPlayer:
   - onPlay: Hide player controls (playerView.useController = false).
   - onCompleted: Show player controls (playerView.useController = true).
-  - onError: Handle gracefully (e.g., log the error).
+  - onError: On the main thread, stop the SDK ads manager and the player, then start the channel
+    again as it was first started (the 3-2 code, e.g. in a startChannel(withPreroll) function),
+    with withPreroll = false. A restart leaves the channel pre-roll out (prerollAdTagUrl omitted):
+    the viewer has already seen it.
+    FlowerExoPlayer2 / FlowerMedia3ExoPlayer: player.stop() also stops the ads manager.
+    FlowerBitmovinPlayer has no stop(): call player.flowerAdView.adsManager.stop() and
+    player.unload() instead. Optionally cap consecutive restarts (e.g., 3) to avoid a restart loop.
 
   Kotlin (FlowerPlayer):
   // Declare as class member:
@@ -71,27 +81,52 @@ For FlowerPlayer:
           }
       }
       override fun onError(error: FlowerError?) {
-          // Handle error
+          CoroutineScope(Dispatchers.Main).launch {
+              player.stop()     // also stops the SDK ads manager
+              startChannel(withPreroll = false)   // the 3-2 code, no pre-roll: setMediaItem(mediaItem, adConfig), prepare, play
+          }
       }
   }
   player.addAdListener(flowerAdsManagerListener)
 
 For MediaPlayerHook:
-  Same listener logic, but register on flowerAdView.adsManager:
+  Same listener logic, but register on flowerAdView.adsManager, and in onError stop the ads
+  manager yourself before restarting. Restart with a NEW changeChannelUrl() call (the 3-2 code);
+  do not reuse the URL returned before stop(). Restart with withPreroll = false (prerollAdTagUrl =
+  null) and play the returned URL right away.
 
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
+
+  override fun onError(error: FlowerError?) {
+      CoroutineScope(Dispatchers.Main).launch {
+          flowerAdView.adsManager.stop()
+          player.stop()
+          startChannel(withPreroll = false)   // the 3-2 code, no pre-roll: changeChannelUrl(...), then load and play
+      }
+  }
 
 --------------------------------------------------
 If AD_TYPE is "vod":
 
 For FlowerPlayer:
   - onPlay: Hide player controls (playerView.useController = false).
-  - onCompleted: Show player controls (playerView.useController = true).
-  - onError: Handle gracefully.
+  - onCompleted: Show player controls (playerView.useController = true). The FIRST call means
+    the pre-roll phase is over; the Flower Player starts the content by itself.
+  - onError (on the main thread):
+    - Pre-roll error (isContentStarted == false): the Flower Player does NOT start the content.
+      Start it without ads: player.stop() (also stops the SDK ads manager), then
+      player.setMediaItem(MediaItem.fromUri(...)) with NO ad config, prepare(), play().
+      FlowerBitmovinPlayer: destroy it, create a new one, and load the source without an ad config.
+    - Mid-roll error (isContentEnd == false): resume the content with player.play(). Do NOT seek
+      or reload it. The SDK also rewinds and resumes it; this makes sure it does not stay paused.
+    - Post-roll error (isContentEnd == true): do NOT resume; run the end-of-playback scenario.
+    Set isContentEnd = true when the content ends (Player.STATE_ENDED).
 
   Kotlin (FlowerPlayer):
-  // Declare as class member:
+  // Declare as class members:
   private lateinit var flowerAdsManagerListener: FlowerAdsManagerListener
+  private var isContentStarted = false
+  private var isContentEnd = false
 
   // In your playContent() method:
   flowerAdsManagerListener = object : FlowerAdsManagerListener {
@@ -102,57 +137,91 @@ For FlowerPlayer:
       }
       override fun onCompleted() {
           CoroutineScope(Dispatchers.Main).launch {
+              isContentStarted = true   // first call = pre-roll phase over
               playerView.useController = true
           }
       }
       override fun onError(error: FlowerError?) {
-          // Handle error
+          CoroutineScope(Dispatchers.Main).launch {
+              if (!isContentStarted) {
+                  // Pre-roll failed: start the content without ads.
+                  isContentStarted = true
+                  player.stop()
+                  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)))
+                  player.prepare()
+                  player.play()
+              } else if (!isContentEnd) {
+                  // Mid-roll failed: resume the content (no seek, no reload).
+                  player.play()
+              }
+              // Post-roll failed: the content has ended - do not resume.
+          }
       }
   }
   player.addAdListener(flowerAdsManagerListener)
 
 For MediaPlayerHook:
-  VOD requires the listener to resume the content after each ad break.
-  - onPrepare: Call flowerAdView.adsManager.play() to start the ad.
-  - onPlay: Do NOT pause the content player. The SDK reuses the player passed through
-    MediaPlayerHook to play the ad, so pausing it here stops the ad.
-  - onCompleted: Resume content player (player.playWhenReady = true) if content not ended.
-  - onError: Resume content player if content not ended.
+  By default the SDK plays VOD ads in its own ad player over the content. For a mid-roll it
+  pauses the content itself and, after the break, rewinds it by rewindDuration (5s) and
+  resumes it. Do NOT pause, seek or reload the content around a VOD ad break. The only
+  exception is onError for a mid-roll: resume the content (no seek, no reload).
+  - onPrepare: Call flowerAdView.adsManager.play() right away (a mid-roll's onPrepare
+    arrives when the content reaches the mid-roll position). Do NOT delay it.
+  - onPlay: Do NOT pause the content player.
+  - onCompleted / onError: The FIRST call means the pre-roll is over. The SDK also calls
+    onCompleted when there is no pre-roll, the ad response has no ad breaks, or the ad request
+    fails, so it always arrives. Load and start the content ONLY on that first call
+    (isContentPrepared == false).
+  - onCompleted after that: after a mid-roll, do nothing: the SDK has already rewound and
+    resumed the content. After a post-roll, the content has ended: run the end-of-playback scenario.
+  - onError after that: on a mid-roll error (isContentEnd == false), resume the content with
+    player.playWhenReady = true (no seek, no reload). The SDK also rewinds and resumes it before
+    it calls onError; this resume is a safety net so the content never stays paused. On a
+    post-roll error (isContentEnd == true), do NOT resume; run the end-of-playback scenario.
 
   Kotlin (MediaPlayerHook):
   // Declare as class members:
   private lateinit var flowerAdsManagerListener: FlowerAdsManagerListener
+  private var isContentPrepared = false
   private var isContentEnd = false
 
   // In your playContent() method:
   flowerAdsManagerListener = object : FlowerAdsManagerListener {
       override fun onPrepare(adDurationMs: Int) {
           CoroutineScope(Dispatchers.Main).launch {
-              if (player.isPlaying) {
-                  showNotification("Ads will start in a moment.")
-                  delay(5000)
-                  flowerAdView.adsManager.play()
-              } else {
-                  flowerAdView.adsManager.play()
-              }
+              flowerAdView.adsManager.play()
           }
       }
       override fun onPlay() {
-          // Do NOT pause the player here - the SDK reuses this same player to play the ad,
-          // so pausing it stops the ad.
+          // Do NOT pause the player here - the SDK pauses and resumes the content itself.
       }
       override fun onCompleted() {
           CoroutineScope(Dispatchers.Main).launch {
-              if (!isContentEnd) { player.playWhenReady = true }
+              if (!isContentPrepared) {
+                  // Pre-roll finished (or no pre-roll was served): load and start the content.
+                  isContentPrepared = true
+                  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)))
+                  player.prepare()
+                  player.playWhenReady = true
+              }
+              // After a mid-roll: nothing to do - the SDK resumes the content itself.
           }
       }
       override fun onError(error: FlowerError?) {
           CoroutineScope(Dispatchers.Main).launch {
-              if (!isContentEnd) { player.playWhenReady = true }
+              if (!isContentPrepared) {
+                  isContentPrepared = true
+                  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)))
+                  player.prepare()
+                  player.playWhenReady = true
+              } else if (!isContentEnd) {
+                  // Mid-roll failed: resume the content (no seek, no reload).
+                  // The SDK also rewinds and resumes it; this makes sure it does not stay paused.
+                  player.playWhenReady = true
+              }
+              // Post-roll failed: the content has ended - do not resume.
           }
       }
-      override fun onAdBreakSkipped(reason: Int) {}
-      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {} // called after ads loaded with ad info list
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -197,7 +266,6 @@ If AD_TYPE is "interstitial":
               flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
           }
       }
-      override fun onAdBreakPrepare(adInfos: List<FlowerAdInfo>) {} // called after ads loaded with ad info list
   }
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -212,11 +280,15 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
   Use values from your config/intent data — do NOT hardcode URLs or parameters.
   Omit optional parameters if they are not available in your config.
 
+  Put this in startChannel(withPreroll: Boolean = true): true for the first start and a channel
+  switch, false for a restart after onError(). A restart leaves the channel pre-roll out
+  (prerollAdTagUrl omitted): the viewer has already seen it.
+
   val adConfig = FlowerLinearTvAdConfig(
       adTagUrl = config.adTagUrl,                     // Required
       channelId = config.channelId,                   // Required
       extraParams = config.extraParams,               // Required (targeting info)
-      prerollAdTagUrl = config.prerollAdTagUrl,       // Optional — omit if not available
+      prerollAdTagUrl = if (withPreroll) config.prerollAdTagUrl else null,  // Optional — omit if not available
       // adTagHeaders = mapOf(...),                   // Optional — omit if not needed
       // channelStreamHeaders = mapOf(...),           // Optional — omit if not needed
   )
@@ -228,9 +300,18 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
 --------------------------------------------------
 If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 
-  Call changeChannelUrl() to get a modified URL, then play it.
+  Call changeChannelUrl() to get a modified URL, then play it: right away without a pre-roll,
+  or after the pre-roll ends when prerollAdTagUrl is set.
   Use values from your config/intent data — do NOT hardcode URLs or parameters.
+  Put this in startChannel(withPreroll: Boolean = true), as above: a restart after onError()
+  passes withPreroll = false.
 
+  // A pre-roll stopped by a channel switch reports nothing: drop its temporary listener first.
+  prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
+  prerollListener = null
+  flowerAdView.adsManager.addListener(flowerAdsManagerListener)   // listeners are a set: no duplicate
+
+  val prerollAdTagUrl = if (withPreroll) config.prerollAdTagUrl else null
   val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
       videoUrl = config.contentUrl,                   // Required
       adTagUrl = config.adTagUrl,                     // Required
@@ -239,12 +320,45 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
       mediaPlayerHook = { player },                   // Required (lambda returning player)
       adTagHeaders = null,                            // Optional
       channelStreamHeaders = null,                    // Optional
-      prerollAdTagUrl = config.prerollAdTagUrl,       // Optional
+      prerollAdTagUrl = prerollAdTagUrl,              // Optional; null on a restart
   )
 
-  player.setMediaItem(MediaItem.fromUri(Uri.parse(changedChannelUrl)))
-  player.prepare()
-  player.playWhenReady = true
+  fun playStream() {
+      player.setMediaItem(MediaItem.fromUri(Uri.parse(changedChannelUrl)))
+      player.prepare()
+      player.playWhenReady = true
+  }
+
+  prerollAdTagUrl == null (no pre-roll configured, or a restart after onError()):
+  play the returned URL right away and keep the main listener registered.
+
+      playStream()
+
+  prerollAdTagUrl != null (first start or channel switch with a pre-roll):
+  The SDK requests the pre-roll and plays it in its own ad player. Do NOT load changedChannelUrl
+  yet: loading it now makes the channel play underneath the pre-roll. Swap the main listener for
+  a temporary one and load the stream on its FIRST onCompleted()/onError(). The SDK reports the
+  end of the pre-roll with onCompleted(), also when there is no pre-roll ad or the pre-roll fails;
+  handle onError() the same way. If you track isAdPlaying for PiP (Step 4), also set it in this
+  listener (true in onPlay(), false in finish()).
+
+  // Declare as class member, so cleanup (Step 4) can remove it while the pre-roll is pending:
+  private var prerollListener: FlowerAdsManagerListener? = null
+
+      flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
+      val listener = object : FlowerAdsManagerListener {
+          override fun onCompleted() { CoroutineScope(Dispatchers.Main).launch { finish() } }
+          override fun onError(error: FlowerError?) { CoroutineScope(Dispatchers.Main).launch { finish() } }
+          private fun finish() {
+              if (prerollListener !== this) return    // only the first call starts the stream
+              playStream()
+              flowerAdView.adsManager.removeListener(this)
+              flowerAdView.adsManager.addListener(flowerAdsManagerListener)
+              prerollListener = null
+          }
+      }
+      prerollListener = listener
+      flowerAdView.adsManager.addListener(listener)
 
 --------------------------------------------------
 If AD_TYPE is "vod" AND APPROACH is "flower-player":
@@ -259,6 +373,7 @@ If AD_TYPE is "vod" AND APPROACH is "flower-player":
       extraParams = config.extraParams,               // Required (targeting info)
       // requestTimeout = 5_000L,                     // Optional, default 5000
       // minPrepareDuration = 5_000L,                 // Optional, default 5000
+      // rewindDuration = 5_000L,                     // Optional, default 5000
       // adTagHeaders = mapOf(...),                   // Optional — omit if not needed
   )
 
@@ -269,8 +384,12 @@ If AD_TYPE is "vod" AND APPROACH is "flower-player":
 --------------------------------------------------
 If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
 
-  Call requestVodAd() then start content playback.
+  Call requestVodAd() only. Do NOT load or start the content here: the content is loaded and
+  started in onCompleted()/onError() of the listener above, after the pre-roll
+  (see PART 1, isContentPrepared). Loading it here makes the content play underneath the pre-roll.
+  The player instance must already exist, because mediaPlayerHook.getPlayer() must not return null.
   Use values from your config/intent data — do NOT hardcode URLs or parameters.
+  Keep the named argument mediaPlayerHook = { player } so the MediaPlayerHook overload is used.
 
   flowerAdView.adsManager.requestVodAd(
       adTagUrl = config.adTagUrl,                     // Required
@@ -280,10 +399,6 @@ If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
       mediaPlayerHook = { player },                   // Required
       // adTagHeaders = mapOf(...),                   // Optional — omit if not needed
   )
-
-  player.setMediaItem(MediaItem.fromUri(Uri.parse(config.contentUrl)))
-  player.prepare()
-  player.playWhenReady = true
 
 --------------------------------------------------
 If AD_TYPE is "interstitial":
@@ -313,8 +428,14 @@ Use values from your config/intent data — do NOT hardcode URLs or parameters.
       myMediaPlayerAdapter,               // MediaPlayerAdapter instead of MediaPlayerHook
       null,                               // adTagHeaders (Optional)
       null,                               // channelStreamHeaders (Optional)
-      config.prerollAdTagUrl              // prerollAdTagUrl (Optional)
+      if (withPreroll) config.prerollAdTagUrl else null   // prerollAdTagUrl (Optional; null on a restart)
   )
+
+  Handle the returned URL as in the linear-tv media-player-hook branch above: without a pre-roll,
+  load and play it right away; with a pre-roll, load it on the first onCompleted()/onError() of
+  the temporary listener. The SDK calls the adapter's pause() when the pre-roll starts and
+  resume() when it ends, before the stream is loaded, so both must be safe to call on an empty
+  player.
 
 MediaPlayerAdapter must implement these methods:
   getCurrentMedia() -> Media (urlOrId, duration, position)
@@ -342,4 +463,15 @@ CONSTRAINTS
 - For VOD with MediaPlayerHook, you MUST call flowerAdView.adsManager.notifyContentEnded() when content finishes.
 - MediaPlayerAdapter is only available for Linear TV, not for VOD.
 - All UI operations in listener callbacks must run on the Main thread.
+- For VOD with MediaPlayerHook, do NOT load or play the content before the first onCompleted()/onError(),
+  and do NOT resume, seek or reload the content after a completed mid-roll — the SDK does it.
+  On a mid-roll onError(), only resume the content (playWhenReady = true; no seek, no reload).
+- For Linear TV, on onError() stop the ads manager and the player, then restart the channel the
+  way it was first started (a new changeChannelUrl() / setMediaItem with the ad config), but
+  without prerollAdTagUrl. A restart leaves the channel pre-roll out (prerollAdTagUrl omitted):
+  the viewer has already seen it.
+- For Linear TV with media-player-hook (or a MediaPlayerAdapter) and a prerollAdTagUrl (first
+  start or channel switch), do NOT load the URL returned by changeChannelUrl() before the
+  pre-roll ends (first onCompleted()/onError() of the temporary listener). A restart after
+  onError() has no pre-roll: load and play the URL right away, with no temporary listener.
 ```

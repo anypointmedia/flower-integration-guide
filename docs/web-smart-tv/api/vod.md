@@ -20,6 +20,25 @@ The parameters are described below:
 | extraParams | map | Extra information which is agreed upon for targeting (null for no extra information) |
 | mediaPlayerHook | MediaPlayerHook | An object implementing an interface that returns a video player |
 | adTagHeaders | map | (Optional) HTTP header information to be added when requesting an ad |
+| requestTimeout | number | (Optional) Timeout for requesting a VOD ad (milliseconds). Default is 5000. |
+| minPrepareDuration | number | (Optional) Preparation lead time (milliseconds). A mid-roll ad is requested `requestTimeout + minPrepareDuration` before the mid-roll's position, and `onPrepare` is called when the content reaches that position. Default is 5000. |
+| rewindDuration | number | (Optional) Duration to rewind the content when a mid-roll ad break ends (milliseconds). The content resumes this much earlier than the point where it was interrupted. Default is 5000. |
+
+`requestTimeout`, `minPrepareDuration` and `rewindDuration` are optional trailing parameters. Omitting them or passing `null` keeps the default, so the 6-argument form works as before.
+
+```javascript
+flowerAdView.adsManager.requestVodAd(
+    'https://ad_request',
+    '100',
+    3600000,
+    null,
+    mediaPlayerHook,
+    null,
+    5000,   // requestTimeout
+    5000,   // minPrepareDuration
+    5000    // rewindDuration
+);
+```
 
 ### FlowerAdsManager.stop
 

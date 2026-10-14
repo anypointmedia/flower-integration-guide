@@ -1,0 +1,11 @@
+{
+  "label": "Prompts by Case",
+  "position": 1,
+  "collapsed": false,
+  "key": "web-prompts-by-case",
+  "link": {
+    "type": "generated-index",
+    "slug": "web-prompts-by-case",
+    "description": "Self-contained LLM prompts, one per integration case. Pick the case that matches your app, fill in the few parameters, and paste the prompt together with your existing code."
+  }
+}

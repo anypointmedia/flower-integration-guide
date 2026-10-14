@@ -51,6 +51,11 @@ If APPROACH is "media-player-hook":
       if let observer = contentEndObserver {
           NotificationCenter.default.removeObserver(observer)
       }
+      if let preroll = prerollListener {   // linear-tv: a pre-roll that has not ended yet
+          flowerAdView.adsManager.removeListener(adsManagerListener: preroll)
+          prerollListener = nil
+          pendingChannelUrl = nil
+      }
       flowerAdView.adsManager.stop()
       player.pause()
       player.removeAllItems()
@@ -62,6 +67,11 @@ If APPROACH is "media-player-hook":
       flowerAdView.adsManager.removeListener(adsManagerListener: self)
       if let observer = contentEndObserver {
           NotificationCenter.default.removeObserver(observer)
+      }
+      if let preroll = prerollListener {   // linear-tv: a pre-roll that has not ended yet
+          flowerAdView.adsManager.removeListener(adsManagerListener: preroll)
+          prerollListener = nil
+          pendingChannelUrl = nil
       }
       flowerAdView.adsManager.stop()
       player.pause()
@@ -106,7 +116,17 @@ UIKit — implement AVPlayerViewControllerDelegate:
   playerViewController.allowsPictureInPicturePlayback = true
   playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
 
-SwiftUI — FlowerVideoPlayer handles PiP automatically for FlowerPlayer approach.
+  Ads are not supported in PiP by default (FlowerSdk.setIgnoreAdBreakInPIPMode(true)), so do
+  not let the content go into PiP while an ad is playing.
+  canStartPictureInPictureAutomaticallyFromInline (iOS 14.2+) only stops automatic PiP;
+  the built-in PiP button of AVPlayerViewController stays enabled. In onPlay set both
+  playerViewController.allowsPictureInPicturePlayback and
+  playerViewController.canStartPictureInPictureAutomaticallyFromInline to false, and set
+  them back to true in onCompleted and onError (on the main thread).
+
+SwiftUI — FlowerVideoPlayer (a SwiftUI VideoPlayer) does not report PiP transitions, and the
+SDK never detects PiP by itself. If the app supports PiP, host an AVPlayerViewController
+(UIViewControllerRepresentable) and notify the SDK from its delegate as above.
 
 ========================================
 PART 3 — Audio Session Configuration (Linear TV)
@@ -126,5 +146,6 @@ CONSTRAINTS
 - iOS SDK does NOT require an explicit destroy/release call.
 - For FlowerAVPlayer, replaceCurrentItem(with: nil) releases all resources.
 - For AVQueuePlayer, call removeAllItems() to release.
-- PiP delegate is only needed for UIKit with media-player-hook approach.
+- Notify PiP transitions (FlowerSdk.notifyPictureInPictureModeChanged) in every approach that
+  allows PiP, including FlowerAVPlayer. The SDK does not detect PiP by itself.
 ```

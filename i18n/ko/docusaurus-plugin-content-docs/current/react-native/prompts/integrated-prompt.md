@@ -62,7 +62,7 @@ android/build.gradle — buildscript.ext:
           media3Version = "1.8.0"
 
           // Optional: pins the underlying Android SDK version.
-          flowerSdkVersion = "2.9.23"
+          flowerSdkVersion = "2.9.28"
       }
   }
 
@@ -262,6 +262,10 @@ If PLAYER_TYPE is "react-native-video":
     />
   </View>
 
+If AD_TYPE is "vod", also mount the <Video> paused (paused={!contentStarted}, see
+Step 3-3): the SDK does not hold the content for a pre-roll. onLoad still fires while
+paused, so the handover is unaffected.
+
 If PLAYER_TYPE is "bitmovin":
 
 The same string does double duty — the nativeID of the overlay view, and the key
@@ -374,14 +378,17 @@ STEP 3-2 — Who starts the break
 ========================================
 
   linear-tv     -> the SDK. Scheduled by the cue in the stream. Do NOT call play().
-  vod           -> your app, via play(). Your app also pauses/resumes the content.
+  vod           -> your app, via play(). Your app holds the content paused until the
+                   first 'completed' or 'error' (the SDK does NOT pause it for a
+                   pre-roll); after that the SDK pauses/resumes the content itself,
+                   and on a mid-roll 'error' your app also resumes it as a safety net.
   interstitial  -> your app, via play(). Your app also pauses/resumes the content.
 
 ========================================
 STEP 3-3 — Handle events by AD_TYPE
 ========================================
 
-If AD_TYPE is "linear-tv" — logging and error recovery only:
+If AD_TYPE is "linear-tv" — logging and error recovery:
 
   const subscription = addAdEventListenerFor(nativeId, event => {
     switch (event.event) {
@@ -392,31 +399,98 @@ If AD_TYPE is "linear-tv" — logging and error recovery only:
         console.log('ad break started');
         break;
       case 'completed':
+        // Keep this idempotent: a break cut short by stop() may still report it.
         console.log('ad break finished');
         break;
       case 'error':
         console.error(`ad error: ${event.message}`);
+        restartChannel();   // see below
         break;
     }
   });
 
+An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
+playlist it failed to manipulate). Recover by starting the channel over: stop the ads
+manager, then call changeChannelUrl() again with the same params except prerollAdTagUrl
+and play the NEW proxy url it returns right away. A restart leaves the channel pre-roll
+out (prerollAdTagUrl omitted): the viewer has already seen it, so nothing is held.
+stop() keeps the overlay and the subscription; release() would drop them.
+
+  const restarting = useRef(false);
+  const restarts = useRef(0);
+
+  const restartChannel = useCallback(async () => {
+    if (restarting.current || restarts.current >= 3) return;   // cheap cap, no endless loop
+    restarting.current = true;
+    restarts.current += 1;
+    try {
+      await stop(nativeId);
+      // Same params as Step 3-4 except prerollAdTagUrl. A restart leaves the channel
+      // pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+      // No pre-roll hold: the new proxy url plays right away.
+      const proxyUrl = await changeChannelUrl(nativeId, {/* ...same as Step 3-4 */});
+      setSourceUri(proxyUrl);   // react-native-video; onLoad fires again, the guard holds
+      // bitmovin: player.load({url: proxyUrl, type: SourceType.HLS}); play from onReady
+    } catch (e: any) {
+      console.error(`channel restart failed: ${e.message}`);
+    } finally {
+      restarting.current = false;
+    }
+  }, [nativeId, config]);
+
+A channel pre-roll needs no restart: a failed pre-roll reports 'completed', not 'error'.
+
 If AD_TYPE is "vod":
 
-  const [paused, setPaused] = useState(false);
+  import Video, {type VideoRef} from 'react-native-video';
+
+  // Held until the pre-roll is over. Only ever goes from false to true.
+  const [contentStarted, setContentStarted] = useState(false);
+  const contentStartedRef = useRef(false);   // the same, readable from the listener
+  const contentEnded = useRef(false);        // set from onEnd, see Step 3-4
+  const videoRef = useRef<VideoRef>(null);   // <Video ref={videoRef}>; only for resume()
+
+  const startContent = () => {
+    contentStartedRef.current = true;
+    setContentStarted(true);
+  };
 
   const subscription = addAdEventListenerFor(nativeId, event => {
     if (event.event === 'prepare') {
-      setPaused(true);           // pausing the content is the app's job
+      // Only play the break. Once the content has started, the SDK pauses it for a
+      // mid-roll and, at 'completed', rewinds and resumes it.
       play(nativeId).catch(e => console.error(`play failed: ${e.message}`));
     } else if (event.event === 'completed') {
-      setPaused(false);
+      // The first one ends the pre-roll, or stands in for it when there is none
+      // (the SDK also sends it for an empty ad response or a failed request).
+      startContent();
     } else if (event.event === 'error') {
-      setPaused(false);          // never strand the viewer on a frozen frame
       console.error(`ad error: ${event.message}`);
+      if (!contentStartedRef.current) {
+        startContent();                 // pre-roll failed: start the held content
+      } else if (!contentEnded.current) {
+        videoRef.current?.resume();     // mid-roll failed: resume (bitmovin: player.play())
+      }
+      // post-roll failed: the content has ended, nothing to resume
     }
   });
 
-Pass `paused={paused}` to the <Video>.
+Pass `paused={!contentStarted}` to the <Video>. The SDK does NOT pause the content for a
+pre-roll; without this the content plays underneath the pre-roll with both soundtracks.
+For bitmovin, call player.play() only once contentStarted is true, e.g.
+useEffect(() => { if (contentStarted) player.play(); }, [player, contentStarted]).
+
+The mid-roll resume on 'error' is a safety net. The SDK rewinds and resumes the content
+after a failed mid-roll itself: it issues that rewind and resume natively BEFORE it emits
+the 'error', which then crosses the bridge to JS asynchronously. So resume() normally
+finds the content already playing and changes nothing. It only resumes: no seek, no
+source change.
+
+Apart from that resume, once the content has started do NOT pause, seek or re-source it
+around a VOD break, and do NOT drive the <Video>'s `paused` prop from VOD ad events. With
+setIgnoreAdBreakInPIPMode(false) such a pause can land on the player the ad is playing
+on, freezing the ad and never handing the content back. resume() never pauses, so it
+cannot cause that.
 
 If AD_TYPE is "interstitial":
 
@@ -466,6 +540,9 @@ If AD_TYPE is "linear-tv" — call from onLoad, guarded, then swap the source:
 PRE-ROLL: with a prerollAdTagUrl the pre-roll runs FIRST. Hold the proxy url in a ref and
 apply it from the 'completed' event rather than right away.
 
+ERROR: on an 'error', restart the channel with stop() and a NEW changeChannelUrl() call,
+as in Step 3-3. The restart omits prerollAdTagUrl and does not hold the proxy url.
+
 If AD_TYPE is "vod" — call from onLoad. The content url is NEVER rewritten:
 
   await requestVodAd(nativeId, {
@@ -480,9 +557,13 @@ durationMs must be the real total duration of the content — the SDK places the
 positions against it.
 
 POST-ROLL: wire the <Video> onEnd prop to notifyContentEnded(nativeId). Without it the
-SDK never learns the content is over and no post-roll can run:
+SDK never learns the content is over and no post-roll can run. Mark the content ended
+first, so a post-roll 'error' does not resume it:
 
-  onEnd={() => notifyContentEnded(nativeId).catch(e => console.error(e.message))}
+  onEnd={() => {
+    contentEnded.current = true;
+    notifyContentEnded(nativeId).catch(e => console.error(e.message));
+  }}
 
 If AD_TYPE is "interstitial" — no player needed, call whenever the break belongs:
 
@@ -531,8 +612,12 @@ Set started.current = true right after the ad request resolves.
 STEP 4-3 — stop() vs release()
 ========================================
 
-  stop(nativeId)     -> ends the ad break in progress. The content keeps playing and the
-                        session stays alive, so a later break will still play.
+  stop(nativeId)     -> stops the ads manager: ends the break in progress AND the ad
+                        session. No later break plays until a new changeChannelUrl() /
+                        requestVodAd() / requestAd(). For linear-tv the local proxy is shut
+                        down, so the proxy url stops serving; that is why stop() is only
+                        the first half of the restart on 'error' (Step 3-3), followed by a
+                        new changeChannelUrl(). The overlay and the event subscription stay.
   release(nativeId)  -> detaches the SDK from that <Video> entirely.
 
 Both ignore an unknown nativeId rather than rejecting.
@@ -545,6 +630,8 @@ STEP 4-4 — Full component skeleton
     const [sourceUri, setSourceUri] = useState(config.contentUrl);
     const [paused, setPaused] = useState(false);
     const started = useRef(false);
+    const videoRef = useRef<VideoRef>(null);   // vod — see Step 3-3
+    const contentEnded = useRef(false);        // vod — see Step 3-3
 
     // 1. events
     useEffect(() => {
@@ -582,9 +669,13 @@ STEP 4-4 — Full component skeleton
           source={{uri: sourceUri}}
           style={StyleSheet.absoluteFill}
           resizeMode="contain"
-          paused={paused}
+          ref={videoRef}    // vod: resume() after a mid-roll 'error' — see Step 3-3
+          paused={paused}   // vod: paused={!contentStarted} — see Step 3-3
           onLoad={start}
-          onEnd={() => notifyContentEnded(nativeId).catch(() => {})}
+          onEnd={() => {
+            contentEnded.current = true;   // vod: no resume after a post-roll 'error'
+            notifyContentEnded(nativeId).catch(() => {});
+          }}
         />
       </View>
     );
@@ -604,6 +695,12 @@ CONSTRAINTS
 - changeChannelUrl() is for linear-tv ONLY. Use requestVodAd() for VOD.
 - Do NOT call play() for linear-tv. The break plays itself.
 - Do NOT swap the video source for vod or interstitial. Only linear-tv returns a url.
+- For vod, hold the content paused only until the first 'completed' or 'error'. Never
+  pause, seek or re-source it after it has started. The one action allowed after that
+  is resuming it (videoRef.current?.resume() / bitmovin player.play()) on an 'error'
+  while the content has started and not ended. After a post-roll 'error', do nothing.
+- For linear-tv, on 'error' await stop(nativeId), then call changeChannelUrl() again
+  without prerollAdTagUrl and play the new proxy url right away. Cap the restarts. Do NOT release() to recover.
 - For bitmovin, do NOT put the nativeID on <PlayerView>. Use a separate overlay <View>.
 - play() and notifyContentEnded() REJECT when no session was started for that nativeId.
   stop() and release() resolve silently.

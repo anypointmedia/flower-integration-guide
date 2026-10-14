@@ -1,0 +1,11 @@
+{
+  "label": "Advanced Ad Formats",
+  "position": 3,
+  "collapsed": true,
+  "key": "ios-prompts-by-case-advanced",
+  "link": {
+    "type": "generated-index",
+    "slug": "ios-prompts-by-case-advanced",
+    "description": "Prompts for ad formats that are not tied to a content player on iOS, such as inline and interstitial ads."
+  }
+}

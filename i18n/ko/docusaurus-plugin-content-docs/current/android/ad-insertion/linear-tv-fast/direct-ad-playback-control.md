@@ -13,6 +13,8 @@ Flower SDK가 제공하는 플레이리스트 매니퓰레이션 기능을 사�
 
 :::note
 이 방식은 SDK 스트림 프록시를 경유하지 않으므로 `changeChannelUrl()`을 사용하지 않습니다. 앱이 원본 채널 URL을 직접 재생합니다.
+
+이 방식에서는 채널 프리롤을 사용할 수 없습니다. `enterChannel()`에는 프리롤 매개변수가 없습니다. 채널 [프리롤](./manual-player-control#pre-roll-ads)(`prerollAdTagUrl`)은 `changeChannelUrl()` 또는 Flower Player를 통해서만 요청됩니다.
 :::
 
 ## 단계별 상세 설명
@@ -249,13 +251,19 @@ private class FlowerAdsManagerListenerImpl(
         CoroutineScope(Main).launch {
             // TODO GUIDE:
             //  SDK 내부에서 오류가 발생한 경우입니다.
-            //  광고 플레이어를 정리하고 메인 콘텐츠를 정상 상태로 복구합니다.
+            //  광고 매니저와 두 플레이어를 정지한 뒤 채널을 다시 시작합니다.
+            activity.adRequestJob?.cancel()
             activity.flowerAdView.adsManager.removeListener(this@FlowerAdsManagerListenerImpl)
             activity.flowerAdView.adsManager.stop()
             activity.adPlayer.stop()
             activity.adPlayer.release()
+            activity.player.stop()
+            activity.player.release()
 
-            activity.player.volume = 1.0f
+            // 처음 채널을 시작한 방식 그대로 다시 시작합니다:
+            // prepareAd()(새 광고 플레이어와 enterChannel)와 playLinearTv()(리스너와 콘텐츠 플레이어).
+            // OPTIONAL GUIDE: 오류가 계속될 때 재시작이 반복되지 않도록 연속 재시작 횟수를 제한하세요(예: 연속 3회).
+            activity.restartChannel()
         }
     }
 

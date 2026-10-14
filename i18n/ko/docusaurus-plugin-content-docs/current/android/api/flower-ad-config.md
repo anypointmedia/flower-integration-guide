@@ -37,7 +37,7 @@ VOD 콘텐츠의 광고 삽입에 필요한 정보를 지정하는 클래스입�
 | contentId | String | 고유 콘텐츠 ID<br/>Flower 백엔드 시스템에 등록되어야 합니다. |
 | contentDuration | Long | VOD 콘텐츠의 재생 시간(밀리초) |
 | requestTimeout | Long | (Optional) VOD 광고 요청 시 최소 타임아웃 시간(밀리초)<br/>기본값은 5000입니다. |
-| minPrepareDuration | Long | (Optional) onPrepare 이벤트부터 광고 재생 시작까지의 최소 대기 시간(밀리초)<br/>기본값은 5000입니다. |
-| rewindDuration | Long | (Optional) 광고 구간 종료 시 콘텐츠를 되감는 시간(밀리초)<br/>기본값은 3000입니다. |
+| minPrepareDuration | Long | (Optional) 광고 준비를 위한 사전 시간(밀리초). Mid-roll 광고는 Mid-roll 위치보다 `requestTimeout + minPrepareDuration`만큼 먼저 요청되며, `onPrepare`는 본편이 해당 위치에 도달했을 때 호출됩니다.<br/>기본값은 5000입니다. |
+| rewindDuration | Long | (Optional) Mid-roll 광고 구간 종료 시 콘텐츠를 되감는 시간(밀리초). 본편은 중단된 위치보다 이 시간만큼 앞에서 재개됩니다. 되감기로 인해 같은 Mid-roll이 다시 재생되지는 않습니다.<br/>기본값은 5000입니다. |
 | extraParams | Map<String, String> | (Optional) 타겟팅을 위해 사전 협의된 추가 정보 |
 | adTagHeaders | Map<String, String> | (Optional) 광고 요청 시 추가할 HTTP 헤더 정보 |

@@ -75,3 +75,7 @@ class PlaybackViewController: UIViewController {
 ```
 
 If the SDK doesn't support your video player, Contact [Helpdesk](mailto:dev-support@anypointmedia.com).
+
+## Linear Channel Pre-roll with MediaPlayerAdapter
+
+For a linear channel played by an unsupported player, you can implement the `MediaPlayerAdapter` protocol and pass it to the `changeChannelUrl(...)` overload that takes `mediaPlayerAdapter` (see [Using MediaPlayerAdapter](./linear-tv-fast/manual-player-control#using-mediaplayeradapter)). This overload also takes `prerollAdTagUrl`, and the channel pre-roll then works the same way as with `MediaPlayerHook`: hold the returned URL and load it when the pre-roll ends (see [Pre-roll Ads](./linear-tv-fast/manual-player-control#pre-roll-ads)). The SDK calls the adapter's `pause()` when the pre-roll is ready and `resume()` when it ends, so both must be safe to call before the channel URL is loaded.

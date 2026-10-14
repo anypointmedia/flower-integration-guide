@@ -10,7 +10,7 @@ sidebar_label: 비디오 플레이어 전달 인터페이스 구현
 
 | **환경** | **지원 플레이어** |
 | ---| --- |
-| HTML5 | Bitmovin Player<br/>HLS.js<br/>Video.js |
+| HTML5 | Bitmovin Player<br/>HLS.js<br/>dash.js<br/>Shaka Player |
 
 SDK가 지원하는 플레이어를 사용하는 경우 SDK에서 제공하는 MediaPlayerHook 인터페이스를 구현하여 플레이어를 반환하면 됩니다.
 

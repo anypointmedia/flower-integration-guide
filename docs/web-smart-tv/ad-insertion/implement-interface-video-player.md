@@ -9,7 +9,7 @@ Supported players:
 
 | **Environment** | **Player** |
 | ---| --- |
-| HTML5 | Bitmovin Player<br/>HLS.js<br/>Video.js |
+| HTML5 | Bitmovin Player<br/>HLS.js<br/>dash.js<br/>Shaka Player |
 
 If the player that you are using is supported by the SDK, you can return the player by implementing the MediaPlayerHook interface that is provided by the SDK.
 

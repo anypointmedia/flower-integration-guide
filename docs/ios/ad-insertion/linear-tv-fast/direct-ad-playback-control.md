@@ -31,6 +31,10 @@ Notifies the SDK of live broadcast entry. The following describes the parameters
 | platformMediaPlayerAdapter | MediaPlayerAdapter | `MediaPlayerAdapter` protocol implementation object for the **ad player**<br/>See [Ad Playback Time Detection](#ad-playback-time-detection--mediaplayeradapter) below. |
 | adTagHeaders | \[String: String\] | (Optional) HTTP header information to add when requesting ads |
 
+:::note Channel pre-roll
+`enterChannel(...)` has no `prerollAdTagUrl` parameter, so the SDK does not play a channel pre-roll in this flow. The channel pre-roll is available only through `changeChannelUrl(...)` and `FlowerAVPlayer` (see [Pre-roll Ads](./manual-player-control#pre-roll-ads)).
+:::
+
 #### Example
 
 ```swift
@@ -264,7 +268,10 @@ extension PlaybackViewController: FlowerAdsManagerListener {
 
     nonisolated func onError(error: FlowerError?) {
         Task { @MainActor in
+            // TODO GUIDE: on an ad error, end the break, stop the ads manager and
+            //             restart the channel (see restartLinearTvAfterError() below).
             self.finishAdBreak()
+            self.restartLinearTvAfterError()
         }
     }
 
@@ -273,6 +280,33 @@ extension PlaybackViewController: FlowerAdsManagerListener {
             self.finishAdBreak()
         }
     }
+}
+```
+
+When `onError` is called, stop the ads manager with `adsManager.stop()`, release the content player item, and start the channel again the same way it was first started (`enterChannel(...)`, a new `AVPlayerItem`, and `play()`):
+
+```swift
+// Declared in PlaybackViewController: simple retry limit so that a channel that keeps
+// failing is not restarted forever. Reset it when the user changes the channel.
+private var errorRestartCount = 0
+
+// TODO GUIDE: restart the channel after an ad error (called on the main actor)
+private func restartLinearTvAfterError() {
+    guard errorRestartCount < 3 else { return }
+    errorRestartCount += 1
+
+    // 1. Cancel the open ad request and stop the ads manager.
+    channelAdRequest?.cancel()
+    channelAdRequest = nil
+    flowerAdView.adsManager.stop()
+
+    // 2. Release the content item.
+    contentPlayer.pause()
+    contentPlayer.replaceCurrentItem(with: nil)
+
+    // 3. Start the channel again the same way it was first started:
+    //    enterChannel(...) -> a new AVPlayerItem -> play().
+    playLinearTv()
 }
 ```
 

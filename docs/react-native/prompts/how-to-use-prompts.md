@@ -6,6 +6,27 @@ sidebar_position: 0
 
 This section contains prompts designed for LLM-assisted SDK integration. Each prompt can be copied and pasted into an AI coding assistant (Claude, ChatGPT, Copilot, etc.) along with your existing code.
 
+## Prompts by Case
+
+Each case prompt is self-contained: it covers one content type with one player, states how the SDK behaves in that case, and ends with what to verify on Android and iOS. Pick the row that matches your app.
+
+| Your case | Prompt |
+|-----------|--------|
+| Live channel or FAST stream, `react-native-video` (incl. channel pre-roll, several channels on one screen) | [Linear TV / FAST with react-native-video](./by-case/linear-tv/react-native-video.md) |
+| Live channel or FAST stream, Bitmovin player | [Linear TV / FAST with the Bitmovin Player](./by-case/linear-tv/bitmovin.md) |
+| VOD with pre/mid/post-roll, `react-native-video` | [VOD with react-native-video](./by-case/vod/react-native-video.md) |
+| VOD with pre/mid/post-roll, Bitmovin player | [VOD with the Bitmovin Player](./by-case/vod/bitmovin.md) |
+| VOD ads must keep playing in PIP mode (`setIgnoreAdBreakInPIPMode(false)`) | [VOD Ads That Keep Playing in PIP Mode](./by-case/vod/ads-in-pip-mode.md) |
+| Existing VOD integration that pauses/resumes the content around breaks (1.0.x) | [Migrate a VOD Integration to SDK-Managed Content](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| Standalone break at a point your app chooses, incl. full-screen interstitials | [Inline / Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
+| Any of the above, in an app that supports PIP (default mode) | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
+
+The PIP prompt is applied on top of a working integration from one of the other rows.
+
+## Full Integration Prompts
+
+The integrated and step-by-step prompts below cover all content types in one prompt that branches on `AD_TYPE` and `PLAYER_TYPE`. Use them when your app combines several content types, or when you prefer to work through the integration step by step.
+
 ## Choose Your Approach
 
 ### Integrated Prompt (Recommended for new projects)
@@ -44,7 +65,7 @@ Before using any prompt, replace the `{{...}}` placeholders:
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | Type of ad content |
 | `PLAYER_TYPE` | `react-native-video` \| `bitmovin` | Which player library owns the view |
-| `SDK_VERSION` | e.g. `1.0.2` | Version of `@anypoint/flower-sdk-react-native` to install |
+| `SDK_VERSION` | e.g. `1.0.3` | Version of `@anypoint/flower-sdk-react-native` to install |
 
 ## Choosing AD_TYPE
 

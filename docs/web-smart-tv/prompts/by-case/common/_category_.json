@@ -1,0 +1,11 @@
+{
+  "label": "Common",
+  "position": 4,
+  "collapsed": true,
+  "key": "web-prompts-by-case-common",
+  "link": {
+    "type": "generated-index",
+    "slug": "web-prompts-by-case-common",
+    "description": "Prompts for features shared by all ad types, such as PIP mode support."
+  }
+}

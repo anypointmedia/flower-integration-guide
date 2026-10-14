@@ -40,9 +40,12 @@ const adsManagerListener = {
     },
 
     onError(error) {
-        // TODO GUIDE: restart to play Linear TV on ad error
-        releasePlayer();
-        playLinearTv();
+        // TODO GUIDE: on error, stop the ads manager, release the player, and restart the channel
+        // (Optional) Count restarts and stop retrying after a few attempts so a broken channel does not loop.
+        flowerAdView.adsManager.stop();
+        releasePlayer(); // e.g. hls.destroy() for HLS.js, player.unload() for Bitmovin
+        // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+        playLinearTv({ withPreroll: false });  // new changeChannelUrl() -> load the returned URL -> play right away
     },
 
     onAdBreakSkipped(reason) {
@@ -52,6 +55,14 @@ const adsManagerListener = {
 flowerAdView.adsManager.addListener(adsManagerListener);
 ```
 
+:::info `onError()` 발생 시 복구
+`onError()`가 호출되면 `flowerAdView.adsManager.stop()`으로 광고 매니저를 중지하고 플레이어를 해제한 뒤 채널을 다시 시작합니다. 즉 `changeChannelUrl()`을 다시 호출하고, 반환된 URL을 로드해 재생합니다. 에러 이전에 반환받은 URL은 재사용하지 마세요. 재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. 처음 시작할 때와 같은 매개변수를 전달하되 `prerollAdTagUrl`만 `null`로 두고, 기다릴 프리롤이 없으므로 원래 리스너를 등록된 상태로 둔 채 반환된 URL을 바로 로드해 재생하세요.
+
+채널 스트림이 치명적 플레이어 오류(예: HLS.js의 치명적 `hlsError`)로 중단된 경우에도, 장애 1건당 한 번 `playback unrecoverable (<reason>) - url: <url>` 메시지와 플레이어의 오류를 `cause`로 담아 `onError()`가 호출됩니다. 같은 방법으로 채널을 다시 시작하되, 가능하면 새로 발급받은 채널 URL을 사용하세요.
+
+`stop()`은 진행 중인 광고 브레이크를 종료하며, SDK는 재시작이 시작된 뒤에도 해당 브레이크의 `onCompleted()`를 호출할 수 있습니다. `onCompleted()`에서는 플레이어 컨트롤 표시와 같은 UI 작업만 하고 재생 시작이나 재로드는 하지 마세요. 그래야 이 늦은 호출로 재시작이 한 번 더 일어나지 않습니다.
+:::
+
 ### 3. 플레이어 전달 -- `MediaPlayerHook`
 
 > 실시간 채널의 경우 본 콘텐츠를 재생하는 플레이어를 SDK에 전달해야 합니다.
@@ -59,8 +70,9 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 #### 지원 플레이어
 
 *   HLS.js
-*   Video.js
 *   Bitmovin Player
+*   dash.js
+*   Shaka Player
 
 위 플레이어들은 `MediaPlayerHook` 인터페이스를 구현하여 SDK에 현재 플레이어를 전달합니다.
 
@@ -109,20 +121,44 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 
 실시간 방송을 중단할 때 사용하는 API입니다. 매개변수는 없습니다.
 
+## 프리롤 광고
+
+채널 프리롤은 시청자가 채널에 진입할 때 채널 스트림이 시작되기 전에 한 번 재생되는 광고입니다. 광고 마커 위치에서 스트림을 대체하는 실시간 광고와는 별개입니다.
+
+**사용 방법:** Anypoint Media에서 발급받은 프리롤 광고 태그 URL을 `changeChannelUrl()`의 `prerollAdTagUrl` 인자로 전달합니다. 프리롤을 사용하지 않으려면 `null`을 전달하거나 생략합니다. FlowerHls를 사용하는 경우에는 `FlowerLinearTvAdConfig`의 `prerollAdTagUrl`을 설정합니다. [확장 HLS.js 사용](./using-extended-hlsjs.md#프리롤-광고)을 참고하세요. `MediaPlayerAdapter`와 함께 사용하는 `enterChannel()`에는 프리롤 매개변수가 없습니다.
+
+**재생 흐름:**
+
+1. `changeChannelUrl()`은 스트림 URL을 바로 반환하고, SDK는 백그라운드에서 프리롤을 요청합니다.
+2. 프리롤이 준비되면 SDK는 `onPrepare()`를 호출하고, 플레이어 위에 SDK 자체 video 요소로 프리롤을 재생하면서 플레이어를 일시정지한 뒤 `onPlay()`를 호출합니다.
+3. 프리롤이 끝나면 SDK는 `onCompleted()`를 호출하고 플레이어 재생을 재개합니다.
+
+**스트림 대기:** `prerollAdTagUrl`을 설정한 경우 반환된 URL을 바로 로드하지 마세요. URL을 저장해 두고, 기존 `FlowerAdsManagerListener`를 제거한 뒤 임시 리스너를 등록합니다. 임시 리스너의 첫 `onCompleted()`(또는 `onError()`)에서 저장한 URL을 로드해 재생하고, 임시 리스너를 제거한 뒤 원래 리스너를 다시 등록합니다. 이렇게 하면 프리롤 전에 스트림 영상이 잠깐 비치거나 광고와 스트림이 동시에 로딩되는 것을 막을 수 있습니다. `prerollAdTagUrl`을 설정하지 않은 경우에는 반환된 URL을 로드하고 바로 `play()`를 호출합니다. 두 경우 모두 [아래 예시](#실시간-채널-광고-요청-예시)에서 확인할 수 있습니다.
+
+**광고 없음과 실패:** 프리롤 광고가 없거나, 광고 요청이 실패하거나, 프리롤 재생에 실패한 경우에도 SDK는 `onCompleted()`를 호출합니다. 실패한 프리롤은 `onError()`로 알리지 않으므로 스트림은 항상 시작됩니다. 임시 리스너의 `onError()`는 스트림 재생을 시작하고 원래 리스너를 복원하기만 하며 `stop()`은 호출하지 않습니다. 이 시점에는 아직 중지할 채널 스트림이나 실시간 광고 브레이크가 없기 때문입니다.
+
+**`onError()` 후 재시작:** 재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. 재시작에서는 원래 리스너를 등록된 상태로 둔 채 반환된 URL을 바로 로드해 재생하며, 임시 리스너를 등록하지 않습니다.
+
+**채널 전환:** 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다. 다음 채널에 대한 `changeChannelUrl()` 호출은 진행 중인 프리롤을 포함해 현재 세션을 중지하고, 새 채널의 프리롤을 요청합니다. 이렇게 중지된 프리롤은 임시 리스너를 호출하지 않으므로, 예시처럼 새 호출 전에 이전 임시 리스너를 제거하고 원래 리스너를 다시 등록하세요. 시청자가 채널 화면을 떠날 때도 `stop()` 전에 임시 리스너를 제거합니다.
+
+**PIP:** 기본 설정(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`)에서는 앱이 PIP 모드에 진입하면 프리롤이 일시정지되고, 앱으로 돌아오면 재개됩니다. VOD 광고와 같은 동작입니다. [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
+
 ## 실시간 채널 광고 요청 예시
-
-:::tip 프리롤 광고와 재생 시작
-`changeChannelUrl()`을 호출하면 SDK가 광고 추적이 적용된 스트림 URL을 반환합니다. `prerollAdTagUrl` 설정 여부에 따라 재생 시작 방식이 달라집니다.
-
-- **`prerollAdTagUrl`을 설정하지 않은 경우:** 반환된 URL을 플레이어에 로드한 뒤 `videoElement.play()`를 직접 호출하여 콘텐츠 재생을 시작해야 합니다.
-- **`prerollAdTagUrl`을 설정한 경우:** 반환된 URL을 바로 플레이어에 로드하지 않고, 기존 `FlowerAdsManagerListener`를 제거한 뒤 임시 리스너를 등록합니다. 임시 리스너의 `onCompleted()`가 호출되면 그 시점에 반환된 URL을 플레이어에 로드하고 재생을 시작한 뒤, 임시 리스너를 제거하고 원래 리스너를 다시 등록합니다.
-
-이렇게 처리하는 이유는, 본 콘텐츠 영상이 미리 로딩되면서 광고 시작 전에 콘텐츠의 잔상이 화면에 남을 수 있고, 광고와 본 콘텐츠가 동시에 로딩되면서 네트워크 자원을 불필요하게 소모하기 때문입니다.
-:::
 
 ### _HLS.js_
 ```javascript
-function playLinearTv() {
+let prerollListener = null;  // 채널 프리롤이 끝나기를 기다리는 동안의 임시 리스너
+
+// withPreroll: 채널을 처음 시작할 때는 true, onError() 후 재시작할 때는 false
+function playLinearTv({ withPreroll = true } = {}) {
+    // 채널을 전환하면 대기 중인 프리롤은 리스너 호출 없이 중지됩니다.
+    // 임시 리스너를 제거하고 원래 리스너를 복원합니다.
+    if (prerollListener) {
+        flowerAdView.adsManager.removeListener(prerollListener);
+        flowerAdView.adsManager.addListener(adsManagerListener);
+        prerollListener = null;
+    }
+
     const player = new Hls();
     const videoElement = document.querySelector('video');
     player.attachMedia(videoElement);
@@ -145,7 +181,8 @@ function playLinearTv() {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    const prerollAdTagUrl = 'https://ad_request?target=preroll';
+    // 재시작할 때는 채널 프리롤을 제외합니다(prerollAdTagUrl 생략). 시청자가 이미 프리롤을 보았기 때문입니다.
+    const prerollAdTagUrl = withPreroll ? 'https://ad_request?target=preroll' : null;
 
     const changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         'https://XXX',
@@ -169,11 +206,12 @@ function playLinearTv() {
         // 프리롤 광고가 완료(onCompleted)된 시점에 스트림 URL을 로드하고 재생을 시작합니다.
         flowerAdView.adsManager.removeListener(adsManagerListener);
 
-        const prerollListener = {
+        prerollListener = {
             onPrepare(adDurationMs) {},
             onPlay() {},
             onCompleted() {
                 // 프리롤 광고 완료 후 스트림 URL 로드 및 재생 시작
+                // (프리롤 광고가 없거나 실패한 경우에도 호출됨)
                 player.loadSource(changedChannelUrl);
                 player.on(Hls.Events.MANIFEST_PARSED, function() {
                     videoElement.play();
@@ -182,6 +220,7 @@ function playLinearTv() {
                 // 임시 리스너를 제거하고 원래 리스너를 복원합니다.
                 flowerAdView.adsManager.removeListener(prerollListener);
                 flowerAdView.adsManager.addListener(adsManagerListener);
+                prerollListener = null;
             },
             onError(error) {
                 // 프리롤 광고 에러 시에도 스트림 재생 시작 및 리스너 복원
@@ -192,6 +231,7 @@ function playLinearTv() {
 
                 flowerAdView.adsManager.removeListener(prerollListener);
                 flowerAdView.adsManager.addListener(adsManagerListener);
+                prerollListener = null;
             },
             onAdBreakSkipped(reason) {}
         };
@@ -209,7 +249,7 @@ function onStreamProgramChanged(targetingInfo) {
 
 SDK가 공식적으로 지원하지 않는 플레이어를 사용하는 경우, `MediaPlayerAdapter` 인터페이스를 구현하여 플레이어를 직접 제어할 수 있습니다.
 
-`MediaPlayerHook`과 함께 `changeChannelUrl()`을 사용하는 대신, `MediaPlayerAdapter` 구현과 함께 `enterChannel()` API를 사용합니다.
+`MediaPlayerHook`과 함께 `changeChannelUrl()`을 사용하는 대신, `MediaPlayerAdapter` 구현과 함께 `enterChannel()` API를 사용합니다. `enterChannel()`에는 `prerollAdTagUrl` 매개변수가 없으므로 이 방식에서는 [채널 프리롤](#프리롤-광고)을 사용할 수 없습니다.
 
 ### FlowerAdsManager.enterChannel(...)
 

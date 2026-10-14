@@ -41,7 +41,7 @@
     "message": "VOD (Video On Demand)"
   },
   "homepage.contentType.vod.description": {
-    "message": "온디맨드 콘텐츠의 Pre-roll, Mid-roll, Post-roll 광고 삽입."
+    "message": "온디맨드 콘텐츠의 프리롤, Mid-roll, Post-roll 광고 삽입."
   },
   "homepage.contentType.advancedAd.title": {
     "message": "Advanced Ad Formats"

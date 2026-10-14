@@ -13,6 +13,8 @@ In this approach the host application owns **two players**: one for the channel 
 
 :::note
 Because this flow does not go through the SDK stream proxy, `changeChannelUrl()` is not used. The application plays the original channel URL directly.
+
+A channel pre-roll is not available in this flow: `enterChannel()` has no pre-roll parameter. The channel [pre-roll](./manual-player-control#pre-roll-ads) (`prerollAdTagUrl`) is requested only through `changeChannelUrl()` or a Flower Player.
 :::
 
 ## Step-by-Step Details
@@ -252,13 +254,19 @@ private class FlowerAdsManagerListenerImpl(
         CoroutineScope(Main).launch {
             // TODO GUIDE:
             //  This is the case where an error occurs inside the SDK.
-            //  Remove the ad player and restore the main content to its normal state
+            //  Stop the ads manager and both players, then restart the channel.
+            activity.adRequestJob?.cancel()
             activity.flowerAdView.adsManager.removeListener(this@FlowerAdsManagerListenerImpl)
             activity.flowerAdView.adsManager.stop()
             activity.adPlayer.stop()
             activity.adPlayer.release()
+            activity.player.stop()
+            activity.player.release()
 
-            activity.player.volume = 1.0f
+            // Restart the channel the same way it was first started:
+            // prepareAd() (a new ad player and enterChannel) and playLinearTv() (the listener and the content player).
+            // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
+            activity.restartChannel()
         }
     }
 

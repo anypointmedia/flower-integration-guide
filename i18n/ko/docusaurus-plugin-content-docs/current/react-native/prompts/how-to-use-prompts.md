@@ -6,6 +6,27 @@ sidebar_position: 0
 
 이 섹션은 LLM을 활용한 SDK 연동을 위한 프롬프트를 제공합니다. 각 프롬프트를 복사해 기존 코드와 함께 AI 코딩 어시스턴트(Claude, ChatGPT, Copilot 등)에 붙여넣어 사용하세요.
 
+## 케이스별 프롬프트
+
+케이스별 프롬프트는 각각 독립적으로 사용할 수 있습니다. 하나의 콘텐츠 유형과 하나의 플레이어 조합을 다루며, 해당 케이스에서 SDK가 어떻게 동작하는지 설명하고, Android와 iOS에서 확인할 항목으로 끝납니다. 앱에 해당하는 행을 고르세요.
+
+| 케이스 | 프롬프트 |
+|-----------|--------|
+| 실시간 채널 또는 FAST 스트림, `react-native-video` (채널 프리롤, 한 화면의 여러 채널 포함) | [react-native-video로 Linear TV / FAST 연동](./by-case/linear-tv/react-native-video.md) |
+| 실시간 채널 또는 FAST 스트림, Bitmovin 플레이어 | [Bitmovin 플레이어로 Linear TV / FAST 연동](./by-case/linear-tv/bitmovin.md) |
+| Pre/Mid/Post-roll이 있는 VOD, `react-native-video` | [react-native-video로 VOD 연동](./by-case/vod/react-native-video.md) |
+| Pre/Mid/Post-roll이 있는 VOD, Bitmovin 플레이어 | [Bitmovin 플레이어로 VOD 연동](./by-case/vod/bitmovin.md) |
+| PIP 모드에서도 VOD 광고가 계속 재생되어야 하는 경우 (`setIgnoreAdBreakInPIPMode(false)`) | [PIP 모드에서도 재생되는 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
+| 브레이크 전후로 콘텐츠를 일시정지/재개하는 기존 VOD 연동 (1.0.x) | [VOD 연동을 SDK 관리 방식으로 전환](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| 앱이 정한 시점에 재생하는 독립 브레이크 (전체 화면 전면 광고 포함) | [인라인 / 전면 광고](./by-case/advanced/inline-interstitial.md) |
+| 위 케이스 중 하나를 사용하면서 PIP를 지원하는 앱 (기본 모드) | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |
+
+PIP 프롬프트는 다른 행의 프롬프트로 연동을 마친 뒤에 추가로 적용합니다.
+
+## 전체 연동 프롬프트
+
+아래의 통합 프롬프트와 단계별 프롬프트는 `AD_TYPE`과 `PLAYER_TYPE`에 따라 분기하는 하나의 프롬프트로 모든 콘텐츠 유형을 다룹니다. 앱에서 여러 콘텐츠 유형을 함께 사용하거나, 연동을 단계별로 진행하고 싶을 때 사용하세요.
+
 ## 접근 방식 선택
 
 ### 통합 프롬프트 (신규 프로젝트에 권장)
@@ -44,7 +65,7 @@ sidebar_position: 0
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | 광고 콘텐츠 유형 |
 | `PLAYER_TYPE` | `react-native-video` \| `bitmovin` | 뷰를 소유한 플레이어 라이브러리 |
-| `SDK_VERSION` | 예: `1.0.2` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
+| `SDK_VERSION` | 예: `1.0.3` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
 
 ## AD_TYPE 선택
 

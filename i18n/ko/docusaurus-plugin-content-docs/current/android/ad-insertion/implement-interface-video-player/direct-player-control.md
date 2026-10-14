@@ -350,6 +350,14 @@ override fun getPlayerVersion(): String? {
 }
 ```
 
+## 실시간 TV 프리롤 광고
+
+`MediaPlayerAdapter`를 받는 `changeChannelUrl()` 오버로드도 `prerollAdTagUrl`을 받습니다. 프리롤을 사용하는 경우 `MediaPlayerHook`을 사용할 때와 같은 방식으로 채널을 시작하세요. 반환된 URL을 바로 로드하지 않고, 프리롤이 끝나면(임시 리스너의 첫 `onCompleted()` 또는 `onError()`) 로드해 재생합니다. [프리롤 광고](../linear-tv-fast/manual-player-control#pre-roll-ads)를 참고하세요.
+
+SDK는 프리롤이 시작될 때 어댑터의 `pause()`를, 끝날 때 `resume()`을 호출하며, 이는 앱이 스트림을 로드하기 전입니다. 두 메서드는 아무것도 로드되지 않은 상태에서 호출되어도 안전하게 구현하세요.
+
+`enterChannel()`(광고 재생 직접 제어)에는 프리롤 매개변수가 없으므로, 이 방식에서는 채널 프리롤을 사용할 수 없습니다.
+
 ## 보조 모델
 
 MediaPlayerAdapter를 구현하는 데 필요한 모델들입니다.

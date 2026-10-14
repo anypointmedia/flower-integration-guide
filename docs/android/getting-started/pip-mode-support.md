@@ -12,6 +12,8 @@ Flower SDK restricts CTA (Call To Action) functionality in PIP (Picture-in-Pictu
 FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode: Boolean)
 ```
 
+Ads are not supported in PIP mode by default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`). When the app enters PIP while an ad is playing, the SDK pauses the ad, and resumes it when the app returns from PIP. This works only if the app notifies both entering and exiting PIP, because the SDK does not detect PIP mode by itself. In addition, while an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. See [VOD PIP Mode Support](../ad-insertion/vod/pip-mode-support) for details and for supporting ads in PIP mode.
+
 Below is an Android source code example:
 
 **_Java_**

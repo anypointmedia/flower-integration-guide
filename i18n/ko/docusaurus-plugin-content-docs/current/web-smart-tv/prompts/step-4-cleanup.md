@@ -44,6 +44,11 @@ If APPROACH is "flower-hls":
 If APPROACH is "media-player-hook":
 
   function stopPlayback() {
+      // linear-tv with a pre-roll: remove a pending prerollListener first (Step 3)
+      if (flowerAdView && prerollListener) {
+          flowerAdView.adsManager.removeListener(prerollListener);
+          prerollListener = null;
+      }
       if (flowerAdView && adsManagerListener) {
           flowerAdView.adsManager.removeListener(adsManagerListener);
           flowerAdView.adsManager.stop();

@@ -39,9 +39,16 @@ val adsManagerListener = object : FlowerAdsManagerListener {
     }
 
     override fun onError(error: FlowerError?) {
-        // TODO GUIDE: restart to play Linear TV on ad error
-        releasePlayer()
-        playLinearTv()
+        // TODO GUIDE: on an error, stop the ads manager and the player, then restart the channel.
+        //             Listeners are called off the main thread, so switch to the main thread first.
+        CoroutineScope(Dispatchers.Main).launch {
+            flowerAdView.adsManager.stop()
+            player.stop()
+            // Start the channel again with a new changeChannelUrl(...) call, then load and play the returned URL.
+            // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+            // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
+            playLinearTv(withPreroll = false)
+        }
     }
 
     override fun onAdBreakSkipped(reason: Int) {
@@ -50,6 +57,12 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 }
 flowerAdView.adsManager.addListener(adsManagerListener)
 ```
+
+:::info Recovering from `onError`
+`onError` is called when an ad fails to play or when the channel stream can no longer be played. Stop the ads manager with `stop()`, stop the content player, and start the channel again with a new `changeChannelUrl(...)` call. Do not reuse the URL returned before `stop()`. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Pass the same parameters as the first start except `prerollAdTagUrl` (`null`), and load and play the returned URL right away; there is no pre-roll to wait for. The listener stays registered, so it receives the events of the restarted channel. A break cut short by `stop()` may still report `onCompleted` afterwards, so keep `onCompleted` limited to UI work that is safe to run more than once.
+
+When the channel stream stops and the SDK will not recover it, the player adapter calls `onError` once per incident with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`: for Media3 ExoPlayer / ExoPlayer2, a fatal player error that the SDK does not recover by itself, `BehindLiveWindow` when the SDK's automatic recovery from it is turned off, or a live playlist still stalled after 3 recovery attempts; for Bitmovin, after 3 reload attempts or with no source to reload. Recover in the same way, ideally with a fresh channel URL.
+:::
 
 ### 3. Passing the Player – `MediaPlayerHook`
 
@@ -108,19 +121,45 @@ Function used to change extraParams, the additional targeting information, durin
 
 API used to stop live broadcasts. No parameters.
 
+## Pre-roll Ads {#pre-roll-ads}
+
+A channel pre-roll is an ad that plays once when the viewer enters a channel, before the live stream starts. It is optional and separate from the ad breaks inserted into the stream.
+
+### Enabling the Pre-roll
+
+Pass the pre-roll ad tag URL issued by Anypoint Media as `prerollAdTagUrl`, the last argument of `changeChannelUrl()`. Pass `null` when the channel has no pre-roll. The `MediaPlayerAdapter` overload of `changeChannelUrl()` takes the same argument. With a Flower Player, set `FlowerLinearTvAdConfig.prerollAdTagUrl` instead; see [Using Flower Player](./using-flower-player#pre-roll-ads).
+
+### Playback Flow
+
+When `prerollAdTagUrl` is set, `changeChannelUrl()` still returns the stream URL right away, and the SDK also requests the pre-roll and plays it in its own ad player over `FlowerAdView`. The app does not call `adsManager.play()` for it. The app starts the channel only after the pre-roll ends:
+
+1. Do not load the returned URL yet. Remove the main `FlowerAdsManagerListener` and register a temporary listener.
+2. On the first `onCompleted()` (or `onError()`) of the temporary listener, switch to the main thread, load and play the returned URL, then remove the temporary listener and register the main listener again.
+
+Without `prerollAdTagUrl`, load and play the returned URL right away, with the main listener registered. Holding the stream keeps the channel from showing before the pre-roll starts and from loading at the same time as the ad.
+
+- **Events:** The temporary listener receives `onPrepare()`, `onPlay()` when the pre-roll starts, and `onCompleted()` when it ends. `onAdBreakPrepare()`, `onAdPlay()`, `onAdUserAction()`, and `onAdBreakSkipped()` are not reported for a channel pre-roll.
+- **No ad or failure:** When the pre-roll response has no ad, the request fails, or the pre-roll fails while playing, the SDK reports `onCompleted()`, not `onError()`, so the channel starts as usual. Handle `onError()` on the temporary listener in the same way as a safeguard.
+- **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, a channel pre-roll is paused when the app enters PIP and resumed when it returns, in the same way as VOD ads. Report PIP changes with `FlowerSdk.notifyPictureInPictureModeChanged()`; see [PIP Mode Support](../../getting-started/pip-mode-support).
+- **Restart after `onError`:** A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Load and play the returned URL right away, keeping the main listener registered, as described in "Recovering from `onError`" above.
+- **Channel switch:** Each `changeChannelUrl()` call stops the previous channel's ad session, including a pre-roll that is still playing, and requests the new channel's pre-roll when `prerollAdTagUrl` is passed. A pre-roll stopped this way, or by `stop()`, does not report `onCompleted()`. Before the next `changeChannelUrl()` call and before `stop()`, remove a temporary listener that is still registered and register the main listener again; otherwise it would load the previous channel's URL when the next pre-roll ends.
+
 ## Linear Channel Ad Request Example
 
-:::tip Pre-roll Ads and Playback Start
-When you call `changeChannelUrl()`, the SDK returns a stream URL with ad tracking applied. The playback start behavior differs depending on whether `prerollAdTagUrl` is set.
-
-- **If `prerollAdTagUrl` is not set:** Set the returned URL on the player and call `player.play()` directly to start content playback.
-- **If `prerollAdTagUrl` is set:** Do not set the returned URL on the player immediately. Instead, remove the existing `FlowerAdsManagerListener` and register a temporary listener. When the temporary listener's `onCompleted()` is called, set the returned URL on the player and start playback, then remove the temporary listener and re-register the original listener.
-
-This approach prevents the main content from briefly flashing on screen before the pre-roll ad starts, and avoids unnecessary network resource consumption caused by the ad and main content loading simultaneously.
-:::
+The example below follows the [Pre-roll Ads](#pre-roll-ads) flow.
 
 ```kotlin
-private fun playLinearTv() {
+// Temporary listener while a channel pre-roll is pending (null otherwise)
+private var prerollListener: FlowerAdsManagerListener? = null
+
+// withPreroll: true for the first start of a channel and a channel switch, false for a restart after onError
+private fun playLinearTv(withPreroll: Boolean = true) {
+    // A pre-roll stopped by a channel switch does not report onCompleted:
+    // drop its temporary listener and make sure the original listener is registered.
+    prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
+    prerollListener = null
+    flowerAdView.adsManager.addListener(adsManagerListener)
+
     // TODO GUIDE: change original LinearTV stream url by adView.adsManager.changeChannelUrl
     // arg0: videoUrl, original LinearTV stream url
     // arg1: adTagUrl, url from flower system
@@ -132,7 +171,8 @@ private fun playLinearTv() {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    val prerollAdTagUrl: String? = "https://ad_request?target=preroll"
+    // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+    val prerollAdTagUrl: String? = if (withPreroll) "https://ad_request?target=preroll" else null
 
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",
@@ -144,41 +184,53 @@ private fun playLinearTv() {
         mapOf("custom-stream-header" to "custom-stream-header-value"),
         prerollAdTagUrl
     )
-    if (prerollAdTagUrl == null) {
-        // If prerollAdTagUrl is not set, set the returned URL directly and start playback.
+    fun playStream() {
         player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
         player.prepare()
         player.play()
+    }
+
+    if (prerollAdTagUrl == null) {
+        // If prerollAdTagUrl is not set, set the returned URL directly and start playback.
+        playStream()
     } else {
         // If prerollAdTagUrl is set, remove the existing listener and register a temporary one.
         // Set the stream URL and start playback after the pre-roll ad completes (onCompleted).
+        // The SDK plays the pre-roll by itself: do not call adsManager.play().
         flowerAdView.adsManager.removeListener(adsManagerListener)
 
-        val prerollListener = object : FlowerAdsManagerListener {
+        val listener = object : FlowerAdsManagerListener {
             override fun onPrepare(adDurationMs: Int) {}
             override fun onPlay() {}
             override fun onCompleted() {
-                // Set stream URL and start playback after pre-roll ad completes
-                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
-                player.prepare()
-                player.play()
-
-                // Remove temporary listener and restore the original listener
-                flowerAdView.adsManager.removeListener(this)
-                flowerAdView.adsManager.addListener(adsManagerListener)
+                // Also called when there is no pre-roll ad or the pre-roll fails
+                finishPreroll()
             }
             override fun onError(error: FlowerError?) {
                 // Start stream playback and restore listener even on pre-roll ad error
-                player.setMediaItem(MediaItem.fromUri(changedChannelUrl))
-                player.prepare()
-                player.play()
-
-                flowerAdView.adsManager.removeListener(this)
-                flowerAdView.adsManager.addListener(adsManagerListener)
+                finishPreroll()
             }
             override fun onAdBreakSkipped(reason: Int) {}
+
+            private fun finishPreroll() {
+                val self = this
+                // Listeners are called off the main thread
+                CoroutineScope(Dispatchers.Main).launch {
+                    // Only the first call for the pending pre-roll starts the stream
+                    if (prerollListener !== self) return@launch
+                    prerollListener = null
+
+                    // Set stream URL and start playback after pre-roll ad completes
+                    playStream()
+
+                    // Remove temporary listener and restore the original listener
+                    flowerAdView.adsManager.removeListener(self)
+                    flowerAdView.adsManager.addListener(adsManagerListener)
+                }
+            }
         }
-        flowerAdView.adsManager.addListener(prerollListener)
+        prerollListener = listener
+        flowerAdView.adsManager.addListener(listener)
     }
 }
 
@@ -206,6 +258,8 @@ Instead of passing a `MediaPlayerHook`, you pass a `MediaPlayerAdapter` implemen
 | adTagHeaders | map | (Optional) HTTP header information to add when requesting ads |
 | channelStreamHeaders | map | (Optional) HTTP header information to add when requesting the original stream |
 | prerollAdTagUrl | string | (Optional) Ad tag URL issued by the ad server for pre-roll |
+
+With `prerollAdTagUrl`, start the channel as described in [Pre-roll Ads](#pre-roll-ads). The SDK calls the adapter's `pause()` when the pre-roll starts and `resume()` when it ends, before the app loads the stream, so both must be safe to call while nothing is loaded.
 
 ### MediaPlayerAdapter Interface
 

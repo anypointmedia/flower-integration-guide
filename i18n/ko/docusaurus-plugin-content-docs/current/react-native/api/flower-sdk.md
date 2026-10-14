@@ -11,6 +11,8 @@ import {
   initialize,
   play,
   notifyContentEnded,
+  notifyPictureInPictureModeChanged,
+  setIgnoreAdBreakInPIPMode,
   stop,
   release,
 } from '@anypoint/flower-sdk-react-native';
@@ -64,13 +66,43 @@ VOD 콘텐츠가 끝까지 재생되었음을 SDK에 알려 post-roll이 재생�
 
 해당 `nativeId`로 채널·VOD·인라인 요청이 시작된 적이 없으면 **reject**됩니다.
 
+### notifyPictureInPictureModeChanged
+
+```ts
+function notifyPictureInPictureModeChanged(isInPictureInPictureMode: boolean): Promise<void>;
+```
+
+앱이 PIP 모드에 진입했거나(`true`) PIP 모드에서 돌아왔음(`false`)을 SDK에 알립니다. 특정 `nativeId`가 아니라 앱 전체에 적용됩니다. 기본 설정인 `setIgnoreAdBreakInPIPMode(true)`에서는 PIP 진입 시 재생 중이던 광고가 일시정지되고 앱으로 돌아오면 재개됩니다. 단, 앱이 두 시점을 모두 알려야 합니다. [PIP 모드 지원](../getting-started/pip-mode-support.md)을 참고하세요.
+
+| **파라미터** | **타입** | **설명** |
+| ---| ---| --- |
+| isInPictureInPictureMode | boolean | PIP 모드 진입 시 `true`, 해제 시 `false` |
+
+### setIgnoreAdBreakInPIPMode
+
+```ts
+function setIgnoreAdBreakInPIPMode(ignore: boolean): Promise<void>;
+```
+
+광고 재생 방식을 선택합니다. 특정 `nativeId`가 아니라 앱 전체에 적용됩니다. 광고를 요청하기 전에 호출하세요. [PIP 모드 지원](../getting-started/pip-mode-support.md)을 참고하세요.
+
+| **파라미터** | **타입** | **설명** |
+| ---| ---| --- |
+| ignore | boolean | `true`(기본값): 광고는 콘텐츠 위의 SDK 자체 광고 플레이어에서 재생되고, PIP 모드에서는 VOD mid-roll과 post-roll을 요청하지 않으며, PIP 진입 시 재생 중이던 광고는 앱으로 돌아올 때까지 일시정지됩니다.<br/>`false`: VOD 브레이크는 앱의 플레이어(Android와 iOS의 `react-native-video`, Android의 Bitmovin)에서 재생되며 PIP 모드에서도 계속 재생됩니다. 인라인 브레이크와 iOS Bitmovin의 VOD 브레이크는 여전히 SDK 자체 광고 플레이어를 사용합니다. 브레이크가 앱의 플레이어에서 재생되는 경우 광고가 끝나면 콘텐츠가 새로운 플레이어 아이템으로 돌아오므로, 앱이 아이템 단위로 관찰하는 로직은 앱이 로드한 아이템이 아니라 콘텐츠를 기준으로 판단해야 합니다. |
+
 ### stop
 
 ```ts
 function stop(nativeId: string): Promise<void>;
 ```
 
-현재 광고 브레이크를 중단합니다. 콘텐츠 재생은 계속되고 세션도 유지됩니다.
+`nativeId`의 광고 매니저를 중지합니다. 현재 광고 브레이크와 광고 세션이 함께 종료됩니다.
+
+*   **Linear TV / FAST**: 로컬 프록시가 종료되므로 프록시 URL은 더 이상 응답하지 않고, 이후의 브레이크도 재생되지 않습니다. 채널을 계속 재생하려면 [`changeChannelUrl`](./linear-channels-fast.md#changechannelurl)을 다시 호출하고 새 프록시 URL을 재생하세요.
+*   **VOD**: 콘텐츠는 자체 URL에서 계속 재생되지만, 새로 [`requestVodAd`](./vod.md)를 호출하기 전까지 이후의 브레이크(Mid-roll, Post-roll)는 재생되지 않습니다.
+*   **Inline / Interstitial**: 광고 브레이크가 종료됩니다.
+
+[`release`](#release)와 달리 광고 오버레이와 이벤트 구독은 유지됩니다.
 
 | **파라미터** | **타입** | **설명** |
 | ---| ---| --- |

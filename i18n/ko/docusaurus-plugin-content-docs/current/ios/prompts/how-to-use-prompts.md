@@ -6,6 +6,30 @@ sidebar_position: 0
 
 이 섹션에는 LLM 기반 SDK 연동을 위한 프롬프트가 포함되어 있습니다. 각 프롬프트를 AI 코딩 어시스턴트(Claude, ChatGPT, Copilot 등)에 기존 코드와 함께 복사하여 붙여넣을 수 있습니다.
 
+## 케이스별 프롬프트
+
+**케이스별 프롬프트**의 각 프롬프트는 하나의 연동 케이스만 다룹니다. 해당 케이스에서 SDK가 어떻게 동작하는지, 추가할 정확한 코드, 하지 말아야 할 것, 테스트 체크리스트를 담고 있어 LLM이 분기 중에서 선택할 필요가 없습니다. 앱에 맞는 행을 찾아 페이지를 열고, 몇 가지 매개변수를 입력한 뒤 기존 코드와 함께 프롬프트를 붙여넣으세요.
+
+| 상황 | 프롬프트 |
+|------|----------|
+| 실시간 채널 / FAST 스트림이며, `AVPlayer`를 SDK의 `FlowerAVPlayer`로 교체할 수 있는 경우 | [FlowerAVPlayer를 사용한 Linear TV / FAST](./by-case/linear-tv/flower-avplayer.md) |
+| 앱의 `AVPlayer` 또는 `AVQueuePlayer`로 실시간 채널 / FAST 스트림을 재생하는 경우(`changeChannelUrl`) | [MediaPlayerHook을 사용한 Linear TV / FAST](./by-case/linear-tv/media-player-hook.md) |
+| 앱이 원본 스트림을 재생하고 광고 마커를 직접 감지하며, 광고를 별도의 두 번째 플레이어에서 재생하는 경우 | [광고 재생 직접 제어](./by-case/linear-tv/direct-ad-playback-control.md) |
+| `MediaPlayerHook`으로 지원되지 않는 플레이어(AVPlayer, AVQueuePlayer, MobileVLCKit 외)로 실시간 채널을 재생하는 경우 | [커스텀 플레이어 어댑터](./by-case/linear-tv/custom-player-adapter.md) |
+| Linear TV 앱에서 AirPlay, Chromecast, 스마트 TV로 캐스팅도 하는 경우 | [화면 캐스팅](./by-case/linear-tv/screen-casting.md) |
+| 프리롤, Mid-roll, Post-roll 광고가 있는 VOD이며, `AVPlayer`를 `FlowerAVPlayer`로 교체할 수 있는 경우(`requestTimeout`, `minPrepareDuration`, `rewindDuration` 설정 포함) | [FlowerAVPlayer를 사용한 VOD](./by-case/vod/flower-avplayer.md) |
+| 프리롤, Mid-roll, Post-roll 광고가 있는 VOD를 앱의 `AVPlayer` 또는 `AVQueuePlayer`로 재생하는 경우(기본 광고 모드) | [MediaPlayerHook을 사용한 VOD](./by-case/vod/media-player-hook.md) |
+| PIP 모드에서도 VOD 광고가 계속 재생되어야 해서 광고를 앱의 플레이어 안에서 재생하는 경우 | [PIP 모드에서의 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
+| 이미 VOD 광고를 표시하고 있으며, 광고 전후로 앱이 직접 재생을 일시정지, 재개, 탐색하거나 지연시키는 경우 | [SDK가 관리하는 본편 재생으로 전환](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| 본편 플레이어 없이 화면 영역에 또는 전체 화면으로 단독 동영상 광고를 표시하는 경우 | [인라인 및 전면 광고](./by-case/advanced/inline-interstitial.md) |
+| 사용자가 영상을 PIP(Picture-in-Picture)로 전환할 수 있는 경우 | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |
+
+케이스를 조합해서 사용할 수도 있습니다. 예를 들어 VOD 프롬프트를 먼저 사용한 뒤, 그 결과에 PIP 프롬프트를 적용하세요.
+
+## 전체 연동 프롬프트
+
+아래 프롬프트는 `{{AD_TYPE}}`, `{{APPROACH}}`, `{{UI_FRAMEWORK}}` 매개변수로 선택하는 하나의 분기형 프롬프트로 모든 케이스를 다룹니다. 전체 연동을 하나의 프롬프트로 진행하고 싶을 때 사용하세요.
+
 ## 접근 방식 선택
 
 ### 통합 프롬프트 (새 프로젝트에 권장)

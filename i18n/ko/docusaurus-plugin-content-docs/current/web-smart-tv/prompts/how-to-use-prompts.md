@@ -6,6 +6,26 @@ sidebar_position: 0
 
 이 섹션에는 LLM 기반 SDK 연동을 위한 프롬프트가 포함되어 있습니다. 각 프롬프트를 AI 코딩 어시스턴트(Claude, ChatGPT, Copilot 등)에 기존 코드와 함께 복사하여 붙여넣을 수 있습니다.
 
+## 케이스별 프롬프트
+
+**케이스별 프롬프트**의 각 프롬프트는 하나의 연동 케이스만 다룹니다. 해당 케이스에서 SDK가 동작하는 방식, 추가할 정확한 코드, 하지 말아야 할 일, 테스트 체크리스트를 담고 있어 LLM이 여러 분기 중에서 고를 필요가 없습니다. 앱에 맞는 행을 찾아 페이지를 열고, 몇 가지 매개변수를 입력한 뒤 기존 코드와 함께 프롬프트를 붙여넣으세요.
+
+| 상황 | 프롬프트 |
+|------|----------|
+| Linear 채널 / FAST 스트림을 HLS.js로 재생하며, `Hls`를 SDK의 래퍼로 교체할 수 있는 경우 | [FlowerHls를 이용한 Linear TV / FAST](./by-case/linear-tv/flower-hls.md) |
+| Linear 채널 / FAST 스트림을 앱의 HLS.js, Bitmovin, dash.js, Shaka Player 인스턴스로 재생하는 경우 | [플레이어 직접 제어를 이용한 Linear TV / FAST](./by-case/linear-tv/media-player-hook.md) |
+| HLS.js, Bitmovin, dash.js, Shaka Player로 재생하는 VOD에 프리롤, Mid-roll, Post-roll 광고를 넣는 경우 (기본 광고 모드) | [앱의 플레이어를 이용한 VOD 광고](./by-case/vod/media-player-hook.md) |
+| PIP 모드에서도 VOD 광고가 계속 재생되어야 하여, 광고를 앱의 HLS.js 또는 Bitmovin 플레이어 안에서 재생하는 경우 | [앱의 플레이어 안에서 재생되는 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
+| 이미 VOD 광고를 연동했으며, 광고 전후로 앱이 직접 일시정지, 재개, 탐색(seek)하거나 재생을 지연하는 경우 | [기존 VOD 연동 업데이트](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| 본편 플레이어 없이 페이지 영역 또는 전체 화면에 독립적인 동영상 광고를 노출하는 경우 | [인라인 광고와 전면 광고](./by-case/advanced/inline-interstitial.md) |
+| 사용자가 동영상을 PIP(Picture-in-Picture)로 전환할 수 있는 경우 | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |
+
+케이스를 조합할 수도 있습니다. 예를 들어 VOD 프롬프트를 먼저 사용한 뒤, 그 결과물에 PIP 프롬프트를 적용하세요.
+
+## 전체 연동 프롬프트
+
+아래 프롬프트는 모든 케이스를 하나의 분기형 프롬프트로 다루며, `{{AD_TYPE}}`과 `{{APPROACH}}` 매개변수로 케이스를 선택합니다. 전체 연동을 하나의 프롬프트로 진행하고 싶을 때 사용하세요.
+
 ## 접근 방식 선택
 
 ### 통합 프롬프트 (새 프로젝트에 권장)

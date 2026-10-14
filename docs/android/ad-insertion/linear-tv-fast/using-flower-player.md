@@ -20,6 +20,18 @@ Class used to specify information required for ad insertion in live broadcasts.
 
 For more information, see [FlowerAdConfig](../../api/flower-ad-config).
 
+## Pre-roll Ads {#pre-roll-ads}
+
+A channel pre-roll is an ad that plays once when the viewer enters a channel, before the live stream starts. To use it, set the pre-roll ad tag URL issued by Anypoint Media as `prerollAdTagUrl` of `FlowerLinearTvAdConfig`; leave it `null` for no pre-roll.
+
+The Flower Player handles the pre-roll by itself. When the channel is loaded with the ad config, it requests the pre-roll, plays it, and loads the channel stream only after the pre-roll ends. Call `prepare()` and `play()` as usual: the Flower Player holds them until the pre-roll is ready. Do not call `changeChannelUrl()` or `adsManager.play()` yourself.
+
+- **Events:** The listener registered with `addAdListener()` receives the pre-roll events in the same way as other ads: `onPlay()` when the pre-roll starts and `onCompleted()` when it ends.
+- **No ad or request failure:** When the pre-roll response has no ad (`onAdBreakSkipped()`) or the request fails, the listener receives `onCompleted()` and the Flower Player starts the channel.
+- **Failure while playing:** When the pre-roll fails while playing, the listener receives `onError()` and the Flower Player does not load the channel by itself. Restart the channel without the pre-roll as described in [Receiving Ad Events](#receiving-ad-events).
+- **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, a channel pre-roll is paused when the app enters PIP and resumed when it returns, in the same way as VOD ads. See [PIP Mode Support](../../getting-started/pip-mode-support).
+- **Channel switch:** Loading another channel with a new `FlowerLinearTvAdConfig` stops the previous channel's ad session and requests the new channel's pre-roll.
+
 ## Receiving Ad Events
 
 When inserting ads into linear channels, UI control logic may be needed at ad playback start/end points. For this, Flower SDK provides a listener interface **FlowerAdsManagerListener** for receiving ad events, which can be implemented as follows.
@@ -43,9 +55,18 @@ val adsManagerListener = object : FlowerAdsManagerListener {
     }
 
     override fun onError(error: FlowerError?) {
-        // TODO GUIDE: Restart to play Linear TV on ad error
-        releasePlayer()
-        playLinearTv()
+        // TODO GUIDE: on an error, stop the ads manager and the player, then restart the channel.
+        //             Listeners are called off the main thread, so switch to the main thread first.
+        CoroutineScope(Dispatchers.Main).launch {
+            // FlowerExoPlayer2 / FlowerMedia3ExoPlayer: stop() and release() also stop the ads manager.
+            // FlowerBitmovinPlayer: destroy() does, or call player.flowerAdView.adsManager.stop() first.
+            player.stop()
+            player.release()
+            // Start the channel again: a Flower Player, then setMediaItem with FlowerLinearTvAdConfig, prepare, and play.
+            // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+            // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
+            playLinearTv(withPreroll = false)
+        }
     }
 
     override fun onAdBreakSkipped(reason: Int) {
@@ -57,6 +78,8 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 // Register the listener to Flower Player
 player.addAdListener(adsManagerListener)
 ```
+
+A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Build the `FlowerLinearTvAdConfig` for the restart with the same values as the first start but without `prerollAdTagUrl`, so the Flower Player plays the channel right away. The first start of a channel and a switch to another channel use the pre-roll as configured.
 
 ## Full Example
 
@@ -87,7 +110,8 @@ class PlaybackActivity : Activity() {
         player.release()
     }
 
-    private fun playLinearTv() {
+    // withPreroll: true for the first start of a channel, false for a restart after onError
+    private fun playLinearTv(withPreroll: Boolean = true) {
         // TODO GUIDE: Create ExoPlayer using standard ExoPlayer.Builder
         val exoPlayer = ExoPlayer.Builder(this)
             .setLoadControl(
@@ -119,9 +143,10 @@ class PlaybackActivity : Activity() {
         // arg3: extraParams, (Optional) Additional information pre-agreed for targeting
         // arg4: adTagHeaders, (Optional) HTTP header information to add for ad requests
         // arg5: channelStreamHeaders, (Optional) HTTP header information to add for original stream requests
+        // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
         val adConfig = FlowerLinearTvAdConfig(
             adTagUrl = "https://ad_request",
-            prerollAdTagUrl = "https://preroll_ad_request",
+            prerollAdTagUrl = if (withPreroll) "https://preroll_ad_request" else null,
             channelId = "1",
             extraParams = mapOf(
                 "title" to "My Summer Vacation",
@@ -148,7 +173,8 @@ class PlaybackActivity : Activity() {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback ends
             }
             override fun onError(error: FlowerError?) {
-                // OPTIONAL GUIDE: Implement custom actions for when the error occurs in Flower SDK
+                // TODO GUIDE: Stop the player (and the ads manager) and restart the channel as shown in Receiving Ad Events,
+                //            with playLinearTv(withPreroll = false)
             }
             override fun onAdBreakSkipped(reason: Int) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped

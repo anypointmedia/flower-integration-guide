@@ -107,6 +107,7 @@ CONSTRAINTS
 
 - FlowerHls is a wrapper around HLS.js with integrated ad support.
 - For media-player-hook, the ad container must have "display: none" initially.
-- Supported players for media-player-hook: HLS.js, Video.js, Bitmovin Player, Dash.js.
+- Supported players for media-player-hook: HLS.js, Bitmovin Player, dash.js, Shaka Player.
+  Video.js is not supported.
 - FlowerAdView constructor requires a DOM element reference.
 ```

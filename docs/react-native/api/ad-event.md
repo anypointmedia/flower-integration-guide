@@ -87,7 +87,7 @@ Dispatched when the ad manifest is loaded for interstitial or VOD ads.
 
 ### prepare
 
-Dispatched when the ad break is loaded for interstitial or VOD ads. This is where the app pauses its content and calls [`play`](./flower-sdk.md#play).
+Dispatched when the ad break is loaded for interstitial or VOD ads (for a VOD mid-roll, when the content reaches the break position). This is where the app calls [`play`](./flower-sdk.md#play). For an interstitial or inline break, the app also pauses its content here. For a VOD break, the app pauses nothing here: a pre-roll arrives while the app still holds the content before its first start, and for a mid-roll the SDK pauses the content itself.
 
 | **Field** | **Type** | **Description** |
 | ---| ---| --- |
@@ -114,7 +114,7 @@ Dispatched when each individual ad unit begins playback.
 
 ### completed
 
-Dispatched when ad playback ends. For VOD and inline breaks, this is where the app resumes its content.
+Dispatched when ad playback ends. For inline breaks, this is where the app resumes its content. For VOD, the first `completed` is where the app starts the content it has been holding — the SDK sends it even when there is no pre-roll, the ad response is empty or the request fails. After a VOD mid-roll, the SDK resumes the content itself.
 
 | **Field** | **Type** | **Description** |
 | ---| ---| --- |
@@ -130,8 +130,20 @@ Dispatched when any error happens in the Flower SDK.
 | message | string \| null | Error message, when the SDK supplied one |
 
 :::caution
-An `error` during a VOD or inline break leaves your content paused, because pausing it was your app's doing. Resume it from this branch as well as from `completed`, or the viewer is left on a frozen frame.
+An `error` during an inline break leaves your content paused, because pausing it was your app's doing. Resume it from this branch as well as from `completed`, or the viewer is left on a frozen frame.
 :::
+
+`error` is sent when an ad fails to play, or when the content stops and the native SDK will not recover it — then `message` starts with `playback unrecoverable`, once per incident (not reported on iOS with `playerType: 'bitmovin'`). On Android it is also sent when the SDK's local proxy server fails to respond. A VOD ad request that fails, times out or returns no ads ends with `completed`, not `error`.
+
+What to do on `error` depends on the kind of session:
+
+*   **Linear TV / FAST**: stop the ads manager with `await stop(nativeId)`, then start the channel over — a new `changeChannelUrl()` with the same parameters except `prerollAdTagUrl`, and the new proxy URL it returns as the source right away. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
+*   **VOD**, by where the content is. When a break fails, the SDK brings the content back before this event is sent, so never resume, seek or re-source it here. `completed` may also arrive for the failed break, in either order.
+    *   Not started yet (pre-roll): start the held content, exactly as on `completed`.
+    *   Started and not ended (mid-roll): nothing — the content is already playing again from the rewind duration before the interruption point.
+    *   Ended (post-roll): nothing to resume — playback is over.
+    *   `playback unrecoverable`: the content itself stopped. Reload it or show an error.
+*   **Inline**: resume your content and call `stop(nativeId)`, as on `completed`.
 
 ### adUserAction
 

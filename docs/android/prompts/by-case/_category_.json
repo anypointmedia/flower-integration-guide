@@ -1,0 +1,11 @@
+{
+  "label": "Prompts by Case (Unicast)",
+  "position": 0,
+  "collapsed": false,
+  "key": "android-prompts-by-case",
+  "link": {
+    "type": "generated-index",
+    "slug": "android-prompts-by-case",
+    "description": "One self-contained LLM prompt per integration case for Android Unicast (HLS/DASH): Linear TV / FAST, VOD, advanced ad formats, and PIP mode. Pick the case that matches your app, fill in the parameters, and paste the prompt together with your code."
+  }
+}

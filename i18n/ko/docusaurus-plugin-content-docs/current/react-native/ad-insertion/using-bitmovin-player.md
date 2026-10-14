@@ -73,6 +73,48 @@ function BitmovinChannel({videoUrl, adTagUrl, channelId, licenseKey}) {
 Bitmovin에서는 플레이어가 뷰가 아니라 `usePlayer({nativeId})`에서 오므로, 해당 훅이 실행되는 즉시 플레이어가 존재합니다. 뷰 마운트를 기다리는 것은 *오버레이* 쪽입니다. 그 외의 흐름은 [react-native-video 경로](./how-the-integration-works.md)와 동일합니다.
 :::
 
+## 채널 프리롤
+
+채널 프리롤(`prerollAdTagUrl`)은 Bitmovin에서도 `react-native-video`와 똑같이 동작합니다 — [프리롤 광고](./linear-tv-fast/linear-tv-implementation.md#프리롤-광고)를 참고하세요. SDK는 오버레이 안의 SDK 자체 광고 플레이어에서 프리롤을 재생하고, 그동안 Bitmovin 플레이어를 일시정지한 뒤 `completed`를 보냅니다. 광고가 없거나 프리롤이 실패해도 마찬가지입니다. 달라지는 것은 앱이 채널을 붙잡아 두는 방법입니다:
+
+*   원본 URL은 로드하되, 프리롤을 기다리는 동안에는 `player.play()`를 호출하지 마세요.
+*   `changeChannelUrl()`이 반환한 프록시 URL을 `handOver`에서 로드하지 말고 보관하세요.
+*   `completed`에서 보관한 프록시 URL을 `player.load()`하고, 다음 `onReady`에서 재생하세요.
+
+```tsx
+const pendingProxyUrl = useRef<string | null>(null);
+
+// 한 번만 실행되도록 가드하세요. 프록시 URL을 로드하면 onReady가 다시 발생합니다.
+const handOver = async () => {
+  const proxyUrl = await changeChannelUrl(NATIVE_ID, {
+    videoUrl,
+    adTagUrl,
+    channelId,
+    playerType: 'bitmovin',
+    prerollAdTagUrl,
+  });
+  // 보관합니다: 프리롤이 먼저 재생됩니다.
+  pendingProxyUrl.current = proxyUrl;
+};
+
+useEffect(() => {
+  const subscription = addAdEventListenerFor(NATIVE_ID, event => {
+    if (event.event === 'completed' && pendingProxyUrl.current) {
+      // 프리롤이 끝났습니다: 프록시 URL을 로드하고, 준비되면 재생합니다.
+      player.load({url: pendingProxyUrl.current, type: SourceType.HLS});
+      pendingProxyUrl.current = null;
+    }
+  });
+  return () => subscription.remove();
+}, [player]);
+```
+
+:::caution
+보관 단계를 우회하려고 `playbackConfig.isAutoplayEnabled`를 켜지 마세요. 프리롤 아래에서 채널이 재생됩니다.
+:::
+
+`onReady` 재생 로직과 프리롤을 넣지 않는 `error` 재시작을 포함한 전체 컴포넌트는 [Bitmovin 플레이어로 Linear TV / FAST 연동 프롬프트](../prompts/by-case/linear-tv/bitmovin.md)에 있습니다.
+
 ## Expo 모듈
 
 `bitmovin-player-react-native`는 **Expo 모듈**이며, 이 사실이 두 플랫폼의 설정 전체를 좌우합니다. JS 측은 `global.expo`를 통해 네이티브에 접근하고, iOS Pod은 Expo의 autolinker를 통해서만 존재하며, Android 빌드는 `expo-crypto` / `expo-keep-awake`를 끌어옵니다. Expo에서 다른 것은 아무것도 쓰지 않는 순수 React Native 앱이라도, 아래 플랫폼별 설정이 동작하려면 먼저 Expo를 구성해야 합니다.

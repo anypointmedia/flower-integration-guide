@@ -73,6 +73,48 @@ function BitmovinChannel({videoUrl, adTagUrl, channelId, licenseKey}) {
 With Bitmovin the player comes from `usePlayer({nativeId})` rather than from the view, so it exists as soon as that hook has run — mounting the view is what the *overlay* waits for. The rest of the flow is identical to the [react-native-video path](./how-the-integration-works.md).
 :::
 
+## Channel Pre-roll
+
+A channel pre-roll (`prerollAdTagUrl`) works with Bitmovin exactly as with `react-native-video` — see [Pre-roll Ads](./linear-tv-fast/linear-tv-implementation.md#pre-roll-ads). The SDK plays the pre-roll on its own ad player in the overlay and pauses the Bitmovin player while it runs, then sends `completed` — also when there is no ad or the pre-roll fails. What changes is how the app holds the channel:
+
+*   Load the original URL, but do not call `player.play()` while the pre-roll is pending.
+*   Keep the proxy URL `changeChannelUrl()` returns instead of loading it in `handOver`.
+*   On `completed`, `player.load()` the held proxy URL and play it from the next `onReady`.
+
+```tsx
+const pendingProxyUrl = useRef<string | null>(null);
+
+// Guard this so it runs once: onReady fires again when the proxy url is loaded.
+const handOver = async () => {
+  const proxyUrl = await changeChannelUrl(NATIVE_ID, {
+    videoUrl,
+    adTagUrl,
+    channelId,
+    playerType: 'bitmovin',
+    prerollAdTagUrl,
+  });
+  // Held: the pre-roll plays first.
+  pendingProxyUrl.current = proxyUrl;
+};
+
+useEffect(() => {
+  const subscription = addAdEventListenerFor(NATIVE_ID, event => {
+    if (event.event === 'completed' && pendingProxyUrl.current) {
+      // The pre-roll is over: load the proxy url, and play it once it is ready.
+      player.load({url: pendingProxyUrl.current, type: SourceType.HLS});
+      pendingProxyUrl.current = null;
+    }
+  });
+  return () => subscription.remove();
+}, [player]);
+```
+
+:::caution
+Do not turn on `playbackConfig.isAutoplayEnabled` to get around the hold: it starts the channel under the pre-roll.
+:::
+
+The [Linear TV / FAST with the Bitmovin Player prompt](../prompts/by-case/linear-tv/bitmovin.md) contains the complete component, including the `onReady` play logic and the `error` restart, which leaves the pre-roll out.
+
 ## Expo Modules
 
 `bitmovin-player-react-native` is an **Expo module**, and that shapes the setup on both platforms: its JS reaches native through `global.expo`, its iOS pod exists only through Expo's autolinker, and its Android build pulls `expo-crypto` / `expo-keep-awake`. A bare React Native app — one that wants nothing else from Expo — still has to wire Expo up before any of the platform setup below works.

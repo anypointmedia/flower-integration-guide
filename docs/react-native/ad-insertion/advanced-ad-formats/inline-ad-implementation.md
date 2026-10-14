@@ -119,7 +119,7 @@ See the [`requestAd` API reference](../../api/interstitial-ads.md).
 | Needs the content player | Yes | Yes | **No** |
 | Content URL rewritten | Yes | No | No |
 | Break started by | The SDK | Your app, via `play()` | Your app, via `play()` |
-| App pauses the content | No | Yes | Yes |
+| App pauses the content | No | Only before its first start, until the first `completed` — the SDK pauses it for a mid-roll | Yes |
 
 ## Related
 

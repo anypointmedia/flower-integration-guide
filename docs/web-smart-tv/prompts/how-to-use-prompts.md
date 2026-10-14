@@ -6,6 +6,26 @@ sidebar_position: 0
 
 This section contains prompts designed for LLM-assisted SDK integration. Each prompt can be copied and pasted into an AI coding assistant (Claude, ChatGPT, Copilot, etc.) along with your existing code.
 
+## Prompts by Case
+
+Each prompt under **Prompts by Case** covers one integration case only. It states how the SDK behaves in that case, the exact code to add, what not to do, and a test checklist, so the LLM does not have to choose between branches. Find the row that matches your app, open the page, fill in its few parameters, and paste the prompt together with your existing code.
+
+| Your situation | Prompt |
+|----------------|--------|
+| Linear channel / FAST stream played with HLS.js, and you can replace `Hls` with the SDK's wrapper | [Linear TV / FAST with FlowerHls](./by-case/linear-tv/flower-hls.md) |
+| Linear channel / FAST stream played with your own HLS.js, Bitmovin, dash.js or Shaka Player instance | [Linear TV / FAST with Manual Player Control](./by-case/linear-tv/media-player-hook.md) |
+| VOD with pre-roll, mid-roll and post-roll ads, played with HLS.js, Bitmovin, dash.js or Shaka Player (default ad mode) | [VOD Ads with Your Own Player](./by-case/vod/media-player-hook.md) |
+| VOD ads must keep playing in PIP mode, so they play inside your HLS.js or Bitmovin player | [VOD Ads Played in the App's Player](./by-case/vod/ads-in-pip-mode.md) |
+| Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Update an Existing VOD Integration](./by-case/vod/migrate-to-sdk-managed-content.md) |
+| Standalone video ad in a page area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
+| Your app lets the user put the video into Picture-in-Picture | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
+
+You can combine cases: for example, use the VOD prompt first, then the PIP prompt on its output.
+
+## Full Integration Prompts
+
+The prompts below cover every case in one branching prompt, selected with the `{{AD_TYPE}}` and `{{APPROACH}}` parameters. Use them when you prefer a single prompt for the whole integration.
+
 ## Choose Your Approach
 
 ### Integrated Prompt (Recommended for new projects)

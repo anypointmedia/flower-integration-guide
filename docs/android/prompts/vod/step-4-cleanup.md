@@ -37,6 +37,7 @@ If APPROACH is "media-player-hook":
   override fun onDestroy() {
       super.onDestroy()
       flowerAdView.adsManager.removeListener(flowerAdsManagerListener)
+      prerollListener?.let { flowerAdView.adsManager.removeListener(it) }   // linear-tv: pre-roll still pending (Step 3)
       flowerAdView.adsManager.stop()
       player.release()
   }
@@ -66,6 +67,7 @@ IMPORTS — Required packages for PiP support
 
   import android.app.PictureInPictureParams
   import android.content.res.Configuration
+  import android.os.Build
   import android.util.Rational
   import tv.anypoint.flower.android.sdk.api.FlowerSdk
 
@@ -75,16 +77,30 @@ PART 3 — Picture-in-Picture Support (Optional)
 
 Available in Flower Android SDK version 2.8.0+.
 
-1. Enter PiP mode when user leaves the Activity:
+1. Enter PiP mode when user leaves the Activity — but NOT while an ad is playing
+   (PiP could otherwise be used to bypass the ad). Track the ad state in the
+   FlowerAdsManagerListener registered in Step 3: set isAdPlaying = true in onPlay(),
+   and isAdPlaying = false in onCompleted() and onError(). For linear-tv with media-player-hook
+   and a pre-roll, set it in the temporary pre-roll listener of Step 3 as well.
+   enterPictureInPictureMode(PictureInPictureParams) requires API 26 and the Flower SDK
+   supports lower API levels, so check the API level.
 
   Kotlin:
+  private var isAdPlaying = false   // set in onPlay, cleared in onCompleted / onError
+
   override fun onUserLeaveHint() {
       super.onUserLeaveHint()
-      val params = PictureInPictureParams.Builder()
-          .setAspectRatio(Rational(16, 9))
-          .build()
-      enterPictureInPictureMode(params)
+      if (isAdPlaying) return
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          val params = PictureInPictureParams.Builder()
+              .setAspectRatio(Rational(16, 9))
+              .build()
+          enterPictureInPictureMode(params)
+      }
   }
+
+  Do NOT enable PictureInPictureParams.Builder().setAutoEnterEnabled(true) (API 31) while an
+  ad is playing, for the same reason.
 
 2. Notify the SDK about PiP state changes and toggle player controls:
 
@@ -142,5 +158,8 @@ CONSTRAINTS
 - Always remove the ad listener BEFORE releasing the player.
 - For FlowerPlayer, use player.removeAdListener(). For others, use flowerAdView.adsManager.removeListener().
 - FlowerSdk.destroy() should only be called in Application.onTerminate(), NOT in Activity.onDestroy().
-- PiP notification is only needed for MediaPlayerHook approach with overlay ads.
+- If the app supports PiP, call FlowerSdk.notifyPictureInPictureModeChanged() on both entering and
+  exiting PiP with every APPROACH — the SDK does not detect PiP by itself.
+- Do NOT enter PiP while an ad is playing, and check Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+  before calling enterPictureInPictureMode(PictureInPictureParams).
 ```
