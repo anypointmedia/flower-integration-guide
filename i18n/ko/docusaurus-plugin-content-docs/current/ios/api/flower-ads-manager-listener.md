@@ -70,14 +70,15 @@ Flower SDK에서 오류가 발생했을 때 발생하는 이벤트입니다.
 `onError`는 다음 경우에 호출됩니다:
 
 - **광고 재생 실패** (예: 광고 미디어 디코딩 오류, 광고 미디어에 접근 불가)
-- **SDK가 복구하지 않는 콘텐츠 재생 중단:** SDK는 3회 복구를 시도한 뒤 장애 1건당 한 번, `playback unrecoverable after 3 recovery attempts (<trigger>) - url: <url>` 메시지로 `onError`를 호출합니다. 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다.
+- **SDK가 복구할 수 없는 콘텐츠 재생 중단:** 메시지는 `playback unrecoverable`로 시작합니다.
+- **SDK 내부 오류:** 실시간 채널이면 채널을 다시 시작하세요. [`onError` 시 채널 재시작](../ad-insertion/linear-tv-fast/manual-player-control#receiving-ad-events)을 참고하세요.
 
 VOD에서 VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 에러가 아닙니다. 이때 SDK는 `onCompleted`를 호출합니다(광고가 없으면 `onAdBreakSkipped(reason: 1)` 후 `onCompleted`).
 
 권장 처리 방법(이 이벤트는 메인 스레드가 아닌 곳에서 전달되므로, 플레이어를 다루기 전에 메인 스레드로 전환하세요):
 
-- **실시간 채널 / FAST:** `stop()`으로 광고 매니저를 중지하고, 콘텐츠 플레이어 아이템을 해제한 뒤, `prerollAdTagUrl`을 포함해 같은 매개변수로, 처음 시작했을 때와 같은 방식으로 채널을 다시 시작합니다. SDK는 마지막으로 진입한 채널의 프리롤을 건너뛰므로 시청자가 프리롤을 다시 보지 않습니다. [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control)를 참고하세요.
-- **VOD:** Ad Break가 실패하면 SDK는 `onError`를 호출하기 전에 콘텐츠를 되돌려 놓습니다. 미드롤이었다면 콘텐츠는 이미 중단 지점에서 `rewindDuration`만큼 앞선 위치부터 다시 재생 중입니다. 광고 에러에 대해 콘텐츠를 정지, seek, 다시 로드하지 마세요. 프리롤 에러이면 콘텐츠를 로드하고 재생을 시작합니다. 포스트롤 에러이면 콘텐츠가 이미 끝났으므로 재개하지 않습니다. 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며 순서는 정해져 있지 않습니다. `playback unrecoverable`이면 콘텐츠를 다시 로드하거나 오류를 표시하세요. [VOD 프리롤, Mid-roll, Post-roll 광고 적용](../ad-insertion/vod/vod-ad-implementation)을 참고하세요.
+- **실시간 채널 / FAST:** `stop()`으로 광고 매니저를 중지하고, 콘텐츠 플레이어 아이템을 해제한 뒤, `prerollAdTagUrl`을 포함해 같은 매개변수로, 처음 시작했을 때와 같은 방식으로 채널을 다시 시작합니다. 채널 변경이 없으면 SDK가 프리롤을 생략하므로 시청자가 프리롤을 다시 보지 않습니다. [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control)를 참고하세요.
+- **VOD:** Ad Break가 실패하면 SDK는 `onError`를 호출하기 전에 콘텐츠를 되돌려 놓습니다. 미드롤이었다면 콘텐츠는 이미 중단 지점에서 `rewindDuration`만큼 앞선 위치부터 다시 재생 중입니다. 광고 에러에 대해 콘텐츠를 정지, seek, 다시 로드하지 마세요. 미드롤 에러이면 안전장치로 `player.play()`를 호출하세요. 콘텐츠가 이미 재생 중이어도 문제가 없습니다. 프리롤 에러이면 콘텐츠를 로드하고 재생을 시작합니다. 포스트롤 에러이면 콘텐츠가 이미 끝났으므로 재개하지 않습니다. 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며 순서는 정해져 있지 않습니다. `playback unrecoverable`이면 콘텐츠를 다시 로드하거나 오류를 표시하세요. [VOD 프리롤, Mid-roll, Post-roll 광고 적용](../ad-insertion/vod/vod-ad-implementation)을 참고하세요.
 
 ### onAdBreakSkipped
 

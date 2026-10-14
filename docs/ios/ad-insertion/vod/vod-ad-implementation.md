@@ -30,7 +30,7 @@ With `setIgnoreAdBreakInPIPMode(false)`, the SDK plays the ads inside the player
 :::
 
 :::info When `onPrepare` is called for a mid-roll
-The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
+The SDK calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
 :::
 
 #### When `onError` is called
@@ -38,14 +38,15 @@ The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the conten
 For VOD, `onError` is called when:
 
 - **An ad fails to play** in a pre-roll, mid-roll, or post-roll (for example, the ad media cannot be decoded or cannot be reached).
-- **The content stops playing and the SDK will not recover it.** After 3 recovery attempts, the SDK calls `onError` once per incident with the message `playback unrecoverable after 3 recovery attempts (<trigger>) - url: <url>`. A new incident starts once playback runs again. Reload the content or show an error to the user.
+- **The content stops playing and the SDK cannot recover it.** `onError` is called with a message starting with `playback unrecoverable`. Reload the content or show an error to the user.
+- **An internal SDK error occurs.**
 
 A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error: the SDK calls `onCompleted` (for no ads, `onAdBreakSkipped(reason: 1)` and then `onCompleted`).
 
 When an ad break fails, the SDK brings the content back **before** it calls `onError`, so the content is already playing again when your handler runs. Handle the error according to where the content is:
 
 - **Pre-roll error** (`isContentPrepared == false`): the content has not started yet. Load the VOD source and start playback, the same as for the pre-roll's `onCompleted`.
-- **Mid-roll error** (`isContentEnd == false`): nothing to do. The SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad, re-inserts the content into your player as `AVPlayerItem`s built from the content URL at that position, and plays it. Do not stop, seek, reload, or resume the content. Only log the error.
+- **Mid-roll error** (`isContentEnd == false`): the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. Do not stop, seek, or reload the content. Call `player.play()` as a safety net so the content never stays paused; it is harmless if the content is already playing.
 - **Post-roll error** (`isContentEnd == true`): the content has already ended. Do not resume it; handle it as the end of playback.
 
 `onCompleted` may also be called for the failed break, before or after `onError`. Make the two handlers safe to run for the same break, for example by checking `isContentPrepared` as below.
@@ -105,11 +106,14 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
             } else if error?.message?.hasPrefix("playback unrecoverable") == true {
                 // TODO GUIDE: the content stopped and the SDK will not recover it.
                 //             Reload the content or show an error to the user.
-            } else if self.playbackView.isContentEnd {
+            } else if !self.playbackView.isContentEnd {
+                // NOTE: a mid-roll ad failed - the SDK has already resumed the content.
+                //       Resume it as a safety net (harmless if already playing). No seek, no reload.
+                self.playbackView.player.play()
+            } else {
                 // NOTE: a post-roll ad failed - the content has already ended.
                 //       Do not resume it; run your post-playback actions as in onCompleted.
             }
-            // NOTE: a mid-roll ad failed - the SDK has already resumed the content. Nothing to do.
         }
     }
 
@@ -171,11 +175,14 @@ extension PlayerViewController: FlowerAdsManagerListener {
             } else if error?.message?.hasPrefix("playback unrecoverable") == true {
                 // TODO GUIDE: the content stopped and the SDK will not recover it.
                 //             Reload the content or show an error to the user.
-            } else if self.isContentEnd {
+            } else if !self.isContentEnd {
+                // NOTE: a mid-roll ad failed - the SDK has already resumed the content.
+                //       Resume it as a safety net (harmless if already playing). No seek, no reload.
+                self.player.play()
+            } else {
                 // NOTE: a post-roll ad failed - the content has already ended.
                 //       Do not resume it; run your post-playback actions as in onCompleted.
             }
-            // NOTE: a mid-roll ad failed - the SDK has already resumed the content. Nothing to do.
         }
     }
 

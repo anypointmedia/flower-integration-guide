@@ -31,7 +31,7 @@ The Flower Player handles the pre-roll by itself. When the channel is loaded wit
 - **Failure while playing:** When the pre-roll fails while playing, the listener receives `onError()` and the Flower Player does not load the channel by itself. Restart the channel as described in [Receiving Ad Events](#receiving-ad-events).
 - **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, a channel pre-roll is paused when the user leaves the app and resumed when the user comes back, in the same way as VOD ads. Report this with `FlowerSdk.notifyUserLeftApp()`; see [PIP Mode Support](../../getting-started/pip-mode-support).
 - **Channel switch:** Loading another channel with a new `FlowerLinearTvAdConfig` stops the previous channel's ad session and requests the new channel's pre-roll.
-- **Same channel again:** The SDK remembers the channel (`channelId`) entered last. When the ad config of that same channel is set again, the Flower Player skips the pre-roll even if `prerollAdTagUrl` is set, and plays the channel. `stop()` and `release()` do not clear the remembered channel; requesting VOD ads or inline ads does. For example, A → B → A plays A's pre-roll again, and so does A → VOD → A. Because the SDK remembers the channel across screens, leaving the player screen and coming back to the same channel with no VOD or inline ad request in between also skips the pre-roll.
+- **Same channel again:** If the channel has not changed, the pre-roll is skipped. When the ad config is set again without a channel change, the Flower Player skips the pre-roll even if `prerollAdTagUrl` is set, and plays the channel. `stop()` and `release()` do not count as a channel change; requesting VOD ads or inline ads does. For example, A → B → A plays A's pre-roll again, and so does A → VOD → A. This also applies when the user leaves the player screen and comes back to the same channel.
 
 ## Receiving Ad Events
 
@@ -80,7 +80,7 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 player.addAdListener(adsManagerListener)
 ```
 
-Build the `FlowerLinearTvAdConfig` for the restart with exactly the same values as the first start, including `prerollAdTagUrl`. The viewer does not see the pre-roll again: the restarted channel is the one entered last, so the Flower Player skips its pre-roll and plays the channel. The first start of a channel and a switch to another channel use the pre-roll as configured.
+Build the `FlowerLinearTvAdConfig` for the restart with exactly the same values as the first start, including `prerollAdTagUrl`. The viewer does not see the pre-roll again: the channel has not changed, so the Flower Player skips the pre-roll and plays the channel (see [Pre-roll Ads](#pre-roll-ads)). The first start of a channel and a switch to another channel use the pre-roll as configured.
 
 ## Full Example
 
@@ -144,7 +144,7 @@ class PlaybackActivity : Activity() {
         // arg3: extraParams, (Optional) Additional information pre-agreed for targeting
         // arg4: adTagHeaders, (Optional) HTTP header information to add for ad requests
         // arg5: channelStreamHeaders, (Optional) HTTP header information to add for original stream requests
-        // Use the same values on a restart: the Flower Player skips the pre-roll of the channel entered last.
+        // Use the same values on a restart: without a channel change, the Flower Player skips the pre-roll.
         val adConfig = FlowerLinearTvAdConfig(
             adTagUrl = "https://ad_request",
             prerollAdTagUrl = "https://preroll_ad_request",

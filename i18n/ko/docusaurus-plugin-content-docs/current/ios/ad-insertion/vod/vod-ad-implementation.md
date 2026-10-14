@@ -31,7 +31,7 @@ sidebar_label: "VOD 프리롤, Mid-roll, Post-roll 광고 적용"
 :::
 
 :::info Mid-roll의 `onPrepare` 호출 시점
-SDK는 Mid-roll 광고를 미리 요청해 두고, 본편이 Mid-roll 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play()`를 호출하세요.
+SDK는 본편이 Mid-roll 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play()`를 호출하세요.
 :::
 
 #### `onError`가 호출될 때
@@ -39,14 +39,15 @@ SDK는 Mid-roll 광고를 미리 요청해 두고, 본편이 Mid-roll 위치에 
 VOD에서 `onError`는 다음 경우에 호출됩니다:
 
 - **광고 재생 실패**: 프리롤, Mid-roll, Post-roll의 광고가 로드 또는 재생에 실패한 경우(예: 광고 미디어 디코딩 오류, 광고 미디어에 접근 불가).
-- **SDK가 복구하지 않는 본편 재생 중단**: SDK는 3회 복구를 시도한 뒤 장애 1건당 한 번, `playback unrecoverable after 3 recovery attempts (<trigger>) - url: <url>` 메시지로 `onError`를 호출합니다. 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다. 본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
+- **SDK가 복구할 수 없는 본편 재생 중단**: `playback unrecoverable`로 시작하는 메시지로 `onError`가 호출됩니다. 본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
+- **SDK 내부 오류**
 
 VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 아닙니다. 이때 SDK는 `onCompleted`를 호출합니다(광고가 없으면 `onAdBreakSkipped(reason: 1)` 후 `onCompleted`).
 
 Ad Break가 실패하면 SDK는 `onError`를 호출하기 **전에** 본편을 되돌려 놓으므로, 핸들러가 실행되는 시점에는 본편이 이미 다시 재생 중입니다. 본편의 상태에 따라 다음과 같이 처리하세요:
 
 - **프리롤 오류** (`isContentPrepared == false`): 본편이 아직 시작되지 않았습니다. 프리롤의 `onCompleted`와 마찬가지로 VOD 소스를 로드하고 재생을 시작합니다.
-- **Mid-roll 오류** (`isContentEnd == false`): 할 일이 없습니다. SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. `setIgnoreAdBreakInPIPMode(false)`인 경우에는 광고 플레이어가 실패한 광고를 버리고, 본편 URL로 만든 `AVPlayerItem`을 그 위치로 앱의 player에 다시 넣어 재생합니다. 본편을 정지, 탐색(seek), 재로드, 재개하지 말고 오류를 로그로만 남기세요.
+- **Mid-roll 오류** (`isContentEnd == false`): SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. 본편을 정지, 탐색(seek), 재로드하지 마세요. 본편이 멈춘 채로 남지 않도록 안전장치로 `player.play()`를 호출하세요. 본편이 이미 재생 중이어도 문제가 없습니다.
 - **Post-roll 오류** (`isContentEnd == true`): 본편이 이미 끝났습니다. 재개하지 말고 재생 종료로 처리하세요.
 
 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며, `onError`보다 먼저 올 수도 나중에 올 수도 있습니다. 아래 예시처럼 `isContentPrepared`를 확인하는 등, 같은 Ad Break에 두 핸들러가 모두 실행되어도 문제가 없도록 구현하세요.
@@ -106,11 +107,14 @@ class FlowerAdsManagerListenerImpl: FlowerAdsManagerListener {
             } else if error?.message?.hasPrefix("playback unrecoverable") == true {
                 // TODO GUIDE: 본편 재생이 중단되었고 SDK가 복구하지 않습니다.
                 //             본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
-            } else if self.playbackView.isContentEnd {
+            } else if !self.playbackView.isContentEnd {
+                // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했습니다.
+                //       안전장치로 본편을 재개합니다(이미 재생 중이어도 무해). 탐색, 재로드는 하지 않습니다.
+                self.playbackView.player.play()
+            } else {
                 // NOTE: post-roll 광고 실패 - 본편은 이미 끝났습니다.
                 //       재개하지 말고, onCompleted와 같이 재생 종료 이후 작업을 수행하세요.
             }
-            // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했으므로 할 일이 없습니다.
         }
     }
 
@@ -172,11 +176,14 @@ extension PlayerViewController: FlowerAdsManagerListener {
             } else if error?.message?.hasPrefix("playback unrecoverable") == true {
                 // TODO GUIDE: 본편 재생이 중단되었고 SDK가 복구하지 않습니다.
                 //             본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
-            } else if self.isContentEnd {
+            } else if !self.isContentEnd {
+                // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했습니다.
+                //       안전장치로 본편을 재개합니다(이미 재생 중이어도 무해). 탐색, 재로드는 하지 않습니다.
+                self.player.play()
+            } else {
                 // NOTE: post-roll 광고 실패 - 본편은 이미 끝났습니다.
                 //       재개하지 말고, onCompleted와 같이 재생 종료 이후 작업을 수행하세요.
             }
-            // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했으므로 할 일이 없습니다.
         }
     }
 

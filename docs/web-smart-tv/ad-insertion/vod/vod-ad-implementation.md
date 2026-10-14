@@ -30,7 +30,7 @@ With `setIgnoreAdBreakInPIPMode(false)`, the SDK plays the ads inside the HLS.js
 :::
 
 :::info When `onPrepare` is called for a mid-roll
-The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
+The SDK calls `onPrepare` when the content reaches the mid-roll's position. Call `play()` right away in `onPrepare`.
 :::
 
 ```javascript
@@ -64,8 +64,6 @@ const adsManagerListener = {
     },
 
     onError(error) {
-        // NOTE: When an ad break fails, the SDK brings the content back before calling onError().
-        //       Do NOT stop, seek, or reload the content for an ad error.
         console.warn(`onError: ${error?.message}`);
         if (!isContentPrepared) {
             // TODO GUIDE: load VOD source when pre-roll ad fails
@@ -75,9 +73,12 @@ const adsManagerListener = {
         } else if (error?.message?.startsWith('playback unrecoverable')) {
             // TODO GUIDE: the content stopped and the SDK will not recover it.
             //             Reload the content or show an error to the user.
+        } else if (!isContentEnd) {
+            // Mid-roll ad error: resume the content as a safety net - play() only, no seek or reload.
+            //                    The content is normally already playing again, so this is harmless.
+            videoElement.play();  // Bitmovin: player.play()
         }
-        // NOTE: on a mid-roll ad error, the SDK has already resumed the content - nothing to do.
-        //       On a post-roll ad error (isContentEnd), VOD playback is over - nothing to resume.
+        // NOTE: post-roll ad error (isContentEnd) - playback is over, nothing to resume.
     },
 
     onAdBreakSkipped(reason) {
@@ -90,7 +91,7 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 :::info When `onError()` is called
 For VOD, the SDK calls `onError()` when:
 - **An ad fails to play** in a pre-roll, mid-roll, or post-roll (for example, the ad media cannot be decoded or cannot be reached).
-- **The content stops playing on a fatal player error.** The player adapter calls `onError()` once per incident with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`: a fatal `hlsError` from HLS.js or FlowerHls, a CRITICAL `error` from Shaka Player, an `error` from dash.js, or an `error` from Bitmovin Player. A new incident starts once playback runs again. Reload the content or show an error to the user.
+- **Content playback stops and the SDK cannot recover it.** `onError()` is called with a message starting with `playback unrecoverable`. Reload the content or show an error to the user.
 
 A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error: the SDK calls `onCompleted()` (for no ads, `onAdBreakSkipped(1)` and then `onCompleted()`).
 :::
@@ -98,10 +99,10 @@ A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error
 :::info The content is already playing when `onError()` is called
 When an ad break fails, the SDK brings the content back **before** it calls `onError()`:
 - **Pre-roll error**: the content has not started yet. Load and start it, as after a completed pre-roll.
-- **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad, reloads the original content source into your player at that position, and plays it. Do not stop, seek, reload, or resume the content. Only log the error.
-- **Post-roll error**: the content has already ended.
+- **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. Do not stop, seek, or reload the content. Resume it with `videoElement.play()` (Bitmovin: `player.play()`) as a safety net; this is harmless if it is already playing.
+- **Post-roll error**: the content has already ended. Do not resume it.
 
-`onCompleted()` may also be called for the same ad break, before or after `onError()`. Keep the `isContentPrepared` and `isContentEnd` checks so the content is never loaded twice. With `setIgnoreAdBreakInPIPMode(false)`, the ad player and the content player adapter share your player, so one ad failure can be reported twice.
+`onCompleted()` may also be called for the same ad break, before or after `onError()`. Keep the `isContentPrepared` and `isContentEnd` checks so the content is never loaded twice. With `setIgnoreAdBreakInPIPMode(false)`, `onError()` can be called twice for one failure.
 :::
 
 ### 3. Passing the Player – `MediaPlayerHook`
@@ -191,7 +192,7 @@ Instead, wait for the first `FlowerAdsManagerListener.onCompleted()` (or `onErro
 
 By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK does not pause the content for a pre-roll. If the VOD source is loaded right after `requestVodAd(...)`, the main content actually plays, with its audio, under the pre-roll ad.
 
-The SDK calls `onCompleted()` even when there is no pre-roll, no ad is served, or the ad request fails, so the content always starts from this callback. After the content has been prepared, do not load, play, pause, or seek the content in `onCompleted()`, because the SDK resumes the content by itself after a mid-roll. In `onError()`, do not load, pause, or seek it either: the SDK has already brought the content back. The exception is `playback unrecoverable`, where you reload the content or show an error.
+The SDK calls `onCompleted()` even when there is no pre-roll, no ad is served, or the ad request fails, so the content always starts from this callback. After the content has been prepared, do not load, play, pause, or seek the content in `onCompleted()`, because the SDK resumes the content by itself after a mid-roll. In `onError()`, do not load, pause, or seek it either; handle it as described in [`onError()`](#2-receiving-ad-events-floweradsmanagerlistener) above.
 :::
 
 ### _HLS.js_

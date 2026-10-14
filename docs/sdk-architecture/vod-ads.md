@@ -76,7 +76,7 @@ flowchart TD
 > (\*1) Mid-roll timing and content control
 > - The SDK requests a mid-roll ad `requestTimeout + minPrepareDuration` before the mid-roll's position, and calls `onPrepare` when the content reaches that position. Call `play` right away in `onPrepare`.
 > - By default (`setIgnoreAdBreakInPIPMode(true)`), ads play in the SDK's own ad player over the content. For a mid-roll, the SDK pauses the content and, after the ad break, resumes it `rewindDuration` (5 seconds by default) before the point where it was interrupted. Do not pause, seek, or reload the content yourself around a VOD ad break.
-> - With `setIgnoreAdBreakInPIPMode(false)`, supported players play the ads inside the content player, and the SDK puts the content back at the resume point after the ad break. How the content comes back (for example, as a new playlist item) depends on the player. See the PIP Mode Support page of each platform.
+> - With `setIgnoreAdBreakInPIPMode(false)`, supported players play the ads inside the content player, and the SDK puts the content back at the resume point after the ad break. See the PIP Mode Support page of each platform.
 
 > (\*2) Perform VOD end scenario
 > - This SDK provides a way to handle specific scenarios at the end of VOD playback, after any post-roll ads have finished. This allows you to implement custom actions or transitions based on your service's requirements.

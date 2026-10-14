@@ -39,9 +39,8 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Mid-roll: the SDK calls onPrepare when the content reaches the mid-roll position and pauses the
   content itself at that moment. When the break ends (onCompleted or onError), it seeks the
   content back 5 seconds (rewindDuration, not configurable through requestVodAd) and resumes it.
-  It does not play the same mid-roll again after the rewind. On onError it does this before it
-  calls the listener; the app still calls player.play() in onError as a safety net so the
-  content never stays paused.
+  On a mid-roll onError the app calls player.play(); the content is normally already playing
+  again, so resuming is a harmless safety net.
 - Post-roll: after notifyContentEnded(); the content has ended, nothing is resumed.
 - When there is no pre-roll, no ad break, or the ad request fails, the SDK still calls
   onCompleted once, so the first onCompleted/onError is where the content starts.
@@ -83,9 +82,12 @@ IMPLEMENTATION
        DispatchQueue.main.async {
            if !self.isContentPrepared {
                self.prepareContentSource()   // pre-roll error: start the content
+           } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+               // The content stopped and the SDK cannot recover it:
+               // reload the content or show an error. No safety-net play() here.
            } else if !self.isContentEnd {
-               // Mid-roll error: resume the content (safety net; the SDK also resumes it).
-               // No seek, no reload.
+               // Mid-roll error: resume the content. It is normally already playing again;
+               // this is a harmless safety net. No seek, no reload.
                self.player.play()
            }
            // post-roll error: the content has ended - do not resume it
@@ -125,7 +127,7 @@ VERIFY
 - Pre-roll: ad first, then the content from 0, no content frame before the ad.
 - No ad / request failure: the content starts right away.
 - Mid-roll: the ad starts exactly at the mid-roll position (no extra countdown), the content
-  resumes about 5 seconds before where it stopped, and the mid-roll does not repeat.
+  resumes about 5 seconds before where it stopped.
 - Post-roll: plays once after the content ends.
 - Ad playback error: the content starts (pre-roll), resumes and does not stay paused (mid-roll),
   or is not resumed (post-roll).

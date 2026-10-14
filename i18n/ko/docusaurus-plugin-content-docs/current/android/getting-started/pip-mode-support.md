@@ -15,7 +15,7 @@ FlowerSdk.notifyUserLeftApp(hasLeftApp: Boolean)
 사용자가 앱을 떠나면(홈 화면이나 다른 앱으로 이동하거나, 앱의 영상이 PIP 창으로 전환되는 경우) `true`를, 사용자가 앱으로 돌아오면 `false`를 전달합니다. 앱이 PIP에 진입하는지와 관계없이 알려야 합니다.
 
 :::note
-`FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 전달받은 값을 그대로 `notifyUserLeftApp`에 전달하므로 기존 호출도 계속 동작합니다.
+`notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 :::
 
 PIP 모드에서는 기본적으로 광고를 지원하지 않습니다(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`). 광고 재생 중 사용자가 앱을 떠나면 SDK는 광고를 일시정지하고, 사용자가 앱으로 돌아오면 광고를 재개합니다. SDK는 이를 스스로 감지하지 않으므로, 앱이 떠날 때와 돌아올 때를 모두 알려주어야 이렇게 동작합니다. 또한 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 광고 재생 중에는 앱이 PIP에 진입하지 않으므로, PIP 진입이 아니라 사용자가 앱을 떠난 것을 알리는 것입니다. 자세한 내용과 PIP 모드에서 광고를 지원하는 방법은 [VOD PIP 모드 지원](../ad-insertion/vod/pip-mode-support) 페이지를 참고하세요.

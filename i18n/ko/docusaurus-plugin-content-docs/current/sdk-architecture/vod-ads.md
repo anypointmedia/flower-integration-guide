@@ -76,7 +76,7 @@ flowchart TD
 > (\*1) Mid-roll 호출 시점과 본편 제어
 > - SDK는 Mid-roll 위치보다 `requestTimeout + minPrepareDuration`만큼 먼저 Mid-roll 광고를 요청하고, 본편이 해당 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play`를 호출하세요.
 > - 기본 설정(`setIgnoreAdBreakInPIPMode(true)`)에서 광고는 본편 위에 표시되는 SDK의 별도 광고 플레이어에서 재생됩니다. Mid-roll의 경우 SDK가 본편을 일시정지하고, 광고 구간이 끝나면 중단된 위치보다 `rewindDuration`(기본 5초)만큼 앞에서 재개합니다. VOD 광고 구간 전후로 앱에서 본편을 일시정지, 탐색, 재로드하지 마세요.
-> - `setIgnoreAdBreakInPIPMode(false)`인 경우 지원하는 플레이어에서는 본편 플레이어 안에서 광고가 재생되며, 광고 구간이 끝나면 SDK가 본편을 재개 지점으로 되돌려 놓습니다. 본편을 되돌리는 방식(예: 새로운 playlist 아이템으로 추가)은 플레이어에 따라 다릅니다. 각 플랫폼의 PIP 모드 지원 페이지를 참고하세요.
+> - `setIgnoreAdBreakInPIPMode(false)`인 경우 지원하는 플레이어에서는 본편 플레이어 안에서 광고가 재생되며, 광고 구간이 끝나면 SDK가 본편을 재개 지점으로 되돌려 놓습니다. 각 플랫폼의 PIP 모드 지원 페이지를 참고하세요.
 
 > (\*2) VOD 종료 시나리오 수행
 > - 이 SDK는 post-roll 광고가 끝난 후 VOD 재생 종료 시점에 특정 시나리오를 처리할 수 있는 방법을 제공합니다. 이를 통해 서비스 요구사항에 맞는 커스텀 동작이나 전환을 구현할 수 있습니다.

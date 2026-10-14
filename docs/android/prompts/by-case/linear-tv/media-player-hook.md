@@ -61,11 +61,11 @@ HOW THE SDK BEHAVES IN THIS CASE
   the channel again with a NEW changeChannelUrl() call (step 5) with the same arguments, including
   prerollAdTagUrl. A break cut short by stop() may still report onCompleted() afterwards, so keep
   onCompleted() idempotent (UI-only).
-- The SDK remembers the channel (channelId) entered last. A changeChannelUrl() call for that same
-  channel skips the pre-roll even if prerollAdTagUrl is passed, and reports onCompleted() right
-  after the call returns (as for a pre-roll with no ad). So a restart after onError() does not
-  show the pre-roll again, and the app starts the stream exactly as on the first start.
-  adsManager.stop() does not clear the remembered channel; requestVodAd() / requestAd() do.
+- If the channel has not changed, the pre-roll is skipped: a changeChannelUrl() call without a
+  channel change skips the pre-roll even if prerollAdTagUrl is passed, and reports onCompleted()
+  right after the call returns (as for a pre-roll with no ad). So a restart after onError() does
+  not show the pre-roll again, and the app starts the stream exactly as on the first start.
+  adsManager.stop() is not a channel change; requestVodAd() / requestAd() are.
   A -> B -> A plays A's pre-roll again.
 
 ========================================
@@ -177,7 +177,7 @@ DO
 - On onError() of the main listener, on the main thread: adsManager.stop(), stop the player, then
   enter the channel again with a new changeChannelUrl(). Do not reuse the previous loopback URL.
 - On that restart pass the same arguments as the first start, including prerollAdTagUrl, and
-  handle the returned URL in the same way. The SDK skips the pre-roll of the channel entered last.
+  handle the returned URL in the same way. The channel has not changed, so the pre-roll is skipped.
 - Before the next changeChannelUrl() and before adsManager.stop(), remove a temporary pre-roll
   listener that is still registered and register the main listener again: a pre-roll stopped
   this way never reports onCompleted(), and the stale listener would load the old channel's URL
@@ -186,8 +186,8 @@ DO NOT
 - Do not use requestVodAd() / notifyContentEnded() for live channels.
 - Do not load the stream before the pre-roll ends when USE_PREROLL = yes (first start, channel
   switch, or restart after onError()).
-- Do not drop prerollAdTagUrl on a restart after onError(): the SDK already skips the pre-roll of
-  the channel entered last.
+- Do not drop prerollAdTagUrl on a restart after onError(): without a channel change, the SDK
+  already skips the pre-roll.
 - Do not call adsManager.play() for linear TV ad breaks.
 - Do not hand the loopback URL to another device (casting) — see the Screen Casting prompt.
 

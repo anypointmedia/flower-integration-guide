@@ -42,8 +42,8 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Report leaving whether or not the app enters PIP. While an ad plays the content must
   not enter PIP, so when the user leaves during an ad there is no PIP at all, and the
   SDK knows the user has left only because the app says so.
-- notifyPictureInPictureModeChanged() is deprecated and replaced by notifyUserLeftApp().
-  Do not use it in new code; replace existing calls.
+- notifyPictureInPictureModeChanged is deprecated and replaced by notifyUserLeftApp.
+  Existing calls keep working. Do not use it in new code; replace existing calls.
 - When the app reports true while an ad plays, the SDK pauses the ad and hides its UI;
   its progress does not advance and no quartile events are sent. When the app reports
   false, the ad resumes from where it stopped and plays to the end.

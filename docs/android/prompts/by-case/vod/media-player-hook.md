@@ -51,9 +51,8 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Post-roll: requested when the app calls notifyContentEnded(). The content is not resumed.
 - Ad error (onError()): before the content started (pre-roll) the app starts the content; on a
   mid-roll error (isContentEnd == false) the app resumes the content (no seek, no reload); on a
-  post-roll error (isContentEnd == true) it does not resume. The SDK stops the failed ad and
-  queues its own rewind and resume before it calls onError(), so the app's resume runs after
-  them and is a safety net that keeps the content from staying paused.
+  post-roll error (isContentEnd == true) it does not resume. On a mid-roll error the content is
+  normally already playing again; resuming is a harmless safety net.
 - The app must call flowerAdView.adsManager.play() in onPrepare() for every ad break.
 - Mid-roll and post-roll are not requested while the user is away from the app
   (only if the app reports it with FlowerSdk.notifyUserLeftApp(true/false), whether or not it
@@ -149,7 +148,7 @@ IMPLEMENTATION
          player.load(SourceConfig.fromUrl(contentUrl))
          player.play()
 
-   resumeContent() by PLAYER (the SDK also rewinds and resumes the content; this is a safety net):
+   resumeContent() by PLAYER (a harmless safety net if the content is already playing):
      media3 / exoplayer2:  player.playWhenReady = true
      bitmovin:             player.play()
 

@@ -62,12 +62,15 @@ For FlowerPlayer (FlowerAVPlayer):
   clears the ad config), then start it again the same way: replaceCurrentItem(with:adConfig:)
   with a new AVPlayerItem of the original stream URL + play(), with the same
   FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl (call playLinearTv()
-  from PART 2 again). The SDK skips the pre-roll of the channel entered last, so the viewer
+  from PART 2 again). The channel has not changed, so the SDK skips the pre-roll: the viewer
   does not see it again and the channel loads right away. If onError arrives before the
   channel item was loaded (player.currentItem == nil, i.e. a pre-roll playback error), restart
-  in a NEW FlowerAVPlayer: FlowerAVPlayer does not load the channel after a pre-roll error and
-  keeps its internal pre-roll listener registered. Keep a simple retry limit (e.g. at most 3
+  in a NEW FlowerAVPlayer: FlowerAVPlayer does not load the channel after a pre-roll error, and
+  the failed player would act again on the next ad events. Keep a simple retry limit (e.g. at most 3
   restarts in a row).
+  Restart the channel for every onError: an ad error, a message starting with
+  "playback unrecoverable" (content playback stopped and the SDK cannot recover it), and an
+  internal SDK error.
 
   SwiftUI — implement as class holding view reference:
   class AdsManagerListenerImpl: FlowerAdsManagerListener {
@@ -92,14 +95,17 @@ For FlowerPlayer (FlowerAVPlayer):
 For MediaPlayerHook:
   Same listener but register on flowerAdView.adsManager.
   onError (called off the main thread): hop to the main thread and restart the channel -
-  flowerAdView.adsManager.stop() (this also ends the SDK proxy the current URL points at),
+  flowerAdView.adsManager.stop() (the current URL stops working after stop(); never reuse it),
   release the content item (removeAllItems / replaceCurrentItem(with: nil)), then start it
   again the same way: a new changeChannelUrl(...) with exactly the same parameters, including
   prerollAdTagUrl -> a new AVPlayerItem -> play() (call playLinearTv() from PART 2 again;
-  with a pre-roll URL, hold the returned URL until onCompleted as on the first start). The SDK
-  skips the pre-roll of the channel entered last and calls onCompleted right after
-  changeChannelUrl(...) returns, so the held URL starts right away and the viewer does not see
+  with a pre-roll URL, hold the returned URL until onCompleted as on the first start). The
+  channel has not changed, so the SDK skips the pre-roll and calls onCompleted right after
+  changeChannelUrl(...) returns: the held URL starts right away and the viewer does not see
   the pre-roll again. Keep a simple retry limit (e.g. at most 3 restarts in a row).
+  Restart the channel for every onError: an ad error, a message starting with
+  "playback unrecoverable" (content playback stopped and the SDK cannot recover it), and an
+  internal SDK error.
 
   SwiftUI:
   flowerAdView.adsManager.addListener(adsManagerListener: listener)
@@ -117,8 +123,10 @@ For FlowerPlayer:
     after it, and replaceCurrentItem(with:) without an ad config loads nothing for VOD.
     Release the player and start the same content in a NEW FlowerAVPlayer with
     replaceCurrentItem(with:adConfig:) + play(), once per content.
-  - onError after that, content not ended (mid-roll error): player.play() as a safety net -
-    the SDK also rewinds and resumes the content. No seek, no reload.
+  - onError with a message starting with "playback unrecoverable" (the content stopped and the
+    SDK cannot recover it): reload the content or show an error. Do not call player.play() for it.
+  - Any other onError after that, content not ended (mid-roll error): player.play(). The content
+    is normally already playing again; resuming is a harmless safety net. No seek, no reload.
   - onError after the content ended (post-roll error): do not resume.
 
 For MediaPlayerHook:
@@ -138,10 +146,12 @@ For MediaPlayerHook:
     onCompleted in those cases. After a mid-roll do nothing: the SDK has already resumed
     the content. After the post-roll (isContentEnd == true) only run post-playback actions.
   - onError: Same as onCompleted for the first call (start the content). After that, if the
-    content has not ended (isContentEnd == false), it is a mid-roll error: call player.play()
-    (no seek, no reload). The SDK also rewinds and resumes the content before it calls
-    onError, so this is a safety net that keeps the content from staying paused. After the
-    post-roll (isContentEnd == true) do not resume the content.
+    message starts with "playback unrecoverable" (the content stopped and the SDK cannot
+    recover it), reload the content or show an error - do not call player.play() for it.
+    Otherwise, if the content has not ended (isContentEnd == false), it is a mid-roll error:
+    call player.play() (no seek, no reload). The content is normally already playing again;
+    resuming is a harmless safety net. After the post-roll (isContentEnd == true) do not
+    resume the content.
 
   SwiftUI (keep isContentPrepared / isContentEnd in a reference type, e.g. an
   ObservableObject, so that the listener and the view share the same state):
@@ -175,6 +185,9 @@ For MediaPlayerHook:
                   // Pre-roll error: start the content
                   self.view.prepareContentSource()
                   self.view.isContentPrepared = true
+              } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+                  // The content stopped and the SDK cannot recover it:
+                  // reload the content or show an error. No safety-net play() here.
               } else if !self.view.isContentEnd {
                   // Mid-roll error: resume the content (safety net). No seek, no reload.
                   self.view.player.play()
@@ -235,8 +248,8 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
   Use values from your config data — do NOT hardcode URLs or parameters.
   Omit optional parameters if not available.
   Put this in playLinearTv() and use it for the first start, a channel change and a restart
-  after onError, always with the same values (the SDK skips the pre-roll of the channel
-  entered last).
+  after onError, always with the same values (if the channel has not changed, the SDK skips
+  the pre-roll).
 
   let adConfig = FlowerLinearTvAdConfig(
       adTagUrl: config.adTagUrl,                           // Required
@@ -313,12 +326,12 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
     thread. The SDK ends the pre-roll with onCompleted, also when there is no pre-roll ad, the
     request failed or the pre-roll could not be played. Its onError does NOT restart the
     channel: the channel has not started yet.
-  - A restart after onError goes through the same path. The SDK remembers the channel
-    (channelId) entered last; when changeChannelUrl(...) is called with that same channelId, it
-    skips the pre-roll even though prerollAdTagUrl is passed and calls onCompleted right after
+  - A restart after onError goes through the same path. If the channel has not changed, the
+    pre-roll is skipped: changeChannelUrl(...) called again without a channel change skips it
+    even though prerollAdTagUrl is passed and calls onCompleted right after
     changeChannelUrl(...) returns, so the temporary listener loads the URL right away. stop()
-    does not clear the remembered channel; requestVodAd and requestAd do. A -> B -> A plays A's
-    pre-roll again. Do not add a flag that drops prerollAdTagUrl on a restart.
+    is not a channel change. A -> B -> A plays A's pre-roll again. Do not add a flag that drops
+    prerollAdTagUrl on a restart.
   - Before the next changeChannelUrl(...) (channel change) and before every stop() (restart,
     cleanup), if prerollListener is still set, remove it from adsManager, set prerollListener
     and pendingChannelUrl to nil, and add mainListener back (cleanup removes it right after).

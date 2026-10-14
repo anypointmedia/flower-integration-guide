@@ -30,7 +30,7 @@ Tells the SDK the user left the app (`true`) — to the home screen, to another 
 | hasLeftApp | boolean | `true` when the user leaves the app, `false` when the user comes back |
 
 :::note
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 :::
 
 ### setIgnoreAdBreakInPIPMode
@@ -52,9 +52,9 @@ Report both moments, the user leaving the app and coming back, through `notifyUs
 
 ## Ads in PIP Mode (Default)
 
-Ads are not supported in PIP mode by default. While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. So when the user leaves the app during an ad, the app does not enter PIP at all — and the SDK learns that the user has left only if the app tells it. Therefore, the app must report every time the user leaves the app and comes back through `notifyUserLeftApp`, whether or not it enters PIP. Only then is the ad paused when the user leaves, and resumed when the user returns to the app.
+Ads are not supported in PIP mode by default. While an ad is playing, keep the content out of PIP, because PIP mode could otherwise be used to bypass the ad. Since the app then does not enter PIP, the SDK learns that the user has left only if the app tells it — that is why the app reports leaving and returning through `notifyUserLeftApp`, whether or not it enters PIP, so that the ad pauses when the user leaves and resumes on return.
 
-*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance.
 *   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
 *   Until the user comes back, mid-roll and post-roll breaks are not requested.
 *   Linear TV ads spliced into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
@@ -127,12 +127,12 @@ A VOD break plays inside your player in this mode for:
 
 `playerType: 'bitmovin'` on iOS always uses the SDK's own ad player, and so do inline breaks (`requestAd()`) on every player — the app still pauses and resumes its content around an inline break.
 
-The rule for the content is the same as in the default mode: hold it paused before its first start, until the first `completed` or `error`, and never pause, seek or re-source it after it has started. On an `error` after a failed mid-roll, do nothing to the content: the SDK has already dropped the failed ad and put the content back into the player at the resume point, and is playing it. Because the ad player and the content player adapter share the player in this mode, one ad failure can surface as two `error` events. Mark the content ended at the same point where you call `notifyContentEnded()` (see below), so a post-roll `error` does not resume it. See [VOD Ad Implementation](../ad-insertion/vod/vod-ad-implementation.md#handling-error).
+The rule for the content is the same as in the default mode: hold it paused before its first start, until the first `completed` or `error`, and never pause, seek or re-source it after it has started. On an `error` after a failed mid-roll, the SDK has already put the content back; do not stop, seek or re-source it, but resume it as a safety net (`videoRef.current?.resume()`, or `player.play()` with Bitmovin), which is harmless if it is already playing. One ad failure can surface as two `error` events in this mode. Mark the content ended at the same point where you call `notifyContentEnded()` (see below), so a post-roll `error` does not resume it. See [VOD Ad Implementation](../ad-insertion/vod/vod-ad-implementation.md#handling-error).
 
 ### How Ads Are Played in Your Player
 
 1. When a break starts, the SDK puts the ad items in front of the content in the native player behind your `<Video>`, and the player moves to the ads.
-2. When the break ends, the SDK puts the content back as a **new player item** at the resume point (the interrupted position minus the rewind duration). With `react-native-video` on iOS it is a new `AVPlayerItem` built from the content URL; with `react-native-video` on Android the original media item is added again, clipped to start at the resume point; with Bitmovin on Android the original source is loaded again with a start offset at the resume point.
+2. When the break ends, the SDK puts the content back as a **new player item** at the resume point (the interrupted position minus the rewind duration).
 
 ### Handling Player Events
 

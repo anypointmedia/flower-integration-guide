@@ -64,7 +64,7 @@ export function ChannelPlayer({nativeId, videoUrl, adTagUrl, channelId}: Props) 
     }
   }, [startChannel]);
 
-  // 'error' 시: 광고 매니저를 중지한 뒤, 처음과 똑같이 채널을 다시 시작합니다.
+  // 'error' 시: 광고 세션을 종료한 뒤, 처음과 똑같이 채널을 다시 시작합니다.
   const restartChannel = useCallback(async () => {
     if (restarting.current || restarts.current >= MAX_RESTARTS) {
       return;
@@ -141,20 +141,16 @@ const styles = StyleSheet.create({
 
 ## 오류 복구
 
-채널에서 `error` 이벤트가 발생했다는 것은 SDK가 스트림에 광고를 계속 유지할 수 없게 되었다는 뜻입니다 — 예를 들어 플레이리스트 조작에 실패해 플레이어가 깨진 스트림에 머무를 수 있습니다. 스트림 자체가 멈췄고 네이티브 SDK가 이를 복구하지 않을 때도 장애 1건당 한 번 전달되며, 이때 메시지는 `playback unrecoverable`로 시작합니다(iOS의 `playerType: 'bitmovin'`에서는 보고되지 않음). 채널을 처음부터 다시 시작해 복구하세요. 위 예제의 `restartChannel`이 이 작업을 합니다:
+채널에서 `error` 이벤트가 발생했다는 것은 SDK가 스트림에 광고를 계속 유지할 수 없게 되었다는 뜻이며, 이 경우 플레이어가 깨진 스트림에 머무를 수 있습니다. 본편 재생이 멈추고 SDK가 이를 복구할 수 없을 때도 `playback unrecoverable`로 시작하는 메시지로 `error`가 전달됩니다(iOS의 `playerType: 'bitmovin'`에서는 보고되지 않음). Android에서는 SDK 내부 오류가 발생했을 때도 `error`가 전달됩니다. 어느 경우든 채널을 처음부터 다시 시작해 복구하세요. 위 예제의 `restartChannel`이 이 작업을 합니다:
 
-1. `await stop(nativeId)`로 채널의 광고 매니저를 중지합니다. `release()`와 달리 광고 오버레이와 이벤트 구독은 그대로 유지되므로, 재시작 시 이를 재사용합니다.
+1. `await stop(nativeId)`로 채널의 광고 세션을 종료합니다. `release()`와 달리 광고 오버레이와 이벤트 구독은 그대로 유지되므로, 재시작 시 이를 재사용합니다.
 2. `prerollAdTagUrl`을 포함해 처음과 완전히 같은 파라미터로 `changeChannelUrl(nativeId, ...)`을 다시 호출합니다. **새** 프록시 URL이 반환됩니다.
 3. 첫 시작과 같은 방식으로 그 URL을 `<Video>`의 소스로 설정합니다. 플레이어는 재생성되지 않고 재사용됩니다. `onLoad`가 다시 발생하지만 `handedOver` 가드가 두 번째 인계를 막습니다.
 
 `stop()`은 진행 중인 브레이크도 종료하며, 그 브레이크는 `error` 이후는 물론 `stop()`이 resolve된 뒤에도 `completed`를 보고할 수 있습니다. `completed` 분기는 여러 번 호출되어도 문제없도록(광고 UI 상태 정리만) 작성해 재시작을 방해하지 않게 하세요. `MAX_RESTARTS`는 시작할 때마다 실패하는 채널이 무한히 재시작되지 않도록 하는 간단한 상한입니다. 카운터는 채널 전환 시 등 앱에 맞는 방식으로 초기화하세요.
 
 :::note
-[채널 프리롤](#프리롤-광고)에는 이 처리가 필요 없습니다. 실패한 프리롤은 `error`가 아니라 `completed`로 끝납니다. SDK가 프리롤을 마치고 채널을 직접 재개하므로, 아래의 `completed` 처리로 이미 충분합니다. `prerollAdTagUrl`로 처음 시작한 채널을 재시작하면 `prerollAdTagUrl`을 전달하더라도 시청자에게 프리롤이 다시 표시되지 않습니다. SDK는 마지막으로 진입한 채널(`channelId`)을 기억하고, 같은 채널에 다시 진입하면 프리롤을 건너뜁니다. 이때 SDK는 광고가 없는 프리롤과 같은 방식으로 `changeChannelUrl()`이 resolve된 직후 `completed`를 보내므로, 재시작에서도 첫 시작과 똑같이 프록시 URL을 `completed`까지 보관하면 됩니다.
-:::
-
-:::info
-SDK는 VOD 또는 인라인 광고를 요청할 때(`requestVodAd()`, `requestAd()`)만 그 채널을 잊으며, `stop()`이나 `initialize()`에서는 잊지 않습니다. 채널 A → B → A로 이동하면 B가 마지막으로 진입한 채널이므로 A의 프리롤이 다시 재생됩니다. 마지막으로 진입한 채널에 다시 진입하면 — 재시작이든, 같은 `channelId`로 하는 다른 호출이든 — 그 사이에 VOD 또는 인라인 광고 요청이 없는 한 프리롤을 건너뜁니다. SDK는 `nativeId`별이 아니라 앱 전체에서 이 채널을 하나만 기억합니다.
+[채널 프리롤](#프리롤-광고)에는 이 처리가 필요 없습니다. 실패한 프리롤은 `error`가 아니라 `completed`로 끝납니다. SDK가 프리롤을 마치고 채널을 직접 재개하므로, 아래의 `completed` 처리로 이미 충분합니다. 채널 변경이 없으면 프리롤을 생략하므로, 재시작에서는 프리롤이 다시 표시되지 않습니다. `changeChannelUrl()`이 resolve된 직후 `completed`가 전달되므로, `completed`까지 프록시 URL을 보관하는 같은 코드가 그대로 동작합니다.
 :::
 
 ## 타게팅과 헤더
@@ -229,8 +225,8 @@ const startChannel = useCallback(async () => {
     channelId,
     prerollAdTagUrl,
   });
-  // 즉시 적용하지 않고 보관합니다 — 프리롤이 먼저 재생됩니다. 재시작에서는 SDK가
-  // 마지막으로 진입한 채널의 프리롤을 건너뛰고 바로 completed를 보냅니다.
+  // 즉시 적용하지 않고 보관합니다 — 프리롤이 먼저 재생됩니다. 재시작은 채널을 바꾸지
+  // 않으므로, SDK가 프리롤을 생략하고 바로 completed를 보냅니다.
   proxyUrlRef.current = proxyUrl;
 }, [nativeId, videoUrl, adTagUrl, channelId, prerollAdTagUrl]);
 ```
@@ -239,7 +235,7 @@ const startChannel = useCallback(async () => {
 
 ### 채널 전환
 
-`changeChannelUrl()`을 호출할 때마다 새 세션이 시작됩니다. SDK는 먼저 현재 세션을 중지하고 — 아직 재생 중인 프리롤도 포함됩니다 — 새 호출에 담긴 채널의 프리롤을 요청합니다. 따라서 자체 `prerollAdTagUrl`이 있는 다른 채널로 전환하는 것은 다시 첫 시작과 같습니다. 새 프록시 URL을 `completed`까지 보관하세요. 프리롤 없이 전환하려면 `prerollAdTagUrl`을 생략하고 새 프록시 URL을 바로 재생하세요. 유일한 예외는 마지막으로 진입한 채널입니다. `error` 이후의 재시작처럼 그 채널로 `changeChannelUrl()`을 다시 호출하면 `prerollAdTagUrl`이 있어도 프리롤을 건너뛰고 바로 `completed`가 전달됩니다 — [오류 복구](#오류-복구)를 참고하세요.
+`changeChannelUrl()`을 호출할 때마다 새 세션이 시작됩니다. SDK는 먼저 현재 세션을 중지하고 — 아직 재생 중인 프리롤도 포함됩니다 — 새 호출에 담긴 채널의 프리롤을 요청합니다. 따라서 자체 `prerollAdTagUrl`이 있는 다른 채널로 전환하는 것은 다시 첫 시작과 같습니다. 새 프록시 URL을 `completed`까지 보관하세요. 프리롤 없이 전환하려면 `prerollAdTagUrl`을 생략하고 새 프록시 URL을 바로 재생하세요. 같은 채널의 재시작은 [오류 복구](#오류-복구)를 참고하세요.
 
 ### PIP 모드
 
@@ -251,7 +247,7 @@ const startChannel = useCallback(async () => {
 
 ## 광고 브레이크 중단
 
-`stop(nativeId)`은 채널의 광고 매니저를 중지합니다. 진행 중인 광고 브레이크뿐 아니라 광고 세션도 종료됩니다. SDK가 광고 처리를 정리하고 로컬 프록시를 종료하므로, `<Video>`가 재생 중인 프록시 URL은 더 이상 응답하지 않고 이후의 브레이크도 재생되지 않습니다. 광고 오버레이와 이벤트 구독은 그대로 유지됩니다. 광고와 함께 채널을 계속 시청하려면 `changeChannelUrl()`을 다시 호출하고 새로 반환된 프록시 URL을 재생하세요.
+`stop(nativeId)`은 진행 중인 광고 브레이크와 함께 채널의 광고 세션을 종료합니다. `<Video>`가 재생 중인 프록시 URL은 더 이상 응답하지 않고 이후의 브레이크도 재생되지 않습니다. 광고 오버레이와 이벤트 구독은 그대로 유지됩니다. 광고와 함께 채널을 계속 시청하려면 `changeChannelUrl()`을 다시 호출하고 새로 반환된 프록시 URL을 재생하세요.
 
 ```tsx
 await stop(nativeId);

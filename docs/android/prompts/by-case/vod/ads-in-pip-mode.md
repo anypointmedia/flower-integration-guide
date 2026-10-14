@@ -47,7 +47,8 @@ HOW THE SDK BEHAVES IN THIS CASE
       resume point: original position = clippingConfiguration.startPositionMs + currentPosition.
     bitmovin: the content Source is loaded again with startOffset = resume point;
       currentTime stays the absolute content position.
-- If an ad fails, the SDK puts the content back in the same way before it calls onError().
+- If an ad fails, the SDK puts the content back in the same way. In onError() the content is
+  normally already playing again; resuming is a harmless safety net.
 - Because items change around every break, Player.STATE_ENDED and onMediaItemTransition (Bitmovin:
   PlaybackFinished / PlaylistTransition) also fire for ad items. After a pre-roll that played
   before any content was loaded, the playlist contains only ads, so STATE_ENDED fires on an ad item.
@@ -71,7 +72,7 @@ IMPLEMENTATION
    - onCompleted(): start the content only if !isContentPrepared; otherwise nothing.
    - onError(): start the content if !isContentPrepared. Otherwise, on a mid-roll error
      (!isContentEnd), only resume: player.playWhenReady = true (bitmovin: player.play()) - no seek,
-     no reload; the SDK has already queued putting the content back. On a post-roll error
+     no reload; a harmless safety net if the content is already playing. On a post-roll error
      (isContentEnd), do not resume.
 
 3) Identify the content item. Keep the content URL in a member:
@@ -114,8 +115,9 @@ IMPLEMENTATION
 
 7) PIP: keep reporting the user leaving and returning, whether or not the app enters PIP:
    FlowerSdk.notifyUserLeftApp(true) from onUserLeaveHint() (before entering PIP) and
-   FlowerSdk.notifyUserLeftApp(false) from onResume(). Replace any call to the deprecated
-   FlowerSdk.notifyPictureInPictureModeChanged(). Entering PIP during an ad is fine in this mode
+   FlowerSdk.notifyUserLeftApp(false) from onResume().
+   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by notifyUserLeftApp();
+   existing calls keep working, but replace them here. Entering PIP during an ad is fine in this mode
    (the ad keeps playing). enterPictureInPictureMode(PictureInPictureParams) still needs API 26
    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O).
 

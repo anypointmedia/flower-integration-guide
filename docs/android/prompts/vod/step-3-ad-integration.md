@@ -58,9 +58,8 @@ For FlowerPlayer:
   - onCompleted: Show player controls (playerView.useController = true).
   - onError: On the main thread, stop the SDK ads manager and the player, then start the channel
     again exactly as it was first started (the 3-2 code, e.g. in a startChannel() function), with
-    the same ad config including prerollAdTagUrl. The viewer does not see the pre-roll again: the
-    SDK remembers the channel entered last and skips its pre-roll when that channel is started
-    again.
+    the same ad config including prerollAdTagUrl. The viewer does not see the pre-roll again: if
+    the channel has not changed, the pre-roll is skipped.
     FlowerExoPlayer2 / FlowerMedia3ExoPlayer: player.stop() also stops the ads manager.
     FlowerBitmovinPlayer has no stop(): call player.flowerAdView.adsManager.stop() and
     player.unload() instead. Optionally cap consecutive restarts (e.g., 3) to avoid a restart loop.
@@ -95,8 +94,8 @@ For MediaPlayerHook:
   manager yourself before restarting. Restart with a NEW changeChannelUrl() call (the 3-2 code);
   do not reuse the URL returned before stop(). Pass the same parameters, including
   prerollAdTagUrl, and handle the returned URL the same way as the first start (with a pre-roll,
-  hold it until the temporary listener's first onCompleted()). The SDK skips the pre-roll of the
-  channel entered last and reports onCompleted() right after changeChannelUrl() returns.
+  hold it until the temporary listener's first onCompleted()). Without a channel change, the SDK
+  skips the pre-roll and reports onCompleted() right after changeChannelUrl() returns.
 
   flowerAdView.adsManager.addListener(flowerAdsManagerListener)
 
@@ -121,7 +120,7 @@ For FlowerPlayer:
       player.setMediaItem(MediaItem.fromUri(...)) with NO ad config, prepare(), play().
       FlowerBitmovinPlayer: destroy it, create a new one, and load the source without an ad config.
     - Mid-roll error (isContentEnd == false): resume the content with player.play(). Do NOT seek
-      or reload it. The SDK also rewinds and resumes it; this makes sure it does not stay paused.
+      or reload it. The content is normally already playing again; resuming is a harmless safety net.
     - Post-roll error (isContentEnd == true): do NOT resume; run the end-of-playback scenario.
     Set isContentEnd = true when the content ends (Player.STATE_ENDED).
 
@@ -178,8 +177,8 @@ For MediaPlayerHook:
   - onCompleted after that: after a mid-roll, do nothing: the SDK has already rewound and
     resumed the content. After a post-roll, the content has ended: run the end-of-playback scenario.
   - onError after that: on a mid-roll error (isContentEnd == false), resume the content with
-    player.playWhenReady = true (no seek, no reload). The SDK also rewinds and resumes it before
-    it calls onError; this resume is a safety net so the content never stays paused. On a
+    player.playWhenReady = true (no seek, no reload). The content is normally already playing
+    again; resuming is a harmless safety net. On a
     post-roll error (isContentEnd == true), do NOT resume; run the end-of-playback scenario.
 
   Kotlin (MediaPlayerHook):
@@ -219,7 +218,7 @@ For MediaPlayerHook:
                   player.playWhenReady = true
               } else if (!isContentEnd) {
                   // Mid-roll failed: resume the content (no seek, no reload).
-                  // The SDK also rewinds and resumes it; this makes sure it does not stay paused.
+                  // The content is normally already playing again; this is a harmless safety net.
                   player.playWhenReady = true
               }
               // Post-roll failed: the content has ended - do not resume.
@@ -284,8 +283,8 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
   Omit optional parameters if they are not available in your config.
 
   Put this in startChannel(), used for the first start, a channel switch, and a restart after
-  onError(). A restart uses the same ad config, including prerollAdTagUrl: the SDK remembers the
-  channel (channelId) entered last and skips its pre-roll when the same channel is started again.
+  onError(). A restart uses the same ad config, including prerollAdTagUrl: if the channel has not
+  changed, the pre-roll is skipped. A -> B -> A plays A's pre-roll again.
 
   val adConfig = FlowerLinearTvAdConfig(
       adTagUrl = config.adTagUrl,                     // Required
@@ -307,10 +306,10 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
   or after the pre-roll ends when prerollAdTagUrl is set.
   Use values from your config/intent data — do NOT hardcode URLs or parameters.
   Put this in startChannel(), as above: a restart after onError() runs the same code with the
-  same parameters, including prerollAdTagUrl. When changeChannelUrl() is called for the channel
-  entered last, the SDK skips the pre-roll and reports onCompleted() right after the call returns
+  same parameters, including prerollAdTagUrl. When changeChannelUrl() is called again without a
+  channel change, the SDK skips the pre-roll and reports onCompleted() right after the call returns
   (as for a pre-roll with no ad), so the temporary listener below starts the stream as usual.
-  stop() does not clear the remembered channel; requestVodAd() or requestAd() does.
+  stop() is not a channel change; requestVodAd() or requestAd() is.
 
   // A pre-roll stopped by a channel switch reports nothing: drop its temporary listener first.
   prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
@@ -474,7 +473,7 @@ CONSTRAINTS
   On a mid-roll onError(), only resume the content (playWhenReady = true; no seek, no reload).
 - For Linear TV, on onError() stop the ads manager and the player, then restart the channel
   exactly the way it was first started (a new changeChannelUrl() / setMediaItem with the ad
-  config), including prerollAdTagUrl. The SDK skips the pre-roll of the channel entered last, so
+  config), including prerollAdTagUrl. Without a channel change, the SDK skips the pre-roll, so
   the viewer does not see it again.
 - For Linear TV with media-player-hook (or a MediaPlayerAdapter) and a prerollAdTagUrl (first
   start, channel switch, or restart after onError()), do NOT load the URL returned by

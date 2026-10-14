@@ -8,7 +8,7 @@ PIP(Picture-in-Picture) 모드와 관련해 아래의 두 가지 옵션을 제�
 
 #### `FlowerSdk.notifyUserLeftApp`
 
-사용자가 앱을 떠나거나(`true`) 앱으로 돌아오면(`false`) 이를 SDK에 알려주는 역할입니다. 홈 화면이나 다른 앱으로 이동하는 경우와 앱의 영상이 PIP 창으로 전환되는 경우 모두 앱을 떠난 것에 해당합니다. `FlowerSdk.notifyPictureInPictureModeChanged`는 deprecated 되었으며 이 API로 대체되었습니다. 전달받은 값을 그대로 `notifyUserLeftApp`에 전달하므로 기존 호출도 계속 동작합니다.
+사용자가 앱을 떠나거나(`true`) 앱으로 돌아오면(`false`) 이를 SDK에 알려주는 역할입니다. 홈 화면이나 다른 앱으로 이동하는 경우와 앱의 영상이 PIP 창으로 전환되는 경우 모두 앱을 떠난 것에 해당합니다. `notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -136,7 +136,7 @@ FlowerSdk.setIgnoreAdBreakInPIPMode(false)
 1. Ad Break가 시작되면 SDK는 플레이어의 playlist에서 본편 앞에 광고 아이템을 추가하고, 플레이어는 광고로 이동합니다.
 2. Ad Break가 끝나면 SDK는 본편을 재개 지점(중단된 위치에서 `rewindDuration`만큼 앞선 위치)으로 되돌려 놓습니다. 방식은 플레이어에 따라 다릅니다.
     *   **Media3 ExoPlayer / ExoPlayer2:** 본편이 **새로운 미디어 아이템**으로 다시 들어옵니다. 원래의 `MediaItem`을 재개 지점부터 시작하도록 클리핑하여 다시 추가합니다. 따라서 `currentPosition`은 재개 지점부터 계산되며, 원래 본편 기준 위치는 클리핑 시작 위치와 `currentPosition`을 더한 값입니다.
-    *   **Bitmovin Player:** 본편 `Source`의 `startOffset`을 재개 지점으로 설정하여 다시 로드합니다. `currentTime`은 원래 본편 기준 위치 그대로이므로 별도로 변환할 필요가 없습니다.
+    *   **Bitmovin Player:** `currentTime`은 원래 본편 기준 위치 그대로이므로 별도로 변환할 필요가 없습니다.
 
 ```kotlin
 // Media3 ExoPlayer / ExoPlayer2: Mid-roll 이후 원래 본편 기준 위치
@@ -150,7 +150,7 @@ Ad Break 전후마다 현재 미디어 아이템이 바뀌므로, 미디어 아�
 
 *   `Player.STATE_ENDED`와 `onMediaItemTransition`은 Ad Break 전후에도 발생합니다. 본편의 이벤트로 처리하기 전에 현재 미디어 아이템이 본편인지 확인하세요.
 *   Post-roll이 끝나면 본편이 끝 위치로 다시 들어오므로 `STATE_ENDED`가 다시 보고될 수 있습니다. `notifyContentEnded()`는 본편당 한 번만 호출하세요.
-*   광고가 실패하면 SDK는 `onError`를 호출하기 전에 실패한 광고를 버리고 같은 방식으로(앱의 원래 `MediaItem`으로 플레이리스트를 다시 구성해) 본편을 되돌려 놓고 재생합니다. [VOD 프리롤, Mid-roll, Post-roll 광고 적용](./vod-ad-implementation)과 같이 `onError`에서 본편을 정지, 탐색(seek), 재로드하지 마세요. 이 모드에서는 광고 플레이어와 본편 플레이어 어댑터가 앱의 player를 함께 사용하므로, 광고 실패 1건이 `onError`로 두 번 보고될 수 있습니다.
+*   광고가 실패하면 SDK는 `onError`를 호출하기 전에 같은 방식으로 본편을 되돌려 놓고 재생합니다. `onError`에서 본편을 정지, 탐색(seek), 재로드하지 마세요. Mid-roll 오류 후에는 [VOD 프리롤, Mid-roll, Post-roll 광고 적용](./vod-ad-implementation)과 같이 안전장치로 본편을 재개하세요. 이 모드에서는 광고 실패 1건이 `onError`로 두 번 보고될 수 있습니다.
 
 **_Kotlin_**
 

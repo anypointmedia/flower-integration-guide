@@ -37,8 +37,8 @@ HOW THE SDK BEHAVES IN THIS CASE
   the app enters PIP: the app must not enter PIP while an ad is playing, so a report sent only on
   PIP changes would never reach the SDK during an ad.
   The SDK detects neither by itself, with any player (Bitmovin included).
-- FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and only passes its value to
-  notifyUserLeftApp(). Replace existing calls with notifyUserLeftApp().
+- FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by
+  notifyUserLeftApp(). Existing calls keep working; use notifyUserLeftApp() in this integration.
 - Default ad mode (FlowerSdk.setIgnoreAdBreakInPIPMode(true)):
   - An ad playing in the SDK's ad player (VOD ads, inline ads, a linear-channel pre-roll) is
     paused and its UI hidden when the app reports that the user left, and resumes and plays to

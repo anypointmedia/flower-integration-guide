@@ -53,13 +53,13 @@ New contract:
   had to pause and resume the Bitmovin player itself.
 - The SDK does NOT hold the content for a PRE-ROLL. It sends 'completed' after the
   pre-roll and also when there is no pre-roll, no breaks, or the request fails.
-- A mid-roll's 'prepare' now arrives when playback reaches the break position (the ad is
-  requested about 10 seconds earlier), so play() goes out right away.
+- A mid-roll's 'prepare' now arrives when playback reaches the break position, so play()
+  goes out right away.
 - An app pause that keeps running fights the SDK's own pause, rewind and resume. With
   setIgnoreAdBreakInPIPMode(false) it lands on the player the ad is playing on, freezes
   the ad, and 'completed' never arrives.
-- On a failed mid-roll the SDK issues its rewind and resume natively BEFORE it emits
-  'error'. The old resume on 'error' therefore survives, reduced to a plain resume
+- On a failed mid-roll the content is normally already playing again. The old resume on
+  'error' survives, reduced to a plain resume
   (react-native-video: videoRef.current?.resume(); Bitmovin: player.play()) as a safety
   net — no seek, no source change, and not after a post-roll, when the content has ended.
 

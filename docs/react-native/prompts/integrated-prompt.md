@@ -409,17 +409,15 @@ If AD_TYPE is "linear-tv" — logging and error recovery:
     }
   });
 
-An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
-playlist it failed to manipulate). Recover by starting the channel over: stop the ads
+An 'error' on a channel means the SDK could not keep its ads in the stream. Recover by
+starting the channel over: stop the ads
 manager, then call changeChannelUrl() again with exactly the same params, prerollAdTagUrl
 included, and handle the NEW proxy url it returns as on the first start (Step 3-4).
 stop() keeps the overlay and the subscription; release() would drop them.
 
-Passing prerollAdTagUrl again is safe: the SDK remembers the channel (channelId) entered
-last, and changeChannelUrl() for that same channel skips the pre-roll and sends
-'completed' right after the call resolves, like a pre-roll with no ad. So the viewer does
-not see the pre-roll again, and a proxy url held until 'completed' plays as on the first
-start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear it.
+Passing prerollAdTagUrl again is safe: if the channel has not changed, the pre-roll is
+skipped, and 'completed' arrives right after the call resolves, so a proxy url held until 'completed'
+plays as on the first start.
 
   const restarting = useRef(false);
   const restarts = useRef(0);
@@ -434,8 +432,8 @@ start. stop() and initialize() keep that channel; requestVodAd() / requestAd() c
       const proxyUrl = await changeChannelUrl(nativeId, {/* ...same as Step 3-4 */});
       // Then the same handling as Step 3-4.
       if (config.prerollAdTagUrl) {
-        // Held, as on the first start. 'completed' follows right away: the SDK skips
-        // the pre-roll of the channel entered last.
+        // Held, as on the first start. 'completed' follows right away: the channel
+        // has not changed, so the pre-roll is skipped.
         pendingProxyUrl.current = proxyUrl;
       } else {
         setSourceUri(proxyUrl);   // react-native-video; onLoad fires again, the guard holds
@@ -490,11 +488,9 @@ pre-roll; without this the content plays underneath the pre-roll with both sound
 For bitmovin, call player.play() only once contentStarted is true, e.g.
 useEffect(() => { if (contentStarted) player.play(); }, [player, contentStarted]).
 
-The mid-roll resume on 'error' is a safety net. The SDK rewinds and resumes the content
-after a failed mid-roll itself: it issues that rewind and resume natively BEFORE it emits
-the 'error', which then crosses the bridge to JS asynchronously. So resume() normally
-finds the content already playing and changes nothing. It only resumes: no seek, no
-source change.
+The mid-roll resume on 'error' is a safety net. The SDK brings the content back after a
+failed mid-roll itself, so the content is normally already playing again; resuming is a
+harmless safety net. It only resumes: no seek, no source change.
 
 Apart from that resume, once the content has started do NOT pause, seek or re-source it
 around a VOD break, and do NOT drive the <Video>'s `paused` prop from VOD ad events. With
@@ -623,8 +619,8 @@ Set started.current = true right after the ad request resolves.
 STEP 4-3 — stop() vs release()
 ========================================
 
-  stop(nativeId)     -> stops the ads manager: ends the break in progress AND the ad
-                        session. No later break plays until a new changeChannelUrl() /
+  stop(nativeId)     -> ends the ad session, along with the break in progress.
+                        No later break plays until a new changeChannelUrl() /
                         requestVodAd() / requestAd(). For linear-tv the local proxy is shut
                         down, so the proxy url stops serving; that is why stop() is only
                         the first half of the restart on 'error' (Step 3-3), followed by a

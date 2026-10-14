@@ -51,8 +51,8 @@ HOW THE SDK BEHAVES IN THIS CASE
 6. If the user leaves the app while this ad plays (another tab or app, the TV app in the
    background, or PIP; default mode), the SDK pauses the ad and resumes it when the user
    comes back. The app reports both with FlowerSdk.notifyUserLeftApp(true / false),
-   whether or not PIP starts (the deprecated notifyPictureInPictureModeChanged() is not
-   used). If the app already does this for its other ads, nothing is added here.
+   whether or not PIP starts. notifyPictureInPictureModeChanged() is deprecated and
+   replaced by notifyUserLeftApp(). Existing calls keep working. If the app already does this for its other ads, nothing is added here.
 
 ========================================
 IMPLEMENTATION

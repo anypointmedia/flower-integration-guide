@@ -56,13 +56,11 @@ HOW THE SDK BEHAVES IN THIS CASE
 - The SDK sends 'completed' after the pre-roll, and ALSO when there is no pre-roll, the
   ad response has no breaks, or the ad request fails or times out. So the first
   'completed' (or an 'error') is always the moment to start the content.
-- MID-ROLL: the ad is requested about 10 seconds before its position, and 'prepare' is
-  held until playback reaches the position. The break plays on the SDK's own ad player
+- MID-ROLL: 'prepare' arrives when playback reaches the position. The break plays on the SDK's own ad player
   over the <Video>. The SDK pauses the content itself and, at 'completed' or 'error',
   seeks it back 5 seconds (the rewind duration, not configurable from React Native) and
   resumes it.
-- MID-ROLL 'error': the SDK stops the ad and issues that rewind and resume natively
-  BEFORE it emits 'error'; the event then reaches JS asynchronously. The app still
+- MID-ROLL 'error': the content is normally already playing again. The app still
   resumes the content (videoRef.current?.resume()) as a safety net. It normally finds
   the content already playing and changes nothing; it never seeks or re-sources.
 - POST-ROLL: requested only after notifyContentEnded(nativeId). The content has ended,

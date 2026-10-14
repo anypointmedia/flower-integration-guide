@@ -68,7 +68,7 @@ useEffect(() => {
 
 | 함수 | 동작 | 등록되지 않은 `nativeId` |
 | ---| ---| --- |
-| `stop(nativeId)` | 광고 매니저를 중지합니다. 현재 광고 브레이크와 광고 세션이 함께 종료됩니다. 새로 `changeChannelUrl()` / `requestVodAd()` / `requestAd()`를 호출하기 전까지 이후의 브레이크는 재생되지 않으며, Linear TV에서는 프록시 URL도 더 이상 응답하지 않습니다. 오버레이와 이벤트 구독은 유지됩니다. | 무시 — 정리 경로에서 조건 없이 호출해도 안전 |
+| `stop(nativeId)` | 현재 광고 브레이크와 함께 광고 세션을 종료합니다. 새로 `changeChannelUrl()` / `requestVodAd()` / `requestAd()`를 호출하기 전까지 이후의 브레이크는 재생되지 않으며, Linear TV에서는 프록시 URL도 더 이상 응답하지 않습니다. 오버레이와 이벤트 구독은 유지됩니다. | 무시 — 정리 경로에서 조건 없이 호출해도 안전 |
 | `release(nativeId)` | 해당 `<Video>`에서 SDK를 완전히 분리하고 오버레이를 해제합니다. | 무시 |
 
 ## 한 화면에 여러 플레이어 사용하기

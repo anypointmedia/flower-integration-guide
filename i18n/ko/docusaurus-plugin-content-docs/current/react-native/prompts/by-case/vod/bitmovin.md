@@ -53,13 +53,12 @@ HOW THE SDK BEHAVES IN THIS CASE
   default, so simply do not call player.play() until the first 'completed' or 'error'.
   The SDK sends 'completed' also when there is no pre-roll, no breaks, or the request
   fails, so the content always gets started.
-- MID-ROLL: requested about 10 seconds before its position; 'prepare' arrives when
+- MID-ROLL: 'prepare' arrives when
   playback reaches it. In the default mode the break plays on the SDK's own ad player
   over the content, and the SDK pauses the content and, at 'completed' or 'error',
   seeks it back 5 seconds and resumes it — through the Bitmovin player, on Android and on
   iOS alike.
-- MID-ROLL 'error': the SDK stops the ad and issues that rewind and resume natively
-  BEFORE it emits 'error'; the event then reaches JS asynchronously. The app still calls
+- MID-ROLL 'error': the content is normally already playing again. The app still calls
   player.play() as a safety net. It normally finds the content already playing and
   changes nothing; it never seeks or reloads.
 - POST-ROLL: requested after notifyContentEnded(nativeId); the content is not resumed —

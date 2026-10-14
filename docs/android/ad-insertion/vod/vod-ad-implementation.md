@@ -37,7 +37,7 @@ The SDK requests a mid-roll ad in advance, and calls `onPrepare` when the conten
 For VOD, the SDK calls `onError` when:
 - **An ad fails to play** in a pre-roll, mid-roll, or post-roll (for example, the ad media cannot be decoded or cannot be reached).
 - **The content stops playing and the SDK will not recover it.** See "When the content cannot be played" below.
-- **The SDK's local proxy server fails to respond.** VOD ad media is cached through this server.
+- **An internal SDK error occurs.**
 
 A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error: the SDK calls `onCompleted` (for no ads, `onAdBreakSkipped(1)` and then `onCompleted`).
 :::
@@ -45,18 +45,16 @@ A failed or timed-out VMAP/VAST request, or a break with no ads, is not an error
 :::info Handling `onError` for a failed ad break
 When an ad break fails, the SDK brings the content back **before** it calls `onError`, so the content is already playing again when your handler runs.
 - **Pre-roll error** (`!isContentPrepared`): the content has not started yet. Load the VOD source and start playback, as after a completed pre-roll.
-- **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad, puts the content back into your player at that position (rebuilding the playlist with your original `MediaItem`s or sources), and plays it. Do not stop, seek, reload, or resume the content. Only log the error.
+- **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. Do not stop, seek, or reload the content. Resume it as a safety net (`player.playWhenReady = true`, or `player.play()` for Bitmovin); this is harmless if it is already playing.
 - **Post-roll error** (`isContentEnd`): the content has already ended. Run the end-of-playback scenario, as after a completed post-roll.
 
 `onCompleted` may also be called for the failed break, before or after `onError`. Make the two handlers safe to run for the same break, for example by checking `isContentPrepared` as below.
 :::
 
 :::info When the content cannot be played
-When content playback stops and the SDK will not recover it, the player adapter calls `onError` once per incident. The message is `playback unrecoverable (<reason>) - url: <url>`, and `cause` is the player's own error. A new incident starts once playback runs again.
-- **Media3 ExoPlayer / ExoPlayer2**: a fatal player error that the SDK does not recover by itself, `BehindLiveWindow` when the SDK's automatic recovery from it is turned off in the Flower configuration, or a live playlist that is still stalled after 3 recovery attempts.
-- **Bitmovin Player**: playback that failed after 3 reload attempts, or with no source to reload.
+When content playback stops and the SDK cannot recover it, `onError` is called with a message that starts with `playback unrecoverable`. For VOD, reload the content or show an error to the user.
 
-For VOD, reload the content or show an error to the user. With `setIgnoreAdBreakInPIPMode(false)`, the ad player and the content player adapter share your player, so one ad failure can be reported twice.
+With `setIgnoreAdBreakInPIPMode(false)`, one ad failure can be reported to `onError` twice.
 :::
 
 ```kotlin
@@ -109,8 +107,11 @@ val adsManagerListener = object : FlowerAdsManagerListener {
             } else if (isContentEnd) {
                 // TODO GUIDE: a post-roll ad failed - VOD playback is fully done.
                 //             Run the same post-playback actions as in onCompleted.
+            } else {
+                // NOTE: a mid-roll ad failed - the content is normally already playing again.
+                //       Resuming is a harmless safety net (Bitmovin: player.play()).
+                player.playWhenReady = true
             }
-            // NOTE: a mid-roll ad failed - the SDK has already resumed the content. Nothing to do.
         }
     }
 

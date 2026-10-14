@@ -16,7 +16,7 @@ PIP 모드와 관련해 아래의 두 가지 옵션을 제공합니다:
 FlowerSdk.notifyUserLeftApp(hasLeftApp)
 ```
 
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+`notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -39,9 +39,9 @@ FlowerSdk.setIgnoreAdBreakInPIPMode(ignore)
 
 ## PIP 모드에서의 광고 (기본값)
 
-PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 따라서 광고 재생 중 사용자가 앱을 떠나도 PIP는 시작되지 않습니다. 그래서 앱은 PIP 시작이 아니라 사용자가 앱을 떠난 것을 알려야 합니다. 사용자가 다른 탭이나 앱으로 전환하거나 TV 앱이 백그라운드로 가면 `notifyUserLeftApp(true)`를, 사용자가 돌아오면 `notifyUserLeftApp(false)`를 호출하세요. 그래야 사용자가 떠나 있는 동안 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다.
+PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 따라서 광고 재생 중 사용자가 앱을 떠나도 PIP는 시작되지 않으며, 그래서 앱은 PIP 시작이 아니라 사용자가 앱을 떠난 것을 알립니다. 사용자가 다른 탭이나 앱으로 전환하거나 TV 앱이 백그라운드로 가면 `notifyUserLeftApp(true)`를, 사용자가 돌아오면 `notifyUserLeftApp(false)`를 호출하세요. 그러면 사용자가 떠나 있는 동안 광고가 일시정지되고, 돌아오면 재개됩니다.
 
-*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않습니다.
 *   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
 *   사용자가 앱을 떠나 있는 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
 *   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.

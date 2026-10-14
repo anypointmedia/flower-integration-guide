@@ -20,7 +20,7 @@ Ads are not supported in PIP mode by default (`FlowerSdk.setIgnoreAdBreakInPIPMo
 While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. This means PIP does not start while an ad is playing, so a PIP delegate callback cannot tell the SDK that the user left during an ad. Report the user leaving from the app lifecycle (the app going to the background), whether or not the app enters PIP. See [VOD PIP Mode Support](../ad-insertion/vod/pip-mode-support) for details and for supporting ads in PIP mode.
 
 :::note
-`FlowerSdk.notifyPictureInPictureModeChanged(_:)` is deprecated and replaced by `notifyUserLeftApp(_:)`. Existing calls keep working: it passes the same value to `notifyUserLeftApp`.
+`FlowerSdk.notifyPictureInPictureModeChanged(_:)` is deprecated and replaced by `notifyUserLeftApp(_:)`. Existing calls keep working.
 :::
 
 Below is an iOS source code example:

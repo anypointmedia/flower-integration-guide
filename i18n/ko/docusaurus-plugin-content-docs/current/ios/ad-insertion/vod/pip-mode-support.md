@@ -10,7 +10,7 @@ PIP(Picture-in-Picture) 모드와 관련해 아래의 두 가지 옵션을 제�
 
 사용자가 앱을 떠나거나(`true`) 앱으로 돌아오면(`false`) 이를 SDK에 알려주는 역할입니다. 앱을 떠난 경우는 홈 화면이나 다른 앱으로 이동했거나, 앱의 영상이 PIP 창으로 옮겨진 경우입니다.
 
-`FlowerSdk.notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+`FlowerSdk.notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -33,7 +33,7 @@ PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 따라�
 
 광고 재생 중에는 본편 플레이어가 PIP로 전환되지 않으므로, 광고 재생 중 사용자가 앱을 떠나도 PIP 콜백(`AVPictureInPictureControllerDelegate` 등)은 호출되지 않습니다. 대신 앱 생명주기에서 알려주세요. 앱이 백그라운드로 전환되면 `notifyUserLeftApp(true)`를, 다시 포그라운드로 돌아오면 `notifyUserLeftApp(false)`를 호출합니다.
 
-*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다.
 *   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
 *   사용자가 앱을 떠나 있는 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
 *   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 앱을 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
@@ -136,7 +136,7 @@ FlowerSdk.setIgnoreAdBreakInPIPMode(false)
 
 1. Ad Break가 시작되면 SDK는 플레이어의 현재 아이템을 광고 아이템으로 교체하고(AVQueuePlayer는 큐에서 본편 앞에 광고 아이템을 넣고), 플레이어는 광고로 이동합니다.
 2. Ad Break가 끝나면 SDK는 본편 URL로 만든 **새로운 `AVPlayerItem`**을 재개 지점, 즉 중단된 위치에서 `rewindDuration`(5초, `FlowerAVPlayer`를 사용할 때만 `FlowerVodAdConfig`로 변경 가능)만큼 앞선 위치에 다시 넣습니다.
-3. 광고 재생에 실패하면 SDK는 `onError`를 호출하기 전에 실패한 광고를 버리고 같은 방식으로(본편 URL로 만든 새 `AVPlayerItem`을 재개 지점에) 본편을 다시 넣어 재생합니다. 기본 모드와 마찬가지로 `onError`에서 본편을 정지, 탐색(seek), 재로드하지 마세요. [`onError`가 호출될 때](./vod-ad-implementation#onerror가-호출될-때)를 참고하세요.
+3. 광고가 실패하면 SDK는 `onError`를 호출하기 전에 2단계와 같은 방식으로 본편을 되돌려 놓습니다. 기본 모드와 마찬가지로 `onError`에서 본편을 정지, 탐색(seek), 재로드하지 마세요. Mid-roll 오류 후에는 안전장치로 `player.play()`를 호출하세요. [`onError`가 호출될 때](./vod-ad-implementation#onerror가-호출될-때)를 참고하세요.
 
 :::caution 아이템 단위 설정은 이어지지 않습니다
 SDK가 다시 넣는 `AVPlayerItem`은 본편 URL만으로 생성됩니다. 앱이 자신의 아이템에 적용한 설정은 이어지지 않습니다. 예:

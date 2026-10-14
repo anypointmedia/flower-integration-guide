@@ -36,8 +36,8 @@ PLAYER_NAME: {{PLAYER_NAME}}
 ========================================
 HOW THE SDK BEHAVES IN THIS CASE
 ========================================
-- changeChannelUrl() returns a loopback URL of the in-app proxy, which puts ad segments in at
-  the ad markers. The app plays that URL on its player.
+- changeChannelUrl() returns a loopback URL that only this device can open, with ads replaced
+  at the ad markers. The app plays that URL on its player.
 - The SDK reads playback state and controls the player only through the adapter: position and
   URL (getCurrentMedia), playing state, volume, height, absolute time (live), and for skippable
   ads it queues / removes / skips play items and seeks.
@@ -119,7 +119,7 @@ IMPLEMENTATION
    onError(): on the main thread, call flowerAdView.adsManager.stop(), stop your player, then
    enter the channel again as in step 4 (a NEW changeChannelUrl() call; do not reuse the old URL).
    Pass the same arguments as the first start, including prerollAdTagUrl, and handle the returned
-   URL in the same way. The SDK remembers the channel (channelId) entered last: for that channel it
+   URL in the same way. If the channel has not changed, the pre-roll is skipped: the SDK
    skips the pre-roll and reports onCompleted() right after changeChannelUrl() returns, so the
    viewer does not see the pre-roll again. A break cut short by stop() may still report onCompleted() afterwards, so keep onCompleted()
    idempotent. Optionally give up after a few consecutive restarts (e.g., 3).

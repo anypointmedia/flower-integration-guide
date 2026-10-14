@@ -43,13 +43,12 @@ HOW THE SDK BEHAVES NOW
    requestVodAd() plays with audio under the pre-roll.
 3. The SDK calls onCompleted() after the pre-roll, and also when there is no pre-roll,
    no ad, or the ad request fails. onError() is called when an ad fails to play, and
-   onCompleted() may follow it. On a mid-roll error the SDK seeks the content back by
-   rewindDuration and resumes it BEFORE it calls onError(); the app calls play() there
-   only as a safety net (no seek or reload), which continues from the rewound position.
-4. Mid-roll: onPrepare() arrives when the content reaches the mid-roll position (the ad
-   was requested requestTimeout + minPrepareDuration earlier). The SDK pauses the content
-   on onPrepare(), and when the break ends it seeks the content back by rewindDuration
-   (default 5000 ms) and resumes it. The same mid-roll does not repeat.
+   onCompleted() may follow it. On a mid-roll error the content is normally
+   already playing again; resuming is a harmless safety net, so the app calls play()
+   there (no seek or reload).
+4. Mid-roll: onPrepare() arrives when the content reaches the mid-roll position. The SDK
+   pauses the content on onPrepare(), and when the break ends it seeks the content back by rewindDuration
+   (default 5000 ms) and resumes it.
 5. Post-roll: after notifyContentEnded(); the content is not resumed afterwards.
 6. Optional trailing requestVodAd() arguments, in milliseconds (null = default 5000):
    requestTimeout, minPrepareDuration, rewindDuration. rewindDuration 0 resumes the
@@ -154,7 +153,7 @@ VERIFY
 - Pre-roll: no content audio or frames under the ad; the content starts after it.
 - No pre-roll / no ad / ad server down: the content starts once.
 - Mid-roll: starts exactly at its position (no 5-second delay); the content resumes about
-  rewindDuration before the interruption point and the mid-roll does not repeat.
+  rewindDuration before the interruption point.
 - Post-roll: plays once; the content does not restart.
 - Ad error during a pre-roll: the content starts exactly once.
 - Ad error during a mid-roll: the content resumes about rewindDuration before the

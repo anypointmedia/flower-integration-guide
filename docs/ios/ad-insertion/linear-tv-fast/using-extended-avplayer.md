@@ -86,7 +86,7 @@ A channel pre-roll is an ad that plays once when the viewer enters a channel, be
 - **No pre-roll ad or request failure:** The SDK calls `onCompleted` and the channel starts as usual.
 - **Pre-roll playback error:** It arrives as `onError`, and `FlowerAVPlayer` does not load the channel. Restart the channel in a new `FlowerAVPlayer` instance (see the "Restarting the channel on `onError`" note below).
 - **Channel switch:** Calling `replaceCurrentItem(with:adConfig:)` with the next channel's configuration stops the previous session and requests the new channel's pre-roll.
-- **Same channel again:** The SDK remembers the channel (`channelId`) entered last. When the ad configuration of that same channel is set again, for example on a restart after `onError`, the SDK skips the pre-roll even though `prerollAdTagUrl` is set, and the player loads the channel right away: the viewer has already seen it. Switching to another channel and back (A → B → A), or requesting VOD or inline ads in between, plays the pre-roll again. `stop()` and leaving the player screen do not clear the remembered channel, so returning to the same channel with no other channel or ad request in between also skips the pre-roll.
+- **Same channel again:** If the channel has not changed, the pre-roll is skipped. Setting the same channel's ad configuration again without a channel change, for example on a restart after `onError`, skips the pre-roll even though `prerollAdTagUrl` is set, and the player loads the channel right away. A channel change plays the pre-roll again: A → B → A plays A's pre-roll again, and so does requesting VOD or inline ads in between. `stop()` and leaving the player screen are not a channel change, so returning to the same channel afterwards skips the pre-roll.
 - **User leaving the app:** In the default mode (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), a pre-roll that is playing when the user leaves the app (`FlowerSdk.notifyUserLeftApp(true)`) is paused and resumes when the user comes back, in the same way as VOD ads.
 
 ## FlowerVodAdConfig
@@ -150,9 +150,11 @@ player.addAdListener(listener: adsManagerListener)
 ```
 
 :::note Restarting the channel on `onError`
-For a linear channel, when `onError` is called, stop the ads manager with `player.flowerAdView.adsManager.stop()`, release the current item with `player.replaceCurrentItem(with: nil)`, and start the channel again the same way it was first started: `replaceCurrentItem(with:adConfig:)` with a new `AVPlayerItem` of the original stream URL and the `FlowerLinearTvAdConfig`, then `play()`. `replaceCurrentItem(with: nil)` also clears the ad configuration held by `FlowerAVPlayer`, so always pass the ad configuration again. Build the restart's `FlowerLinearTvAdConfig` with exactly the same values as the first start, including `prerollAdTagUrl`. The SDK skips the pre-roll of the channel entered last, so the viewer does not see the pre-roll again, and `FlowerAVPlayer` loads and plays the channel right away. Do this on the main thread.
+For a linear channel, when `onError` is called, stop the ads manager with `player.flowerAdView.adsManager.stop()`, release the current item with `player.replaceCurrentItem(with: nil)`, and start the channel again the same way it was first started: `replaceCurrentItem(with:adConfig:)` with a new `AVPlayerItem` of the original stream URL and the `FlowerLinearTvAdConfig`, then `play()`. `replaceCurrentItem(with: nil)` also clears the ad configuration held by `FlowerAVPlayer`, so always pass the ad configuration again. Build the restart's `FlowerLinearTvAdConfig` with exactly the same values as the first start, including `prerollAdTagUrl`. The channel has not changed, so the SDK skips the pre-roll (see [Pre-roll Ads](#pre-roll-ads)): the viewer does not see it again, and `FlowerAVPlayer` loads and plays the channel right away. Do this on the main thread.
 
-A pre-roll (`prerollAdTagUrl`) playback error also arrives as `onError`. In that case `FlowerAVPlayer` does not load the channel, and its internal pre-roll listener stays registered on that player. If `onError` arrives before the channel item was loaded (`player.currentItem == nil`), restart the channel in a new `FlowerAVPlayer` instance instead of the same one.
+When content playback stops and the SDK cannot recover it, `onError` is called with a message starting with `playback unrecoverable`. `onError` is also called when an internal SDK error occurs. In both cases, restart the channel in the same way.
+
+A pre-roll (`prerollAdTagUrl`) playback error also arrives as `onError`. In that case `FlowerAVPlayer` does not load the channel. If `onError` arrives before the channel item was loaded (`player.currentItem == nil`), restart the channel in a new `FlowerAVPlayer` instance instead of the same one, because the failed player stays set up for its pre-roll and would act on the next ad events again.
 :::
 
 ## Linear Channel Ad Request Example
@@ -257,8 +259,8 @@ struct PlaybackView: View {
 
         // 3. Start the channel again the same way it was first started:
         //    replaceCurrentItem(with:adConfig:) with a new AVPlayerItem -> play(),
-        //    with the same ad config, including prerollAdTagUrl. The SDK skips the pre-roll
-        //    of the channel entered last, so the viewer does not see it again.
+        //    with the same ad config, including prerollAdTagUrl. Without a channel change,
+        //    the SDK skips the pre-roll, so the viewer does not see it again.
         //    NOTE: if onError came during the pre-roll (player.currentItem was nil),
         //          restart in a new FlowerAVPlayer instead (see the note above).
         playLinearTv()
@@ -381,8 +383,8 @@ class PlaybackViewController: UIViewController {
 
         // 3. Start the channel again the same way it was first started:
         //    replaceCurrentItem(with:adConfig:) with a new AVPlayerItem -> play(),
-        //    with the same ad config, including prerollAdTagUrl. The SDK skips the pre-roll
-        //    of the channel entered last, so the viewer does not see it again.
+        //    with the same ad config, including prerollAdTagUrl. Without a channel change,
+        //    the SDK skips the pre-roll, so the viewer does not see it again.
         //    NOTE: if onError came during the pre-roll (player.currentItem was nil),
         //          restart in a new FlowerAVPlayer instead (see the note above).
         playLinearTv()

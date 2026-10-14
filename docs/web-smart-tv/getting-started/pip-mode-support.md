@@ -16,7 +16,7 @@ Notifies the SDK when the user leaves the app (`true`) or comes back to it (`fal
 FlowerSdk.notifyUserLeftApp(hasLeftApp)
 ```
 
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
+`notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -39,9 +39,9 @@ You must notify the SDK with `notifyUserLeftApp`, both when the user leaves the 
 
 ## Ads in PIP Mode (Default)
 
-Ads are not supported in PIP mode by default. While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. So when the user leaves the app during an ad, PIP does not start at all. That is why the app reports the user leaving the app, not the start of PIP: when the user switches to another tab or app, or the TV app goes to the background, call `notifyUserLeftApp(true)`, and when the user comes back, call `notifyUserLeftApp(false)`. Only then is the ad paused while the user is away, and resumed when the user returns to the app.
+Ads are not supported in PIP mode by default. While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. So PIP does not start when the user leaves the app during an ad, which is why the app reports leaving the app, not the start of PIP: call `notifyUserLeftApp(true)` when the user switches to another tab or app or the TV app goes to the background, and `notifyUserLeftApp(false)` when the user comes back. The ad is then paused while the user is away and resumed on return.
 
-*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance.
 *   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
 *   While the user is away from the app, Mid-roll and Post-roll Ad Breaks are not requested.
 *   Linear TV ads inserted into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.

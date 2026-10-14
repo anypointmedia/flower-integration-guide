@@ -103,7 +103,8 @@ Report the user leaving the app (home screen, another app, or the video moved to
 with FlowerSdk.notifyUserLeftApp(true), and coming back with FlowerSdk.notifyUserLeftApp(false).
 Report it from the app lifecycle, whether or not the app enters PiP: while an ad plays the
 content must not go into PiP, so PiP delegate callbacks never fire during an ad.
-FlowerSdk.notifyPictureInPictureModeChanged(_:) is deprecated (replaced by notifyUserLeftApp).
+FlowerSdk.notifyPictureInPictureModeChanged(_:) is deprecated and replaced by
+notifyUserLeftApp(_:). Existing calls keep working.
 
 UIKit — observe the app lifecycle in the playback view controller:
 

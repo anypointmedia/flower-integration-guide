@@ -25,7 +25,7 @@ When inserting ads into VOD contents, UI control logic may be needed at ad play
 The Flower Player starts the content by itself after the pre-roll, and the SDK pauses and resumes the content around a mid-roll. When an ad fails (`onError`), handle it by where the content is:
 
 *   **Pre-roll error** (the content has not started): the Flower Player does not start the content by itself. Start the content without ads.
-*   **Mid-roll error** (the content has not ended): nothing to do. Before it calls `onError`, the SDK brings the content back `rewindDuration` before the point where the mid-roll interrupted it, so the content is already playing again. Do not stop, seek, or reload it.
+*   **Mid-roll error** (the content has not ended): before it calls `onError`, the SDK brings the content back `rewindDuration` before the point where the mid-roll interrupted it, so the content is normally already playing again. Do not stop, seek, or reload it. Call `player.play()` as a safety net; this is harmless if it is already playing.
 *   **Post-roll error** (the content has ended): do not resume. Run the end-of-playback scenario.
 *   **Content playback error** (message starting with `playback unrecoverable`): the content stopped and the SDK will not recover it. Reload the content or show an error to the user. See [VOD Ad Implementation](./vod-ad-implementation) for when this is reported.
 
@@ -74,9 +74,11 @@ val adsManagerListener = object : FlowerAdsManagerListener {
             } else if (isContentEnd) {
                 // TODO GUIDE: a post-roll failed - VOD playback is fully done. Do not resume.
                 //             Run your end-of-playback actions.
+            } else {
+                // NOTE: a mid-roll failed - the content is normally already playing again.
+                //       Do not stop, seek, or reload it. Resuming is a harmless safety net.
+                player.play()
             }
-            // NOTE: a mid-roll failed - the SDK has already resumed the content.
-            //       Do not stop, seek, or reload it.
         }
     }
 

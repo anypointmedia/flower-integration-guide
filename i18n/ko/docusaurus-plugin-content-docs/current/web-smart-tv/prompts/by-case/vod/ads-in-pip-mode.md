@@ -45,7 +45,7 @@ HOW THE SDK BEHAVES IN THIS CASE
    app's player. dash.js and Shaka Player still use the SDK's own video element; for them
    use the default-mode VOD prompt instead.
 3. When an ad break starts (on adsManager.play()), the SDK switches the player's source to
-   the ad(s), with the content queued after them. When the last ad ends, the SDK loads the
+   the ad(s). When the last ad ends, the SDK loads the
    content source again, seeks to the interrupted position minus rewindDuration (default
    5000 ms; 0 for a pre-roll or post-roll) and plays it. Ads play at normal speed; the
    content's playback rate is restored afterwards.
@@ -63,12 +63,10 @@ HOW THE SDK BEHAVES IN THIS CASE
    After a post-roll the SDK hands the content back at its end, so the content's 'ended'
    handler can run again; it must notify the content end only once.
 9. Supported player check happens at requestVodAd(); getPlayer() must return the player.
-10. When a mid-roll ad fails, the SDK puts the content source back into the player (at the
-    interrupted position minus rewindDuration) BEFORE it calls onError(). The app still
-    calls play() in onError() as a safety net: play() only, no seek or reload. Loading the
-    content source finishes asynchronously, so play() can arrive while it is still
-    loading; the SDK seeks to the resume point and plays it once loaded. onCompleted() may
-    follow onError(). After a post-roll error the content stays ended.
+10. When a mid-roll ad fails, the content is normally already playing again (from the
+    interrupted position minus rewindDuration); resuming is a harmless safety net. The app
+    still calls play() in onError(): play() only, no seek or reload.
+    onCompleted() may follow onError(). After a post-roll error the content stays ended.
 
 ========================================
 IMPLEMENTATION
@@ -177,7 +175,8 @@ STEP 8 — Report the user leaving the app and coming back (ads may play in PIP;
   videoElement.addEventListener('enterpictureinpicture', reportUserLeftApp);
   videoElement.addEventListener('leavepictureinpicture', reportUserLeftApp);
   (Bitmovin: attach the PIP listeners to player.getVideoElement().)
-  FlowerSdk.notifyPictureInPictureModeChanged() is deprecated; use notifyUserLeftApp().
+  FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by
+  notifyUserLeftApp(). Existing calls keep working.
 
 STEP 9 — Cleanup
 

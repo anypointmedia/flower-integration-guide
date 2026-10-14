@@ -42,12 +42,14 @@ HOW THE SDK BEHAVES IN THIS CASE
   - there is no pre-roll, the VMAP has no ad breaks, or the request failed or timed out:
     the SDK calls onCompleted without onPrepare.
   So the FIRST onCompleted/onError is always the moment to load and start the content.
-- Mid-roll: the SDK requests it ahead of time and calls onPrepare when the content reaches the
-  mid-roll position. When onPrepare is called, the SDK pauses the content itself. When the break
-  ends (onCompleted or onError), the SDK seeks the content back 5 seconds (rewindDuration) and
-  resumes it. requestVodAd has no parameter to change these timings. On onError the SDK does
-  this before it calls the listener; the app still calls player.play() in onError after a
-  mid-roll as a safety net so the content never stays paused (no seek, no reload).
+- Mid-roll: the SDK calls onPrepare when the content reaches the mid-roll position. When
+  onPrepare is called, the SDK pauses the content itself. When the break ends (onCompleted or
+  onError), the SDK seeks the content back 5 seconds (rewindDuration) and resumes it.
+  requestVodAd has no parameter to change these timings. The app still calls player.play() in
+  onError after a mid-roll (no seek, no reload): the content is normally already playing again;
+  resuming is a harmless safety net.
+- onError with a message starting with "playback unrecoverable": the content stopped and the
+  SDK cannot recover it. Reload the content or show an error; do not call player.play() for it.
 - Post-roll: requested when the app calls notifyContentEnded(). The content has ended, so it is
   not resumed afterwards.
 - A mid-roll with no ad is reported as onAdBreakSkipped + onCompleted without onPrepare.
@@ -121,9 +123,12 @@ IMPLEMENTATION
        DispatchQueue.main.async {
            if !self.isContentPrepared {
                self.prepareContentSource()   // pre-roll error: start the content
+           } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+               // The content stopped and the SDK cannot recover it:
+               // reload the content or show an error. No safety-net play() here.
            } else if !self.isContentEnd {
-               // Mid-roll error: resume the content. The SDK also rewinds and resumes it;
-               // this is a safety net so it never stays paused. No seek, no reload.
+               // Mid-roll error: resume the content. It is normally already playing again;
+               // this is a harmless safety net. No seek, no reload.
                self.player.play()
            }
            // Post-roll error: the content has already ended - do not resume it.

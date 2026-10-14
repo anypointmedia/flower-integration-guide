@@ -53,14 +53,15 @@ HOW THE SDK BEHAVES IN THIS CASE
   manager, release the content item, and start the channel again with a new
   changeChannelUrl(...) (the old loopback URL dies with the proxy). The listener is called off
   the main thread. A restart passes exactly the same parameters as the first start, including
-  prerollAdTagUrl, and handles the returned URL the same way (held until onCompleted).
-- The SDK remembers the channel (channelId) entered last. When changeChannelUrl(...) is called
-  with that same channelId (e.g. a restart after onError), the SDK skips the pre-roll even
-  though prerollAdTagUrl is passed, and calls onCompleted right after changeChannelUrl(...)
-  returns, like a pre-roll with no ad. So the held URL starts right away and the viewer does
-  not see the pre-roll again. stop() does not clear the remembered channel; requestVodAd and
-  requestAd do. A -> B -> A plays A's pre-roll again; coming back to the same channel with no
-  other channel or ad request in between skips it.
+  prerollAdTagUrl, and handles the returned URL the same way (held until onCompleted). This
+  applies to every onError: an ad error, a message starting with "playback unrecoverable"
+  (content playback stopped and the SDK cannot recover it), and an internal SDK error.
+- If the channel has not changed, the pre-roll is skipped: when changeChannelUrl(...) is called
+  again without a channel change (e.g. a restart after onError), the SDK skips the pre-roll
+  even though prerollAdTagUrl is passed, and calls onCompleted right after
+  changeChannelUrl(...) returns, like a pre-roll with no ad. So the held URL starts right away
+  and the viewer does not see the pre-roll again. stop() is not a channel change.
+  A -> B -> A plays A's pre-roll again.
 - While the user is away from the app (FlowerSdk.notifyUserLeftApp(true), see the PIP mode
   support case), stream ads keep playing and only the ad UI is hidden; a pre-roll that is
   playing is paused and resumes when the user comes back (notifyUserLeftApp(false)) (default
@@ -97,6 +98,7 @@ IMPLEMENTATION
    func onPlay() { /* UI: hide your own controls */ }
    func onCompleted() { /* UI: show them again */ }
    func onError(error: FlowerError?) {
+       // Every onError restarts the channel, including "playback unrecoverable".
        DispatchQueue.main.async { self.restartAfterAdError() }   // step 10
    }
    func onAdBreakSkipped(reason: Int32) {}
@@ -174,7 +176,7 @@ IMPLEMENTATION
        playLinearTv()                   // 3. same start as before: new changeChannelUrl -> new item -> play
    }
    The restart passes the same prerollAdTagUrl and goes through step 7 like the first start.
-   The SDK skips the pre-roll of the channel entered last and calls onCompleted right after
+   The channel has not changed, so the SDK skips the pre-roll and calls onCompleted right after
    changeChannelUrl(...) returns, so the temporary listener loads the new URL right away. Do
    not add a flag that drops prerollAdTagUrl on a restart. The temporary
    pre-roll listener (step 7) does NOT restart: the channel has not started yet, so its onError

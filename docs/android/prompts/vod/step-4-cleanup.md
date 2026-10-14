@@ -107,7 +107,8 @@ Available in Flower Android SDK version 2.8.0+.
 
 2. Notify the SDK when the user comes back (the Activity resumes, including when the PiP window
    is expanded back to full screen), and toggle player controls on PiP changes.
-   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated: use notifyUserLeftApp() instead.
+   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by notifyUserLeftApp().
+   Existing calls keep working; use notifyUserLeftApp() in this integration.
 
   Kotlin:
   override fun onResume() {

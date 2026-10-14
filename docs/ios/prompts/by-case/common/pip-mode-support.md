@@ -38,7 +38,8 @@ HOW THE SDK BEHAVES IN THIS CASE
   the user leaves the app (home screen, another app, or the video moved to a PIP window) and
   FlowerSdk.notifyUserLeftApp(false) when the user comes back.
 - FlowerSdk.notifyPictureInPictureModeChanged(_:) is deprecated and replaced by
-  notifyUserLeftApp(_:). Do not use it in new code.
+  notifyUserLeftApp(_:). Existing calls keep working; use notifyUserLeftApp(_:) in this
+  integration.
 - Because the content player must not go into PIP while an ad plays, PIP delegate callbacks
   never fire during an ad. So report leaving/returning from the app lifecycle (background /
   foreground), not from the PIP delegate.

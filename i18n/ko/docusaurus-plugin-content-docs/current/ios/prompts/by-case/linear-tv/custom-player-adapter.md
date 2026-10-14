@@ -44,11 +44,11 @@ HOW THE SDK BEHAVES IN THIS CASE
   SDK calls the adapter's pause() and resume(); both must be safe before changedUrl is loaded.
   A channel change (stop() + a new changeChannelUrl(...)) stops a pre-roll still playing and
   requests the new channel's pre-roll; drop the old temporary listener first.
-- The SDK remembers the channel (channelId) entered last. When changeChannelUrl(...) is called
-  with that same channelId (e.g. a restart after onError), the SDK skips the pre-roll even
-  though prerollAdTagUrl is passed, and calls onCompleted (and the adapter's resume()) right
-  after changeChannelUrl(...) returns, like a pre-roll with no ad. stop() does not clear the
-  remembered channel; requestVodAd and requestAd do. A -> B -> A plays A's pre-roll again.
+- If the channel has not changed, the pre-roll is skipped: when changeChannelUrl(...) is called
+  again without a channel change (e.g. a restart after onError), the SDK skips the pre-roll
+  even though prerollAdTagUrl is passed, and calls onCompleted (and the adapter's resume())
+  right after changeChannelUrl(...) returns, like a pre-roll with no ad. stop() is not a
+  channel change. A -> B -> A plays A's pre-roll again.
 - The SDK calls the adapter from its own worker threads, synchronously. Every method must answer
   without waiting on the main thread (a main-queue hop that waits can deadlock).
 - The SDK keeps the adapter for the whole ad session. Releasing the app's reference does not
@@ -125,8 +125,9 @@ IMPLEMENTATION
    step 4 again with a new adapter and a new changeChannelUrl(...) (the old loopback URL dies
    with stop()). The restart passes exactly the same parameters as the first start, including
    prerollAdTagUrl, and handles changedUrl the same way (held until the first onCompleted/
-   onError if a pre-roll tag was passed). The SDK skips the pre-roll of the channel entered
-   last and calls onCompleted right away, so the viewer does not see it again. A break cut short by stop() may still report onCompleted afterwards, so keep
+   onError if a pre-roll tag was passed). The channel has not changed, so the SDK skips the
+   pre-roll and calls onCompleted right away: the viewer does not see it again. Restart for
+   every onError, including an internal SDK error. A break cut short by stop() may still report onCompleted afterwards, so keep
    onCompleted idempotent. Keep a simple retry limit (e.g. at most 3 restarts in a row). While waiting for
    a pre-roll, the first onCompleted/onError only loads changedUrl; it does not restart.
 

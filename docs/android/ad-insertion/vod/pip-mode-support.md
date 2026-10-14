@@ -8,7 +8,7 @@ The SDK provides the following two options related to PIP (Picture-in-Picture) m
 
 #### `FlowerSdk.notifyUserLeftApp`
 
-Notifies the SDK when the user leaves the app (`true`) or comes back to the app (`false`). Leaving the app includes going to the home screen or another app, and the app's video moving to a PIP window. `FlowerSdk.notifyPictureInPictureModeChanged` is deprecated and replaced by this API; existing calls keep working, as it passes the same value to `notifyUserLeftApp`.
+Notifies the SDK when the user leaves the app (`true`) or comes back to the app (`false`). Leaving the app includes going to the home screen or another app, and the app's video moving to a PIP window. `notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -136,7 +136,7 @@ The following players play ads inside the app's player in this mode. Other playe
 1. When an ad break starts, the SDK adds the ad items to the player's playlist in front of the content, and the player moves to the ads.
 2. When the ad break ends, the SDK puts the content back at the resume point (the interrupted position minus `rewindDuration`). How it does this depends on the player:
     *   **Media3 ExoPlayer / ExoPlayer2:** The content comes back as a **new media item**. The original `MediaItem` is added again, clipped to start at the resume point. Because of this, `currentPosition` is counted from the resume point, and the position within the original content is the clipping start position plus `currentPosition`.
-    *   **Bitmovin Player:** The content `Source` is loaded again with its `startOffset` set to the resume point. `currentTime` stays the position within the original content, so no conversion is needed.
+    *   **Bitmovin Player:** `currentTime` stays the position within the original content, so no conversion is needed.
 
 ```kotlin
 // Media3 ExoPlayer / ExoPlayer2: position within the original content after a mid-roll
@@ -150,7 +150,7 @@ Because the current media item changes around every ad break, any app logic that
 
 *   `Player.STATE_ENDED` and `onMediaItemTransition` also occur around ad breaks. Check that the current media item is the content before treating the event as the content's.
 *   After the post-roll, the content is put back at its end, so `STATE_ENDED` may be reported again. Call `notifyContentEnded()` only once per content.
-*   If an ad fails, the SDK drops the failed ad and puts the content back in the same way (rebuilding the playlist with your original `MediaItem`s) and plays it, before it calls `onError`. Do not stop, seek, or reload the content in `onError`, as in [VOD Pre-roll, Mid-roll, Post-roll Ad Implementation](./vod-ad-implementation). Because the ad player and the content player adapter share your player in this mode, one ad failure can be reported to `onError` twice.
+*   If an ad fails, the SDK puts the content back in the same way and plays it, before it calls `onError`. Do not stop, seek, or reload the content in `onError`; after a mid-roll error, resume it as a safety net, as in [VOD Pre-roll, Mid-roll, Post-roll Ad Implementation](./vod-ad-implementation). In this mode, one ad failure can be reported to `onError` twice.
 
 **_Kotlin_**
 

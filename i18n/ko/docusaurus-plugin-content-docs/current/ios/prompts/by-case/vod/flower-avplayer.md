@@ -50,14 +50,15 @@ HOW THE SDK BEHAVES IN THIS CASE
   - rewindDuration: how far before the interrupted position the content resumes after a mid-roll
   These can only be set here; FlowerAdsManager.requestVodAd(...) has no such parameters.
 - Ad playback error (listener onError, called off the main thread):
-  - During the pre-roll: FlowerAVPlayer does NOT load the content by itself (its internal
-    pre-roll listener ignores onError), and replaceCurrentItem(with:) without an ad config loads
-    nothing for VOD. The app must start the content: release this player and start the same
+  - During the pre-roll: FlowerAVPlayer does NOT load the content by itself, and
+    replaceCurrentItem(with:) without an ad config loads nothing for VOD. The app must start the content: release this player and start the same
     content in a new FlowerAVPlayer with replaceCurrentItem(with:adConfig:) + play(). This
     requests the ads again, so do it only once per content.
-  - During a mid-roll: the SDK rewinds and resumes the content itself before it calls onError.
-    The app still calls player.play() as a safety net so the content never stays paused
-    (no seek, no reload).
+  - During a mid-roll: the SDK rewinds and resumes the content itself. The app still calls
+    player.play() (no seek, no reload): the content is normally already playing again;
+    resuming is a harmless safety net.
+  - A message starting with "playback unrecoverable": the content stopped and the SDK cannot
+    recover it. Reload the content or show an error; do not call player.play() for it.
   - During the post-roll: the content has already ended; it is not resumed.
 - The first onCompleted is where FlowerAVPlayer loads the content (end of the pre-roll, or no
   pre-roll / no ad break / request failure). Until then the content has not started.
@@ -135,15 +136,15 @@ IMPLEMENTATION
 
    class AdListener: FlowerAdsManagerListener {
        private let onAdCompleted: () -> Void
-       private let onAdError: () -> Void
-       init(onAdCompleted: @escaping () -> Void, onAdError: @escaping () -> Void) {
+       private let onAdError: (FlowerError?) -> Void
+       init(onAdCompleted: @escaping () -> Void, onAdError: @escaping (FlowerError?) -> Void) {
            self.onAdCompleted = onAdCompleted
            self.onAdError = onAdError
        }
        func onPrepare(adDurationMs: Int32) {}
        func onPlay() { /* e.g. hide your own overlay */ }
        func onCompleted() { DispatchQueue.main.async { self.onAdCompleted() } }
-       func onError(error: FlowerError?) { DispatchQueue.main.async { self.onAdError() } }
+       func onError(error: FlowerError?) { DispatchQueue.main.async { self.onAdError(error) } }
        func onAdBreakSkipped(reason: Int32) {}
        func onAdBreakPrepare(adInfos: NSMutableArray) {}
        func onAdPlay(adInfo: AdInfo) {}
@@ -162,7 +163,7 @@ IMPLEMENTATION
    }
 
    // onError (main thread)
-   func handleAdError() {
+   func handleAdError(_ error: FlowerError?) {
        if !isContentPrepared {
            // Pre-roll error: FlowerAVPlayer does not load the content after a pre-roll
            // playback error. Start the content in a new FlowerAVPlayer, once.
@@ -174,9 +175,12 @@ IMPLEMENTATION
            // (SwiftUI: FlowerVideoPlayer(player:) picks up the new @State player)
            player.addAdListener(listener: adListener)
            playVod()
+       } else if error?.message?.hasPrefix("playback unrecoverable") == true {
+           // The content stopped and the SDK cannot recover it:
+           // reload the content or show an error. No safety-net play() here.
        } else if !isContentEnd {
-           // Mid-roll error: resume the content. The SDK also rewinds and resumes it;
-           // this is a safety net so the content never stays paused. Do not seek or reload.
+           // Mid-roll error: resume the content. It is normally already playing again;
+           // this is a harmless safety net. Do not seek or reload.
            player.play()
        } else {
            // Post-roll error: the content has already ended - do not resume it.

@@ -45,7 +45,7 @@ flowchart LR
 
 ## Pre-roll Ads
 
-A channel pre-roll is the [channel entry ad](#channel-entry-ads) described above. It is enabled by passing `prerollAdTagUrl` to `changeChannelUrl`, and it is independent of the main stream replacement ads: the SDK requests it from its own ad tag and plays it on its own ad player in the _AdView_, not by manipulating the manifest.
+A channel pre-roll is the [channel entry ad](#channel-entry-ads) described above. It is enabled by passing `prerollAdTagUrl` to `changeChannelUrl`, and it is independent of the main stream replacement ads: it is played in the _AdView_.
 
 ```mermaid
 flowchart TD
@@ -69,10 +69,10 @@ flowchart TD
 ```
 
 - **Flow**: `changeChannelUrl` requests the pre-roll together with the channel and returns the media stream URL as usual. When the pre-roll is ready, the SDK starts it by itself — the app does not call `play` for it — and pauses the content player while it runs. When it ends, the SDK fires `onCompleted` and resumes the content player.
-- **No ad or failure**: if the pre-roll tag returns no ad, or the request fails, the SDK fires `onCompleted` and the channel starts as usual. With `changeChannelUrl`, a pre-roll whose playback fails also ends with `onCompleted`, not `onError`. Some player integrations report a playback failure differently; see the Linear TV guide of your platform.
+- **No ad or failure**: if the pre-roll tag returns no ad, or the request fails, the SDK fires `onCompleted` and the channel starts as usual. With `changeChannelUrl`, a pre-roll whose playback fails also ends with `onCompleted`, not `onError`.
 - **When the app starts playback**: when the app calls `changeChannelUrl` itself, it holds the returned URL and sets it on the player at `onCompleted`, so the main content does not flash on screen before the pre-roll. When the SDK's player integration manages the channel (for example an SDK-provided player), the player holds the channel itself. Follow the Linear TV guide of your platform.
 - **Channel switch**: every `changeChannelUrl` call stops the current session first, including a pre-roll in progress, and then requests the pre-roll of the new call. Pass the new channel's `prerollAdTagUrl` to play its pre-roll.
-- **Restart after `onError`**: the app repeats the first call unchanged, `prerollAdTagUrl` included. The SDK remembers the channel entered last and skips the pre-roll when the same channel is entered again, firing `onCompleted` as for a pre-roll with no ad. `stop()` and SDK initialization keep the remembered channel; a VOD or inline ad request clears it.
+- **Restart after `onError`**: the app repeats the first call unchanged, `prerollAdTagUrl` included. If the channel has not changed, the pre-roll is skipped, and the SDK fires `onCompleted` as for a pre-roll with no ad. `stop()` does not count as a channel change; a VOD or inline ad request does, so A → B → A or A → VOD → A plays A's pre-roll again.
 - **User leaving the app**: by default, a pre-roll pauses when the app reports that the user left the app (`notifyUserLeftApp(true)`) and resumes when the user returns, in the same way as VOD ads. Main stream replacement ads keep playing.
 
 ## Lifecycle

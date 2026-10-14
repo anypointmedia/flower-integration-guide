@@ -20,7 +20,7 @@ PIP 모드에서는 기본적으로 광고를 지원하지 않습니다(`FlowerS
 또한 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 즉 광고 재생 중에는 PIP가 시작되지 않으므로, PIP delegate 콜백으로는 광고 재생 중 사용자가 앱을 떠난 것을 SDK에 알릴 수 없습니다. PIP 진입 여부와 관계없이, 사용자가 앱을 떠난 것은 앱 생명주기(앱이 백그라운드로 전환될 때)에서 알려주세요. 자세한 내용과 PIP 모드에서 광고를 지원하는 방법은 [VOD PIP 모드 지원](../ad-insertion/vod/pip-mode-support) 페이지를 참고하세요.
 
 :::note
-`FlowerSdk.notifyPictureInPictureModeChanged(_:)`는 deprecated 되었으며 `notifyUserLeftApp(_:)`로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+`FlowerSdk.notifyPictureInPictureModeChanged(_:)`는 deprecated 되었으며 `notifyUserLeftApp(_:)`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 :::
 
 아래는 iOS 소스 코드 예시입니다:

@@ -28,7 +28,7 @@ sidebar_label: 실시간 채널 / FAST
 
 `prerollAdTagUrl`을 설정해도 `changeChannelUrl()`은 스트림 URL을 바로 반환하며, 프리롤은 백그라운드에서 요청됩니다. SDK는 플레이어 위에 SDK 자체 video 요소로 프리롤을 재생하는 동안 플레이어를 일시정지하고, 프리롤이 끝나면 `onCompleted()`를 호출한 뒤 플레이어 재생을 재개합니다. 프리롤 광고가 없거나 프리롤이 실패한 경우에도 `onCompleted()`를 호출하며, 실패한 프리롤은 `onError()`로 알리지 않습니다.
 
-그때까지 스트림을 기다리게 하세요. 반환된 URL을 저장해 두고 임시 리스너의 첫 `onCompleted()`(또는 `onError()`)에서 로드한 뒤, 원래 리스너를 다시 등록합니다. `changeChannelUrl()`을 호출할 때마다 대기 중인 프리롤을 포함한 이전 세션이 중지되고 새 채널의 프리롤을 요청합니다. 마지막으로 진입한 채널과 같은 `channelId`로 `changeChannelUrl()`이 호출되면, SDK는 `prerollAdTagUrl`을 전달하더라도 프리롤을 건너뛰고 `changeChannelUrl()`이 반환된 직후 `onCompleted()`를 호출합니다. 따라서 `onError()` 후 재시작할 때도 같은 `prerollAdTagUrl`을 전달하고 같은 방식으로 스트림을 기다리게 합니다. `stop()`은 기억한 채널을 지우지 않으며, `requestVodAd()`와 `requestAd()`는 지웁니다. 전체 흐름과 예시는 [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control.md#프리롤-광고)를 참고하세요.
+그때까지 스트림을 기다리게 하세요. 반환된 URL을 저장해 두고 임시 리스너의 첫 `onCompleted()`(또는 `onError()`)에서 로드한 뒤, 원래 리스너를 다시 등록합니다. `changeChannelUrl()`을 호출할 때마다 대기 중인 프리롤을 포함한 이전 세션이 중지되고 새 채널의 프리롤을 요청합니다. 채널 변경 없이 `changeChannelUrl()`을 다시 호출하면 `prerollAdTagUrl`을 전달하더라도 프리롤을 생략하며, SDK는 `changeChannelUrl()`이 반환된 직후 `onCompleted()`를 호출합니다. 따라서 `onError()` 후 재시작할 때도 같은 `prerollAdTagUrl`을 전달하고 같은 방식으로 스트림을 기다리게 합니다. 전체 흐름과 예시는 [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control.md#프리롤-광고)를 참고하세요.
 
 ### FlowerAdsManager.changeChannelExtraParams
 

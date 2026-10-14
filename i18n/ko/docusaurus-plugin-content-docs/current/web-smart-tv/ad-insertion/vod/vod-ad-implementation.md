@@ -30,7 +30,7 @@ sidebar_label: VOD 프리롤, Mid-roll, Post-roll 광고 적용
 :::
 
 :::info Mid-roll의 `onPrepare` 호출 시점
-SDK는 Mid-roll 광고를 미리 요청해 두고, 본편이 Mid-roll 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play()`를 호출하세요.
+SDK는 본편이 Mid-roll 위치에 도달했을 때 `onPrepare`를 호출합니다. `onPrepare`에서 바로 `play()`를 호출하세요.
 :::
 
 ```javascript
@@ -64,8 +64,6 @@ const adsManagerListener = {
     },
 
     onError(error) {
-        // NOTE: Ad Break가 실패하면 SDK는 onError() 호출 전에 본편을 되돌려 놓습니다.
-        //       광고 오류에 대해 본편을 정지, 탐색(seek), 재로드하지 마세요.
         console.warn(`onError: ${error?.message}`);
         if (!isContentPrepared) {
             // TODO GUIDE: 프리롤 광고 실패 시에도 VOD 소스를 로드합니다.
@@ -75,9 +73,12 @@ const adsManagerListener = {
         } else if (error?.message?.startsWith('playback unrecoverable')) {
             // TODO GUIDE: 본편 재생이 중단되었고 SDK가 복구하지 않습니다.
             //             본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
+        } else if (!isContentEnd) {
+            // mid-roll 광고 오류: 안전장치로 본편을 재개합니다 - play()만 호출하고 탐색(seek)이나 재로드는 하지 않습니다.
+            //                    본편은 보통 이미 다시 재생 중이므로 호출해도 문제가 없습니다.
+            videoElement.play();  // Bitmovin: player.play()
         }
-        // NOTE: mid-roll 광고 오류 시에는 SDK가 이미 본편을 재개했으므로 할 일이 없습니다.
-        //       post-roll 광고 오류(isContentEnd) 시에는 VOD 재생이 끝난 상태이므로 재개하지 않습니다.
+        // NOTE: post-roll 광고 오류(isContentEnd) - 재생이 끝난 상태이므로 재개하지 않습니다.
     },
 
     onAdBreakSkipped(reason) {
@@ -90,7 +91,7 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 :::info `onError()`가 호출되는 경우
 VOD에서 SDK는 다음 경우에 `onError()`를 호출합니다.
 - **광고 재생 실패**: 프리롤, Mid-roll, Post-roll의 광고가 로드 또는 재생에 실패한 경우(예: 광고 미디어 디코딩 오류, 광고 미디어에 접근 불가).
-- **치명적 플레이어 오류로 인한 본편 재생 중단**: 플레이어 어댑터가 장애 1건당 한 번, `playback unrecoverable (<reason>) - url: <url>` 메시지와 플레이어의 오류를 `cause`로 담아 `onError()`를 호출합니다. HLS.js 또는 FlowerHls의 치명적(fatal) `hlsError`, Shaka Player의 CRITICAL `error`, dash.js의 `error`, Bitmovin Player의 `error`가 해당합니다. 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다. 본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
+- **SDK가 복구할 수 없는 본편 재생 중단**: `playback unrecoverable`로 시작하는 메시지와 함께 `onError()`가 호출됩니다. 본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
 
 VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 아닙니다. 이때 SDK는 `onCompleted()`를 호출합니다(광고가 없으면 `onAdBreakSkipped(1)` 후 `onCompleted()`).
 :::
@@ -98,10 +99,10 @@ VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 
 :::info `onError()` 호출 시점에 본편은 이미 재생 중입니다
 Ad Break가 실패하면 SDK는 `onError()`를 호출하기 **전에** 본편을 되돌려 놓습니다.
 - **프리롤 오류**: 본편이 아직 시작되지 않았습니다. 프리롤이 정상 종료된 경우와 같이 본편을 로드하고 시작하세요.
-- **Mid-roll 오류**: SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. `setIgnoreAdBreakInPIPMode(false)`인 경우에는 광고 플레이어가 실패한 광고를 버리고, 원래 본편 소스를 그 위치로 앱의 player에 다시 로드해 재생합니다. 본편을 정지, 탐색(seek), 재로드, 재개하지 말고 오류를 로그로만 남기세요.
-- **Post-roll 오류**: 본편은 이미 끝났습니다.
+- **Mid-roll 오류**: SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. 본편을 정지, 탐색(seek), 재로드하지 마세요. 안전장치로 `videoElement.play()`(Bitmovin: `player.play()`)를 호출해 본편을 재개하세요. 이미 재생 중이어도 문제가 없습니다.
+- **Post-roll 오류**: 본편은 이미 끝났습니다. 재개하지 마세요.
 
-같은 Ad Break에 대해 `onCompleted()`도 호출될 수 있으며, `onError()`보다 먼저 올 수도 나중에 올 수도 있습니다. 본편이 두 번 로드되지 않도록 `isContentPrepared`와 `isContentEnd` 검사를 유지하세요. `setIgnoreAdBreakInPIPMode(false)`인 경우 광고 플레이어와 본편 플레이어 어댑터가 앱의 player를 함께 사용하므로, 광고 실패 1건이 두 번 보고될 수 있습니다.
+같은 Ad Break에 대해 `onCompleted()`도 호출될 수 있으며, `onError()`보다 먼저 올 수도 나중에 올 수도 있습니다. 본편이 두 번 로드되지 않도록 `isContentPrepared`와 `isContentEnd` 검사를 유지하세요. `setIgnoreAdBreakInPIPMode(false)`인 경우 실패 1건에 대해 `onError()`가 두 번 호출될 수 있습니다.
 :::
 
 ### 3. 플레이어 전달 – `MediaPlayerHook`
@@ -191,7 +192,7 @@ VOD 콘텐츠를 재개할 때 사용하는 API입니다. 매개변수는 없습
 
 기본 설정(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`)에서 SDK는 프리롤을 위해 본편을 일시정지하지 않습니다. `requestVodAd(...)` 직후에 VOD 소스를 로드하면 프리롤 광고 아래에서 본편이 소리와 함께 실제로 재생됩니다.
 
-SDK는 프리롤이 없거나, 광고가 송출되지 않거나, 광고 요청이 실패한 경우에도 `onCompleted()`를 호출하므로 본편은 항상 이 콜백에서 시작됩니다. 본편이 준비된 이후에는 `onCompleted()`에서 본편을 로드, 재생, 일시정지, 탐색(seek)하지 마세요. mid-roll 이후에는 SDK가 본편을 직접 재개합니다. `onError()`에서도 본편을 로드, 일시정지, 탐색하지 마세요. SDK가 이미 본편을 되돌려 놓았습니다. 예외는 `playback unrecoverable`로, 이때는 본편을 다시 로드하거나 오류를 표시하세요.
+SDK는 프리롤이 없거나, 광고가 송출되지 않거나, 광고 요청이 실패한 경우에도 `onCompleted()`를 호출하므로 본편은 항상 이 콜백에서 시작됩니다. 본편이 준비된 이후에는 `onCompleted()`에서 본편을 로드, 재생, 일시정지, 탐색(seek)하지 마세요. mid-roll 이후에는 SDK가 본편을 직접 재개하기 때문입니다. `onError()`에서도 본편을 로드, 일시정지, 탐색하지 말고, 위의 [`onError()`](#2-광고-이벤트-수신--floweradsmanagerlistener) 설명대로 처리하세요.
 :::
 
 ### _HLS.js_

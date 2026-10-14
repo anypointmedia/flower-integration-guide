@@ -22,7 +22,7 @@ sidebar_label: "실시간 채널 / FAST"
 | channelStreamHeaders | map | (Optional) 원본 스트림 요청 시 추가할 HTTP 헤더 정보 |
 | prerollAdTagUrl | string | (Optional) 광고 서버에서 발급된 프리롤용 광고 태그 URL |
 
-`prerollAdTagUrl`을 설정하면 SDK는 라이브 스트림보다 먼저 한 번 재생되는 채널 프리롤을 요청하고, SDK 자체 광고 플레이어에서 재생합니다. 이 메서드는 그래도 스트림 URL을 바로 반환하므로, 반환된 URL은 프리롤이 끝난 뒤(임시 리스너의 첫 번째 `onCompleted` 또는 `onError`)에 플레이어에 로드하세요. 프리롤 광고가 없거나, 요청이 실패하거나, 프리롤을 재생할 수 없는 경우에도 SDK는 `onCompleted`를 호출합니다. 호출할 때마다 아직 재생 중인 프리롤을 포함해 이전 세션이 중지되므로, 채널을 전환하면 새 채널의 프리롤이 요청됩니다. SDK는 마지막으로 진입한 채널(`channelId`)을 기억하며, `onError` 후 재시작처럼 같은 `channelId`로 `changeChannelUrl`이 다시 호출되면 `prerollAdTagUrl`이 전달되어도 프리롤을 건너뛰고 메서드가 반환된 직후 `onCompleted`를 호출합니다. 따라서 재시작할 때도 `prerollAdTagUrl`을 포함해 처음 시작할 때와 같은 매개변수를 전달하고, 반환된 URL도 같은 방식으로 보류합니다. `stop()`은 기억한 채널을 지우지 않으며, `requestVodAd`와 `requestAd`가 지웁니다. [프리롤 광고](../ad-insertion/linear-tv-fast/manual-player-control#프리롤-광고)를 참고하세요.
+`prerollAdTagUrl`을 설정하면 SDK는 라이브 스트림보다 먼저 한 번 재생되는 채널 프리롤을 요청하고, SDK 자체 광고 플레이어에서 재생합니다. 이 메서드는 그래도 스트림 URL을 바로 반환하므로, 반환된 URL은 프리롤이 끝난 뒤(임시 리스너의 첫 번째 `onCompleted` 또는 `onError`)에 플레이어에 로드하세요. 프리롤 광고가 없거나, 요청이 실패하거나, 프리롤을 재생할 수 없는 경우에도 SDK는 `onCompleted`를 호출합니다. 호출할 때마다 아직 재생 중인 프리롤을 포함해 이전 세션이 중지되므로, 채널을 전환하면 새 채널의 프리롤이 요청됩니다. 채널 변경이 없으면 프리롤을 생략합니다. `onError` 후 재시작처럼 채널 변경 없이 `changeChannelUrl`을 다시 호출하면 `prerollAdTagUrl`이 전달되어도 프리롤을 생략하고 메서드가 반환된 직후 `onCompleted`를 호출합니다. 따라서 재시작할 때도 `prerollAdTagUrl`을 포함해 처음 시작할 때와 같은 매개변수를 전달하고, 반환된 URL도 같은 방식으로 보류합니다. [프리롤 광고](../ad-insertion/linear-tv-fast/manual-player-control#프리롤-광고)를 참고하세요.
 
 ### FlowerAdsManager.changeChannelExtraParams
 

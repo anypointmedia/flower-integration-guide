@@ -78,7 +78,7 @@ Tells the SDK the user left the app (`true`) — to the home screen, to another 
 | ---| ---| --- |
 | hasLeftApp | boolean | `true` when the user leaves the app, `false` when the user comes back |
 
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -98,7 +98,7 @@ Selects how ads are played. App-wide, not per `nativeId`. Call it before request
 function stop(nativeId: string): Promise<void>;
 ```
 
-Stops the ads manager of `nativeId`. This ends the current ad break and the ad session:
+Ends the ad session of `nativeId`, along with the current ad break:
 
 *   **Linear TV / FAST**: the local proxy is shut down, so the proxy URL stops serving and no later break plays. To keep playing the channel, call [`changeChannelUrl`](./linear-channels-fast.md#changechannelurl) again and play the new proxy URL.
 *   **VOD**: the content keeps playing from its own URL, but no later break (mid-roll, post-roll) plays until a new [`requestVodAd`](./vod.md).

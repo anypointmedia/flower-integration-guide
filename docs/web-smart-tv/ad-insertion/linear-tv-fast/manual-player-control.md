@@ -43,8 +43,7 @@ const adsManagerListener = {
         // (Optional) Count restarts and stop retrying after a few attempts so a broken channel does not loop.
         flowerAdView.adsManager.stop();
         releasePlayer(); // e.g. hls.destroy() for HLS.js, player.unload() for Bitmovin
-        // Start the channel exactly as the first time, prerollAdTagUrl included:
-        // the SDK skips the pre-roll of the channel entered last.
+        // Start the channel exactly as the first time, prerollAdTagUrl included.
         playLinearTv();  // new changeChannelUrl() -> load the returned URL -> play
     },
 
@@ -56,9 +55,9 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 ```
 
 :::info Recovering from `onError()`
-When `onError()` is called, stop the ads manager with `flowerAdView.adsManager.stop()`, release the player, and start the channel again: call `changeChannelUrl()` again, load the URL it returns, and play it. Do not reuse the URL returned before the error. Pass exactly the same parameters as the first start, including `prerollAdTagUrl`, and handle the returned URL the same way as the first start. The viewer does not see the pre-roll again: the SDK skips the pre-roll when `changeChannelUrl()` is called for the same channel (`channelId`) it entered last, and calls `onCompleted()` right after `changeChannelUrl()` returns, as when there is no pre-roll ad. See [Pre-roll Ads](#pre-roll-ads).
+When `onError()` is called, stop the ads manager with `flowerAdView.adsManager.stop()`, release the player, and start the channel again: call `changeChannelUrl()` again, load the URL it returns, and play it. Do not reuse the URL returned before the error. Pass exactly the same parameters as the first start, including `prerollAdTagUrl`, and handle the returned URL the same way as the first start. The viewer does not see the pre-roll again; see [Pre-roll Ads](#pre-roll-ads).
 
-`onError()` is also called once per incident when the channel stream stops on a fatal player error (for example, a fatal `hlsError` from HLS.js), with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`. Restart the channel in the same way, ideally with a fresh channel URL.
+When content playback stops and the SDK cannot recover it, `onError()` is called with a message starting with `playback unrecoverable`. Restart the channel in the same way.
 
 `stop()` ends any ad break in progress, and the SDK can still call `onCompleted()` for that break after the restart has begun. Keep `onCompleted()` limited to UI work such as showing the player controls, and never start or reload playback from it, so this late call cannot start a second restart.
 :::
@@ -135,11 +134,11 @@ A channel pre-roll is an ad that plays once when the viewer enters a channel, be
 
 **Holding the stream:** When `prerollAdTagUrl` is set, do not load the returned URL right away. Store it, remove the main `FlowerAdsManagerListener`, and register a temporary listener. On the temporary listener's first `onCompleted()` (or `onError()`), load and play the stored URL, remove the temporary listener, and register the main listener again. This keeps the stream from flashing on screen before the pre-roll and from loading at the same time as the ad. Without `prerollAdTagUrl`, load the returned URL and call `play()` right away. The [example below](#linear-channel-ad-request-example) shows both paths.
 
-**No ad and failures:** The SDK also calls `onCompleted()` when there is no pre-roll ad, the ad request fails, or the pre-roll fails to play; a failed pre-roll is not reported through `onError()`. So the stream always starts. The temporary listener's `onError()` only starts the stream and restores the main listener; it does not call `stop()`, because there is no channel stream or linear ad break to stop yet.
+**No ad and failures:** The SDK also calls `onCompleted()` when there is no pre-roll ad, the ad request fails, or the pre-roll fails to play; a failed pre-roll is not reported through `onError()`. So the stream always starts. The temporary listener's `onError()` only starts the stream and restores the main listener. Do not call `stop()` there, because there is no channel stream or linear ad break to stop yet.
 
-**Restart after `onError()`:** The SDK remembers the channel (`channelId`) entered last through `changeChannelUrl()`. When `changeChannelUrl()` is called again with that same `channelId`, the SDK skips the pre-roll even if `prerollAdTagUrl` is passed, and calls `onCompleted()` right after `changeChannelUrl()` returns, as when there is no pre-roll ad. So a restart passes the same parameters as the first start, including `prerollAdTagUrl`, and holds the stream in the same way: the temporary listener's `onCompleted()` starts it at once. `stop()` does not clear the remembered channel.
+**Restart after `onError()`:** A restart passes the same parameters as the first start, including `prerollAdTagUrl`, and holds the stream in the same way. The pre-roll is not shown again: if the channel has not changed, the pre-roll is skipped (also after `stop()`), and the SDK calls `onCompleted()` right after `changeChannelUrl()` returns, so the temporary listener's `onCompleted()` starts the stream at once.
 
-**Channel change:** The first start of a channel and a switch to another channel use the pre-roll as configured. `changeChannelUrl()` for the next channel stops the current session, including a pre-roll still in progress, and requests the new channel's pre-roll. Coming back to a channel after another channel (A → B → A) plays A's pre-roll again. Entering the channel entered last once more (for example, after leaving the channel screen with `stop()`) skips its pre-roll, unless `requestVodAd()` or `requestAd()` was called in between. The stopped pre-roll does not call the temporary listener, so remove the previous temporary listener (and register the main listener again) before the new call, as the example does. Remove it as well before `stop()` when the viewer leaves the channel screen.
+**Channel change:** The first start of a channel and a switch to another channel use the pre-roll as configured. `changeChannelUrl()` for the next channel stops the current session, including a pre-roll still in progress, and requests the new channel's pre-roll. Coming back to a channel after another channel (A → B → A) plays A's pre-roll again. The stopped pre-roll does not call the temporary listener, so remove the previous temporary listener (and register the main listener again) before the new call, as the example does. Remove it as well before `stop()` when the viewer leaves the channel screen.
 
 **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the user leaves the app and resumed when the user comes back, like VOD ads. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
 
@@ -181,7 +180,6 @@ function playLinearTv() {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    // Pass it on a restart too: the SDK skips the pre-roll of the channel entered last.
     const prerollAdTagUrl = 'https://ad_request?target=preroll';
 
     const changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(

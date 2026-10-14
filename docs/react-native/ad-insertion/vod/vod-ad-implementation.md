@@ -6,11 +6,11 @@ sidebar_position: 1
 
 VOD ads are requested with `requestVodAd()`. Nothing is rewritten here — the content keeps playing from its own URL, and each break arrives as a `prepare` event, which is where the app calls `play()`.
 
-Around the content itself, the app has exactly two jobs: **hold it before it first starts**, and **leave it alone after that** — including when a break fails.
+Around the content itself, the app has exactly two jobs: **hold it before it first starts**, and **leave it alone after that** — apart from a safety-net resume when a mid-roll fails.
 
 *   **Before the first start.** The SDK does not pause the content for a pre-roll. Mount the `<Video>` paused, request the ads from `onLoad`, and start the content on the first `completed` or `error`. The SDK sends `completed` even when there is no pre-roll, the ad response is empty or the request fails, so the content always gets started.
 *   **After the content has started.** By default ([`setIgnoreAdBreakInPIPMode`](../../getting-started/pip-mode-support.md) `true`), a break plays on the SDK's own ad player, layered over your `<Video>`. For a mid-roll, the SDK pauses the content itself, and at `completed` (or `error`) seeks it back by the rewind duration (5 seconds) and resumes it. After a post-roll the content has ended, so it is not resumed. **Do not pause, seek or re-source the content once it has started.**
-*   **On `error` after the content has started.** Log it. When a break fails, the SDK brings the content back before it emits `error`, so a failed mid-roll finds the content already playing again: no resume, no seek, no source change. If the content has ended (a post-roll failed), there is nothing to do either. The exception is an `error` whose message starts with `playback unrecoverable` — the content itself stopped. See [Handling `error`](#handling-error).
+*   **On `error` after the content has started.** Log it. After a failed mid-roll the SDK has already brought the content back; do not stop, seek or re-source it, but resume it as a safety net (`videoRef.current?.resume()`, harmless if it is already playing). If the content has ended (a post-roll failed), there is nothing to resume. The exception is an `error` whose message starts with `playback unrecoverable` — the content itself stopped. See [Handling `error`](#handling-error).
 
 ## The Break Lifecycle
 
@@ -98,8 +98,11 @@ export function VodPlayer({
         } else if (event.message?.startsWith('playback unrecoverable')) {
           // The content itself stopped and the SDK will not recover it:
           // reload the content or show an error.
+        } else if (!contentEnded.current) {
+          // Mid-roll failed: the SDK has normally brought the content back already.
+          // Resume as a safety net (harmless if already playing). No seek, no source change.
+          videoRef.current?.resume();
         }
-        // Mid-roll failed: the SDK has already resumed the content. No resume, no seek, no source change.
         // Post-roll failed: the content has ended, there is nothing to resume.
       }
     });
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
 :::caution Hold the content before it starts — never after
 The SDK does not hold the content for a pre-roll. Mounted without `paused`, the content plays underneath the pre-roll and both soundtracks are heard at once. Hold it, as above, until the first `completed` or `error`.
 
-Once the content has started, do not drive the `paused` prop (or a Bitmovin player's `pause()`, `seek()` or `load()`) from `prepare`, `play`, `completed` or `error`. The SDK owns those moments: it pauses the content for a mid-roll and, at `completed`, rewinds and resumes it. This holds for `playerType: 'bitmovin'` on iOS too, where the SDK pauses and resumes the content through the Bitmovin player. A failed break needs nothing from the app either — see [below](#handling-error).
+Once the content has started, do not drive the `paused` prop (or a Bitmovin player's `pause()`, `seek()` or `load()`) from `prepare`, `play`, `completed` or `error`. The SDK owns those moments: it pauses the content for a mid-roll and, at `completed`, rewinds and resumes it. This holds for `playerType: 'bitmovin'` on iOS too, where the SDK pauses and resumes the content through the Bitmovin player. The one exception is a failed mid-roll, where the app resumes the content as a safety net — see [below](#handling-error).
 
 With `setIgnoreAdBreakInPIPMode(false)`, the break plays on the player the SDK took over from `<Video nativeID={nativeId}>`. A pause written around `play()` after the content has started can then land on the player the ad is now playing on, which freezes the ad, withholds `completed` and never hands the content back. See [PIP Mode Support](../../getting-started/pip-mode-support.md) for this mode.
 :::
@@ -176,23 +179,23 @@ With `setIgnoreAdBreakInPIPMode(false)`, the break plays on the player the SDK t
 For VOD, `error` arrives when:
 
 *   **An ad fails to play** in a pre-, mid- or post-roll — its media cannot be decoded or cannot be reached.
-*   **The content stops and the SDK will not recover it.** The message starts with `playback unrecoverable`. This comes from the native player adapters, sent once per incident; a new incident starts once playback runs again. On iOS with `playerType: 'bitmovin'`, the app-side Bitmovin adapter does not report it.
-*   **On Android, the SDK's local proxy server fails to respond.** VOD ad media is cached through it.
+*   **Content playback stops and the SDK cannot recover it.** The message starts with `playback unrecoverable`. Not reported on iOS with `playerType: 'bitmovin'`.
+*   **On Android, an internal SDK error occurs.**
 
 A VMAP/VAST request that fails or times out, or a break with no ads, is not an `error`: it ends with `completed` (with no ads, `adBreakSkipped` with reason `1` comes first).
 
-When a break fails on an ad, the SDK first stops the ad and brings the content back itself, and only then emits `error`. By default it resumes the content it paused for the mid-roll, the rewind duration before where the break interrupted it. With `setIgnoreAdBreakInPIPMode(false)`, the ad player drops the failed ad and puts the content back into the player it took over from `<Video>`, at that same position, and plays it. So what the app does on `error` depends only on where the content is:
+When a break fails on an ad, in both modes the SDK brings the content back (rewound, playing) before it emits `error`. So what the app does on `error` depends only on where the content is:
 
 | Content | What failed | What the app does |
 | ---| ---| --- |
 | Not started yet | Pre-roll | Start the held content, as on `completed` |
-| Started, not ended | Mid-roll | Nothing — the content is already playing again. No resume, no seek, no source change. |
+| Started, not ended | Mid-roll | Resume the content as a safety net — `videoRef.current?.resume()` (Bitmovin: `player.play()`), harmless if it is already playing. No stop, no seek, no source change. |
 | Ended (`onEnd` fired) | Post-roll | Nothing — playback is over |
 | Stopped | The content itself (`playback unrecoverable`) | Reload the content or show an error |
 
 Track the end with a ref set from `onEnd`, as in the example above, before calling `notifyContentEnded()`.
 
-A failed break may also report `completed`, before or after the `error`. Keep both branches safe to run for the same break — as `startContent()` is above. With `setIgnoreAdBreakInPIPMode(false)` the ad player and the content player adapter share the player, so one ad failure can surface as two `error` events.
+A failed break may also report `completed`, before or after the `error`. Keep both branches safe to run for the same break — as `startContent()` is above. With `setIgnoreAdBreakInPIPMode(false)` one ad failure can surface as two `error` events.
 
 ## Pre-roll, Mid-roll and Post-roll
 
@@ -201,7 +204,7 @@ The break positions come from the ad response, placed against the `durationMs` y
 | Break | Trigger |
 | ---| --- |
 | Pre-roll | A `prepare` event shortly after `requestVodAd()` resolves, while the app still holds the content |
-| Mid-roll | A `prepare` event when playback reaches the break position (the ad itself is requested about 10 seconds earlier) |
+| Mid-roll | A `prepare` event when playback reaches the break position |
 | Post-roll | A `prepare` event after you call `notifyContentEnded()` |
 
 When the ad response has no pre-roll — or no breaks at all, or the request fails — no `prepare` arrives before the content. The SDK sends `completed` instead, which is what starts the held content.

@@ -25,7 +25,7 @@ VOD 콘텐츠에 광고를 삽입할 때, 광고 재생 시작/종료 시점에 
 Flower Player는 프리롤이 끝나면 콘텐츠를 직접 시작하며, 미드롤 전후의 콘텐츠 일시정지와 재개는 SDK가 처리합니다. 광고가 실패하면(`onError`) 콘텐츠 상태에 따라 다음과 같이 처리하세요:
 
 *   **프리롤 오류** (콘텐츠가 시작되지 않음): Flower Player는 콘텐츠를 직접 시작하지 않습니다. 광고 없이 콘텐츠를 시작하세요.
-*   **미드롤 오류** (콘텐츠가 끝나지 않음): 할 일이 없습니다. SDK는 `onError`를 호출하기 전에 미드롤이 콘텐츠를 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치로 콘텐츠를 되돌려 놓으므로, 콘텐츠는 이미 다시 재생 중입니다. 정지, 탐색(seek), 재로드하지 마세요.
+*   **미드롤 오류** (콘텐츠가 끝나지 않음): SDK는 `onError`를 호출하기 전에 미드롤이 콘텐츠를 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치로 콘텐츠를 되돌려 놓으므로, 콘텐츠는 보통 이미 다시 재생 중입니다. 정지, 탐색(seek), 재로드하지 마세요. 안전장치로 `player.play()`를 호출하세요. 이미 재생 중이어도 문제가 없습니다.
 *   **포스트롤 오류** (콘텐츠가 끝남): 재개하지 마세요. 재생 종료 시나리오를 실행하세요.
 *   **콘텐츠 재생 오류** (메시지가 `playback unrecoverable`로 시작): 콘텐츠 재생이 중단되었고 SDK가 복구하지 않습니다. 콘텐츠를 다시 로드하거나 사용자에게 오류를 표시하세요. 이 오류가 보고되는 경우는 [VOD 광고 적용](./vod-ad-implementation)을 참고하세요.
 
@@ -74,9 +74,11 @@ val adsManagerListener = object : FlowerAdsManagerListener {
             } else if (isContentEnd) {
                 // TODO GUIDE: a post-roll failed - VOD playback is fully done. Do not resume.
                 //             Run your end-of-playback actions.
+            } else {
+                // NOTE: a mid-roll failed - the content is normally already playing again.
+                //       Do not stop, seek, or reload it. Resuming is a harmless safety net.
+                player.play()
             }
-            // NOTE: a mid-roll failed - the SDK has already resumed the content.
-            //       Do not stop, seek, or reload it.
         }
     }
 

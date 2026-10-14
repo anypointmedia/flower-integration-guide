@@ -45,11 +45,7 @@ HOW THE SDK BEHAVES IN THIS CASE
     react-native-video on Android and iOS, and Bitmovin on Android.
   The SDK pauses that player, puts the ads in front of the content, plays them, and at
   the end of the break puts the content back at the interrupted position minus 5 seconds
-  as a NEW player item:
-    - react-native-video on iOS: a new AVPlayerItem built from the content url
-    - react-native-video on Android: the original media item again, clipped to start at
-      the resume point
-    - Bitmovin on Android: the original source loaded again with a start offset
+  as a NEW player item.
 - Bitmovin on iOS ignores this setting: its VOD breaks always play on the SDK's own ad
   player, exactly as in the default mode.
 - Inline breaks (requestAd) always play on the SDK's own ad player, in every mode.
@@ -59,11 +55,10 @@ HOW THE SDK BEHAVES IN THIS CASE
 - A pause, seek or source change made by the app while a break runs lands on the player
   the AD is now playing on: the ad freezes, 'completed' never arrives, the content is
   never handed back, and only stop()/release() recover.
-- When a break FAILS, the SDK returns the player to the content (rewound, playing)
-  natively BEFORE it emits 'error', and the event reaches JS asynchronously. So the
-  app's resume on a mid-roll 'error' (videoRef.current?.resume() / Bitmovin
-  player.play()) lands on the content, not on an ad, and is a safety net that normally
-  changes nothing. It never pauses, seeks or re-sources.
+- When a break FAILS, the content is already back and playing when 'error' arrives. So
+  the app's resume on a mid-roll 'error' (videoRef.current?.resume() / Bitmovin
+  player.play()) lands on the content, not on an ad, and is a harmless safety net. It
+  never pauses, seeks or re-sources.
 
 Consequences for the app (react-native-video):
 - iOS: onEnd does NOT fire after a break, because react-native-video's observers are
@@ -152,9 +147,10 @@ not the app enters PIP:
     return () => subscription.remove();
   }, []);
 
-  If the app already reports PIP with the deprecated notifyPictureInPictureModeChanged,
-  replace those calls with this subscription. Same for every player, Bitmovin on Android
-  included.
+  notifyPictureInPictureModeChanged is deprecated and replaced by notifyUserLeftApp.
+  Existing calls keep working. If the app already reports PIP with
+  notifyPictureInPictureModeChanged, replace those calls with this subscription. Same
+  for every player, Bitmovin on Android included.
   Ads keep playing in PIP in this mode, so the content player may enter PIP during a
   break (enterPictureInPictureOnLeave need not be turned off for ads).
   Bitmovin on iOS: breaks still play on the SDK's ad player, so follow the default-mode

@@ -26,7 +26,7 @@ A channel component that:
   - hands the player to the SDK with changeChannelUrl(..., playerType: 'bitmovin'),
   - loads and plays the proxy url the SDK returns,
   - optionally plays a channel pre-roll first, and releases the session on unmount,
-  - on an ad 'error', stops the ads manager and starts the channel over.
+  - on an ad 'error', ends the ad session and starts the channel over.
 
 ========================================
 PARAMETERS
@@ -60,19 +60,13 @@ HOW THE SDK BEHAVES IN THIS CASE
 - By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses when the
   user leaves the app and resumes on return, like a VOD ad, if the app reports both
   moments with notifyUserLeftApp() on Android and iOS (see the PIP prompt).
-- An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
-  playlist it failed to manipulate). The recovery is a restart: await stop(nativeId) -
-  it stops the ads manager but, unlike release(), keeps the overlay and the
-  subscription - then call changeChannelUrl() again with exactly the same params
-  (prerollAdTagUrl included) and handle the NEW proxy url it returns as on the first
-  start: load it and play it from onReady as usual.
-- The SDK remembers the channel (channelId) entered last. changeChannelUrl() for that
-  same channel skips the pre-roll even with prerollAdTagUrl, and sends 'completed' right
-  after the call resolves, like a pre-roll with no ad. So a restart does not show the
-  pre-roll again, and a proxy url held until 'completed' plays exactly as on the first
-  start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear
-  it. It is one channel for the whole app, not one per id (A -> B -> A plays A's
-  pre-roll again).
+- An 'error' on a channel means the SDK could not keep its ads in the stream. The
+  recovery is a restart: await stop(nativeId) - it ends the ad session but, unlike
+  release(), keeps the overlay and the subscription - then call changeChannelUrl()
+  again with exactly the same params (prerollAdTagUrl included) and handle the NEW
+  proxy url it returns as on the first start: load it and play it from onReady as usual.
+- If the channel has not changed, the pre-roll is skipped, so a restart does not show it
+  again: 'completed' arrives right after the call resolves, so a proxy url held until 'completed' plays exactly as on the first start.
 - stop() ends any break in progress, and that break may still report 'completed' after
   the 'error', even after stop() resolved. The 'completed' handling must be idempotent.
 - Bitmovin does not autoplay by default, and player.play() before a source is ready is a
@@ -174,8 +168,8 @@ Step 2 — Load whichever url is current, and play whenever a source is ready
 
 Step 3 — Start the channel: the first handover from onReady (once), and the restart
 
-  // The same call for the first start and for every restart. On a restart the SDK skips
-  // the pre-roll of the channel entered last and sends 'completed' right away, so the
+  // The same call for the first start and for every restart. A restart does not change
+  // the channel, so the pre-roll is skipped: 'completed' arrives right away and the
   // held proxy url plays exactly as on the first start.
   const startChannel = useCallback(async () => {
     const proxyUrl = await changeChannelUrl(nativeId, {
@@ -206,7 +200,7 @@ Step 3 — Start the channel: the first handover from onReady (once), and the re
     }
   }, [startChannel]);
 
-  // On 'error': stop the ads manager, then start the channel over with a NEW
+  // On 'error': end the ad session, then start the channel over with a NEW
   // changeChannelUrl() and its NEW proxy url. Never release() here.
   const restartChannel = useCallback(async () => {
     if (restarting.current || restarts.current >= MAX_RESTARTS) return;
@@ -306,8 +300,9 @@ Android and iOS each:
    play again on the restart and the new proxy url is loaded from the 'completed' that
    follows right away. After MAX_RESTARTS it stops restarting.
 6. Unmount: release() is called and no overlay remains.
-Known limit: on iOS a Bitmovin DASH break cannot use deferred ad start and plays the next
-item plainly; HLS is unaffected.
+Known limit: on iOS, with a DASH stream, a replacement ad may play for a second or two
+and then restart from its beginning; HLS is unaffected. This is an SDK-side limit, not
+something the app can fix.
 
 ========================================
 OUTPUT

@@ -10,7 +10,7 @@ The SDK provides the following two options related to PIP (Picture-in-Picture) m
 
 Notifies the SDK when the user leaves the app (`true`): to the home screen, to another app, or the app's video moved to a PIP window. Notifies the SDK when the user comes back to the app (`false`).
 
-`FlowerSdk.notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working: it passes the same value to `notifyUserLeftApp`.
+`FlowerSdk.notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -33,7 +33,7 @@ Ads are not supported in PIP mode by default. Therefore, the app must notify the
 
 Because the content player does not go into PIP while an ad is playing, PIP callbacks (such as `AVPictureInPictureControllerDelegate`) are not called when the user leaves during an ad. Report the user leaving from the app lifecycle instead: call `notifyUserLeftApp(true)` when the app goes to the background, and `notifyUserLeftApp(false)` when it comes back to the foreground.
 
-*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI.
 *   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
 *   While the user is away from the app, Mid-roll and Post-roll Ad Breaks are not requested.
 *   Linear TV ads inserted into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
@@ -136,7 +136,7 @@ The following players play ads inside the app's player in this mode. Other playe
 
 1. When an ad break starts, the SDK replaces the player's current item with the ad items (with AVQueuePlayer, it queues them in front of the content), and the player moves to the ads.
 2. When the ad break ends, the SDK puts the content back as a **new `AVPlayerItem`** built from the content URL, at the resume point: the interrupted position minus `rewindDuration` (5 seconds; configurable through `FlowerVodAdConfig` only when using `FlowerAVPlayer`).
-3. When an ad fails to play, the SDK drops the failed ad and puts the content back in the same way (new `AVPlayerItem`s built from the content URL, at the resume point) and plays it, before it calls `onError`. As in the default mode, do not stop, seek, or reload the content in `onError`. See [When `onError` is called](./vod-ad-implementation#when-onerror-is-called).
+3. When an ad fails, the SDK puts the content back as in step 2 before it calls `onError`. As in the default mode, do not stop, seek, or reload the content in `onError`; after a mid-roll error, call `player.play()` as a safety net. See [When `onError` is called](./vod-ad-implementation#when-onerror-is-called).
 
 :::caution Item-level settings are not carried over
 The `AVPlayerItem` the SDK puts back is created from the content URL only. Settings the app applied to its own item are not carried over, for example:

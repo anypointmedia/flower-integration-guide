@@ -15,7 +15,7 @@ FlowerSdk.notifyUserLeftApp(hasLeftApp: Boolean)
 Pass `true` when the user leaves the app (to the home screen, to another app, or when the app's video moves to a PIP window), and `false` when the user comes back to the app. Report it whether or not the app enters PIP.
 
 :::note
-`FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working, as it passes the same value to `notifyUserLeftApp`.
+`notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working.
 :::
 
 Ads are not supported in PIP mode by default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`). When the user leaves the app while an ad is playing, the SDK pauses the ad, and resumes it when the user comes back. This works only if the app reports both leaving and returning, because the SDK does not detect this by itself. In addition, while an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. This is why the app reports the user leaving the app, not entering PIP: while an ad is playing, the app does not enter PIP at all. See [VOD PIP Mode Support](../ad-insertion/vod/pip-mode-support) for details and for supporting ads in PIP mode.

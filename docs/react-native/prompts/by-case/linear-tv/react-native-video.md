@@ -25,7 +25,7 @@ A channel player component that:
   - hands the player to the SDK with changeChannelUrl() once it exists,
   - swaps the source to the local proxy url the SDK returns,
   - optionally plays a channel pre-roll first,
-  - on an ad 'error', stops the ads manager and starts the channel over,
+  - on an ad 'error', ends the ad session and starts the channel over,
   - releases the session on unmount.
 Ad breaks are spliced into the stream and play by themselves.
 
@@ -51,7 +51,7 @@ HOW THE SDK BEHAVES IN THIS CASE
 - The SDK needs the REAL player instance. react-native-video only builds it once a
   source is set, so the flow is two-phase: mount on the original url, wait for onLoad,
   call changeChannelUrl(), then swap <Video source> to the returned proxy url.
-- Swapping the source does NOT rebuild the player, so the SDK's listeners stay valid.
+- Swapping the source does NOT rebuild the player.
 - onLoad fires AGAIN after the swap. The handover must be guarded so it runs once.
 - The SDK starts every linear break itself, scheduled by the cue in the stream. The app
   never calls play() for a linear break and never pauses the content for one.
@@ -64,19 +64,13 @@ HOW THE SDK BEHAVES IN THIS CASE
 - By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses when the
   user leaves the app and resumes on return, like a VOD ad, if the app reports both
   moments with notifyUserLeftApp() (see the PIP prompt).
-- An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
-  playlist it failed to manipulate), which can leave the player on a broken stream. The
-  recovery is a restart: await stop(nativeId) - it stops the ads manager but, unlike
-  release(), keeps the overlay and the subscription - then call changeChannelUrl() again
-  with exactly the same params (prerollAdTagUrl included) and handle the NEW proxy url it
-  returns as on the first start.
-- The SDK remembers the channel (channelId) entered last. changeChannelUrl() for that
-  same channel skips the pre-roll even with prerollAdTagUrl, and sends 'completed' right
-  after the call resolves, like a pre-roll with no ad. So a restart does not show the
-  pre-roll again, and a proxy url held until 'completed' plays exactly as on the first
-  start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear
-  it. It is one channel for the whole app, not one per nativeID (A -> B -> A plays A's
-  pre-roll again).
+- An 'error' on a channel means the SDK could not keep its ads in the stream, which can
+  leave the player on a broken stream. The recovery is a restart: await stop(nativeId) -
+  it ends the ad session but, unlike release(), keeps the overlay and the subscription
+  - then call changeChannelUrl() again with exactly the same params (prerollAdTagUrl
+  included) and handle the NEW proxy url it returns as on the first start.
+- If the channel has not changed, the pre-roll is skipped, so a restart does not show it
+  again: 'completed' arrives right after the call resolves, so a proxy url held until 'completed' plays exactly as on the first start.
 - stop() ends any break in progress, and that break may still report 'completed' after
   the 'error', even after stop() resolved. The 'completed' handling must be idempotent.
 - All SDK state is keyed by nativeID, and every ad event carries it back. Several
@@ -150,8 +144,8 @@ Step 1 — Component skeleton and imports
 
 Step 2 — Start the channel: the first handover from onLoad (guarded), and the restart
 
-  // The same call for the first start and for every restart. On a restart the SDK skips
-  // the pre-roll of the channel entered last and sends 'completed' right away, so the
+  // The same call for the first start and for every restart. A restart does not change
+  // the channel, so the pre-roll is skipped: 'completed' arrives right away and the
   // held proxy url plays exactly as on the first start.
   const startChannel = useCallback(async () => {
     const proxyUrl = await changeChannelUrl(nativeId, {
@@ -181,7 +175,7 @@ Step 2 — Start the channel: the first handover from onLoad (guarded), and the 
     }
   }, [startChannel]);
 
-  // On 'error': stop the ads manager, then start the channel over with a NEW
+  // On 'error': end the ad session, then start the channel over with a NEW
   // changeChannelUrl() and its NEW proxy url. Never release() here.
   const restartChannel = useCallback(async () => {
     if (restarting.current || restarts.current >= MAX_RESTARTS) return;

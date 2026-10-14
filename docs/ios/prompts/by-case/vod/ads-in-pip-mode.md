@@ -46,10 +46,8 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Not carried over to the new item: AVURLAsset options (HTTP headers, cookies), resourceLoader
   delegates (FairPlay), preferredForwardBufferDuration / preferredPeakBitRate, selected audio and
   subtitle tracks, and KVO/notification observers registered on the old item.
-- When an ad fails to play, the SDK puts the content back the same way before it calls onError.
-  With AVPlayer it seeks only once the new item is ready, so a player.play() from onError can
-  land before that seek: the content may briefly play from the start of the item before it
-  jumps to the resume point.
+- When an ad fails to play, the SDK puts the content back the same way. In onError the content
+  is normally already playing again; resuming is a harmless safety net.
 - Mid-roll and post-roll breaks are also requested and played while in PIP mode.
 - The first onCompleted/onError still marks the moment to start the content (MediaPlayerHook
   apps): the SDK calls onCompleted also when there is no pre-roll or the request failed.
@@ -91,15 +89,19 @@ IMPLEMENTATION
 
 5. Listener (MediaPlayerHook apps): keep play() in onPrepare and the isContentPrepared start
    logic. After a mid-roll, do nothing in onCompleted. Keep the onError handling: pre-roll
-   error -> start the content; mid-roll error -> player.play() as a safety net (no seek, no
-   reload); post-roll error -> do not resume. FlowerAVPlayer apps keep the onError handling of
-   the FlowerAVPlayer case (pre-roll error -> start the content in a new FlowerAVPlayer once;
-   mid-roll error -> player.play()).
+   error -> start the content; message starting with "playback unrecoverable" (the content
+   stopped and the SDK cannot recover it) -> reload the content or show an error, without
+   player.play(); mid-roll error -> player.play() as a safety net (no seek, no reload);
+   post-roll error -> do not resume. FlowerAVPlayer apps keep the onError handling of the
+   FlowerAVPlayer case (pre-roll error -> start the content in a new FlowerAVPlayer once;
+   "playback unrecoverable" -> reload the content or show an error; mid-roll error ->
+   player.play()).
 
 6. Leaving the app: keep calling FlowerSdk.notifyUserLeftApp(true) when the user leaves the app
    and (false) when the user comes back, from the app lifecycle (didEnterBackground /
-   willEnterForeground, or scenePhase in SwiftUI). If the code still calls the deprecated
-   FlowerSdk.notifyPictureInPictureModeChanged, replace it with notifyUserLeftApp. Remove any
+   willEnterForeground, or scenePhase in SwiftUI). FlowerSdk.notifyPictureInPictureModeChanged
+   is deprecated and replaced by notifyUserLeftApp; existing calls keep working, but replace
+   them here. Remove any
    code that blocks PIP while an ad plays (that belongs to the default mode).
 
 ========================================

@@ -68,7 +68,7 @@ useEffect(() => {
 
 | Function | Effect | Unknown `nativeId` |
 | ---| ---| --- |
-| `stop(nativeId)` | Stops the ads manager: ends the current ad break and the ad session. No later break plays until a new `changeChannelUrl()` / `requestVodAd()` / `requestAd()`, and for Linear TV the proxy URL stops serving. The overlay and the event subscription stay in place. | Ignored — safe to call unconditionally from teardown paths |
+| `stop(nativeId)` | Ends the ad session, along with the current ad break. No later break plays until a new `changeChannelUrl()` / `requestVodAd()` / `requestAd()`, and for Linear TV the proxy URL stops serving. The overlay and the event subscription stay in place. | Ignored — safe to call unconditionally from teardown paths |
 | `release(nativeId)` | Detaches the SDK from that `<Video>` entirely and tears the overlay down. | Ignored |
 
 ## Multiple Players on One Screen

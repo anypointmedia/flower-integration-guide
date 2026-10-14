@@ -64,7 +64,7 @@ export function ChannelPlayer({nativeId, videoUrl, adTagUrl, channelId}: Props) 
     }
   }, [startChannel]);
 
-  // On 'error': stop the ads manager, then start the channel over exactly as the first time.
+  // On 'error': end the ad session, then start the channel over exactly as the first time.
   const restartChannel = useCallback(async () => {
     if (restarting.current || restarts.current >= MAX_RESTARTS) {
       return;
@@ -141,20 +141,16 @@ const styles = StyleSheet.create({
 
 ## Recovering from an Error
 
-An `error` event on a channel means the SDK could not keep its ads in the stream — for one, a playlist it failed to manipulate, which can leave the player sitting on a broken stream. It is also sent, once per incident, when the stream itself stops and the native SDK will not recover it; its message then starts with `playback unrecoverable` (not reported on iOS with `playerType: 'bitmovin'`). Recover by starting the channel over, which is what `restartChannel` above does:
+An `error` event on a channel means the SDK could not keep its ads in the stream, which can leave the player sitting on a broken stream. When content playback stops and the SDK cannot recover it, `error` is sent with a message starting with `playback unrecoverable` (not reported on iOS with `playerType: 'bitmovin'`). On Android, `error` is also sent for an internal SDK error. In every case, recover by starting the channel over, which is what `restartChannel` above does:
 
-1. `await stop(nativeId)` stops the channel's ads manager. Unlike `release()`, it keeps the ad overlay and the event subscription in place, so the restart reuses them.
+1. `await stop(nativeId)` ends the channel's ad session. Unlike `release()`, it keeps the ad overlay and the event subscription in place, so the restart reuses them.
 2. Call `changeChannelUrl(nativeId, ...)` again with exactly the same parameters as the first time, `prerollAdTagUrl` included. It returns a **new** proxy URL.
 3. Set that URL as the `<Video>` source, the same way as on the first start. The player is reused, not rebuilt; `onLoad` fires again, and the `handedOver` guard keeps it from starting a second handover.
 
 `stop()` also ends any break in progress, and that break can still report `completed` — after the `error`, and even after `stop()` has resolved. Keep the `completed` branch idempotent (clear ad UI state, nothing more) so it cannot disturb the restart. `MAX_RESTARTS` is a cheap cap that keeps a channel failing on every start from restarting in a loop; reset the counter in whatever way suits your app, such as on a channel change.
 
 :::note
-A [channel pre-roll](#pre-roll-ads) needs none of this. A pre-roll that fails ends with `completed`, not `error`: the SDK finishes it and resumes the channel itself, so the `completed` handling below already covers it. A restart of a channel that was first started with `prerollAdTagUrl` does not show the viewer the pre-roll again, even though it passes `prerollAdTagUrl`: the SDK remembers the channel (`channelId`) entered last and skips the pre-roll when the same channel is entered again. It then sends `completed` right after `changeChannelUrl()` resolves, the same way as a pre-roll with no ad, so the restart holds the proxy URL until `completed` exactly like the first start.
-:::
-
-:::info
-The SDK forgets that channel only when a VOD or inline ad is requested (`requestVodAd()`, `requestAd()`), not on `stop()` or `initialize()`. Channel A → B → A plays A's pre-roll again, because B was entered last. Entering the channel that was entered last again — a restart, or any other call for the same `channelId` — skips the pre-roll unless a VOD or inline ad was requested in between. The SDK keeps one such channel for the whole app, not one per `nativeId`.
+A [channel pre-roll](#pre-roll-ads) needs none of this. A pre-roll that fails ends with `completed`, not `error`: the SDK finishes it and resumes the channel itself, so the `completed` handling below already covers it. If the channel has not changed, the pre-roll is skipped, so a restart does not show it again; `completed` arrives right after `changeChannelUrl()` resolves, so the same hold-until-`completed` code works.
 :::
 
 ## Targeting and Headers
@@ -229,8 +225,8 @@ const startChannel = useCallback(async () => {
     channelId,
     prerollAdTagUrl,
   });
-  // Held rather than applied — the pre-roll plays first. On a restart the SDK skips the
-  // pre-roll of the channel entered last and sends completed right away.
+  // Held rather than applied — the pre-roll plays first. A restart does not change the
+  // channel, so the SDK skips the pre-roll and sends completed right away.
   proxyUrlRef.current = proxyUrl;
 }, [nativeId, videoUrl, adTagUrl, channelId, prerollAdTagUrl]);
 ```
@@ -239,7 +235,7 @@ The first start and `restartChannel` both call `startChannel()`; the restart cal
 
 ### Channel Switch
 
-Every `changeChannelUrl()` call starts a new session. The SDK first stops the current one — a pre-roll still playing included — and then requests the pre-roll of the channel in the new call. Switching to another channel with its own `prerollAdTagUrl` is therefore a first start again: hold the new proxy URL until `completed`. Omit `prerollAdTagUrl` to switch without a pre-roll, and play the new proxy URL right away. The one exception is the channel entered last: calling `changeChannelUrl()` again for it, as a restart after an `error` does, skips its pre-roll even with `prerollAdTagUrl`, and `completed` follows right away — see [Recovering from an Error](#recovering-from-an-error).
+Every `changeChannelUrl()` call starts a new session. The SDK first stops the current one — a pre-roll still playing included — and then requests the pre-roll of the channel in the new call. Switching to another channel with its own `prerollAdTagUrl` is therefore a first start again: hold the new proxy URL until `completed`. Omit `prerollAdTagUrl` to switch without a pre-roll, and play the new proxy URL right away. For a restart of the same channel, see [Recovering from an Error](#recovering-from-an-error).
 
 ### PIP Mode
 
@@ -251,7 +247,7 @@ With `playerType: 'bitmovin'` the pre-roll works the same way: hold the proxy UR
 
 ## Stopping the Break
 
-`stop(nativeId)` stops the channel's ads manager. It ends any break in progress and ends the ad session as well: the SDK tears down its ad handling and shuts down the local proxy, so the proxy URL the `<Video>` is playing stops serving and no later break plays. The ad overlay and the event subscription stay in place. To keep watching the channel with ads, call `changeChannelUrl()` again and play the new proxy URL it returns.
+`stop(nativeId)` ends the channel's ad session, along with any break in progress: the proxy URL the `<Video>` is playing stops serving and no later break plays. The ad overlay and the event subscription stay in place. To keep watching the channel with ads, call `changeChannelUrl()` again and play the new proxy URL it returns.
 
 ```tsx
 await stop(nativeId);

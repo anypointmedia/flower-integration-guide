@@ -29,12 +29,13 @@ HOW THE SDK BEHAVES IN THIS CASE
    FlowerSdk.notifyUserLeftApp(true) when the user leaves the app (switches to another
    tab or app, the TV app goes to the background, or the video moves to a PIP window) and
    FlowerSdk.notifyUserLeftApp(false) when the user comes back.
-   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated; do not use it.
+   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by
+   notifyUserLeftApp(). Existing calls keep working.
 2. Default mode (FlowerSdk.setIgnoreAdBreakInPIPMode(true), no call needed): VOD ads and
    inline ads play in the SDK's own video element, not in the content video. While the
    user is away:
-   - an ad that is playing is paused and its UI hidden; its progress and quartile
-     tracking stop. When the user comes back it resumes where it stopped and plays to
+   - an ad that is playing is paused and its UI hidden; its progress stops.
+     When the user comes back it resumes where it stopped and plays to
      the end.
    - VOD mid-roll and post-roll ad breaks are not requested. A post-roll skipped this
      way produces no listener callback after notifyContentEnded().
@@ -102,7 +103,8 @@ DO:
 
 DO NOT:
 - Report only PIP enter/exit; the user leaving during an ad does not start PIP.
-- Call the deprecated FlowerSdk.notifyPictureInPictureModeChanged().
+- Add new calls to the deprecated FlowerSdk.notifyPictureInPictureModeChanged(); use
+  notifyUserLeftApp().
 - Pause, resume, seek, or reload the content or the ad because the user left or came
   back; the SDK handles it.
 - Call flowerAdView.adsManager.pause()/resume() when the user leaves or comes back.

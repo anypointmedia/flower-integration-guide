@@ -41,14 +41,13 @@ HOW THE SDK BEHAVES AFTER THE UPGRADE
 - Mid-roll: the ad is requested requestTimeout + minPrepareDuration before its position;
   onPrepare() now arrives when the content REACHES the position. In the default mode the SDK
   pauses the content at onPrepare(), and after the break seeks it back by rewindDuration
-  (5000 ms) and resumes it. The same mid-roll is not played again after the rewind.
-  Flower Players play the ad right on onPrepare() without waiting minPrepareDuration.
+  (5000 ms) and resumes it.
 - Pre-roll: the SDK does not touch the content. onCompleted() (or onError()) always ends the
   pre-roll phase, also when there is no pre-roll or the request fails.
 - Post-roll: requested by notifyContentEnded(); the content is not resumed afterwards.
-- Ad error (onError()): the SDK stops the failed ad and queues its own rewind and resume before
-  it calls onError(). The app still resumes the content on a mid-roll error (no seek, no reload)
-  as a safety net so it never stays paused; on a post-roll error it does not resume.
+- Ad error (onError()): the app resumes the content on a mid-roll error (no seek, no reload);
+  the content is normally already playing again, so resuming is a harmless safety net.
+  On a post-roll error it does not resume.
 - With setIgnoreAdBreakInPIPMode(true), an ad playing when the user leaves the app is paused and
   resumed when the user comes back (the app must report both with FlowerSdk.notifyUserLeftApp(),
   whether or not it enters PIP).
@@ -109,7 +108,8 @@ IMPLEMENTATION — find and fix
      android:visibility="gone". Flower Players add it themselves.
    - PIP: report the user leaving with FlowerSdk.notifyUserLeftApp(true) in onUserLeaveHint()
      before deciding on PIP, and the user returning with FlowerSdk.notifyUserLeftApp(false) in
-     onResume(); replace any call to the deprecated notifyPictureInPictureModeChanged(). Do not
+     onResume(). notifyPictureInPictureModeChanged() is deprecated and replaced by
+     notifyUserLeftApp(); existing calls keep working, but replace them here. Do not
      enter PIP while an ad is playing (track isAdPlaying: true in onPlay, false in
      onCompleted/onError). enterPictureInPictureMode(PictureInPictureParams) requires API 26.
    AD_MODE = ads-in-pip:
@@ -142,7 +142,7 @@ VERIFY
 - Pre-roll: content starts after the pre-roll; no content frame before it.
 - No ad / failed request: content starts.
 - Mid-roll: no double pause, no jump back twice; content resumes about 5 s before the
-  interrupted point exactly once; the same mid-roll does not replay.
+  interrupted point exactly once.
 - Mid-roll ad error: the content resumes (it does not stay paused), with no reload.
 - Post-roll: plays once after the content ends.
 - PIP during an ad (default mode): the ad pauses in PIP and resumes when the app returns.

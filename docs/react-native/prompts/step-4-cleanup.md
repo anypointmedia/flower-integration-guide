@@ -70,8 +70,8 @@ be attached before the ad request is made and removed on unmount.
 PART 4 — stop() vs release()
 ========================================
 
-  stop(nativeId)     -> stops the ads manager: ends the break in progress AND the ad
-                        session. No later break plays until a new changeChannelUrl() /
+  stop(nativeId)     -> ends the ad session, along with the break in progress.
+                        No later break plays until a new changeChannelUrl() /
                         requestVodAd() / requestAd(). For linear-tv the local proxy is shut
                         down, so the proxy url stops serving. The overlay and the event
                         subscription stay in place.

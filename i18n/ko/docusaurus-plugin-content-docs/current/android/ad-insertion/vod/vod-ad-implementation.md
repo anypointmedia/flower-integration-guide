@@ -37,7 +37,7 @@ SDK는 Mid-roll 광고를 미리 요청해 두고, 본편이 Mid-roll 위치에 
 VOD에서 SDK는 다음 경우에 `onError`를 호출합니다.
 - **광고 재생 실패**: 프리롤, Mid-roll, Post-roll의 광고가 로드 또는 재생에 실패한 경우(예: 광고 미디어 디코딩 오류, 광고 미디어에 접근 불가).
 - **SDK가 복구하지 않는 본편 재생 중단**: 아래 "본편을 재생할 수 없는 경우"를 참고하세요.
-- **SDK 로컬 프록시 서버 응답 실패**: VOD 광고 미디어는 이 서버를 거쳐 캐시됩니다.
+- **SDK 내부 오류**
 
 VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 아닙니다. 이때 SDK는 `onCompleted`를 호출합니다(광고가 없으면 `onAdBreakSkipped(1)` 후 `onCompleted`).
 :::
@@ -45,18 +45,16 @@ VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 오류가 
 :::info 실패한 Ad Break의 `onError` 처리
 Ad Break가 실패하면 SDK는 `onError`를 호출하기 **전에** 본편을 되돌려 놓습니다. 따라서 핸들러가 실행되는 시점에는 본편이 이미 다시 재생 중입니다.
 - **프리롤 오류** (`!isContentPrepared`): 본편이 아직 시작되지 않았습니다. 프리롤이 정상 종료된 경우와 같이 VOD 소스를 로드하고 재생을 시작합니다.
-- **Mid-roll 오류**: SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. `setIgnoreAdBreakInPIPMode(false)`인 경우에는 광고 플레이어가 실패한 광고를 버리고, 앱의 원래 `MediaItem`(또는 소스)으로 플레이리스트를 다시 구성해 그 위치에서 본편을 재생합니다. 본편을 정지, 탐색(seek), 재로드, 재개하지 말고 오류를 로그로만 남기세요.
+- **Mid-roll 오류**: SDK가 이미 Mid-roll이 본편을 중단시킨 지점에서 `rewindDuration`만큼 앞선 위치부터 본편을 재개했습니다. 본편을 정지, 탐색(seek), 재로드하지 마세요. 안전장치로 본편을 재개하세요(`player.playWhenReady = true`, Bitmovin은 `player.play()`). 이미 재생 중이어도 문제가 없습니다.
 - **Post-roll 오류** (`isContentEnd`): 본편은 이미 끝났습니다. Post-roll이 정상 종료된 경우와 같이 재생 종료 시나리오를 실행합니다.
 
 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며, `onError`보다 먼저 올 수도 나중에 올 수도 있습니다. 아래 예시처럼 `isContentPrepared`를 확인하는 등, 같은 Ad Break에 두 핸들러가 모두 실행되어도 문제가 없도록 구현하세요.
 :::
 
 :::info 본편을 재생할 수 없는 경우
-본편 재생이 중단되었고 SDK가 이를 복구하지 않을 때, 플레이어 어댑터가 장애 1건당 한 번 `onError`를 호출합니다. 메시지는 `playback unrecoverable (<reason>) - url: <url>`이며, `cause`에는 플레이어의 오류가 담깁니다. 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다.
-- **Media3 ExoPlayer / ExoPlayer2**: SDK가 자동 복구하지 않는 치명적 플레이어 오류, Flower 설정에서 SDK의 `BehindLiveWindow` 자동 복구가 꺼져 있을 때의 `BehindLiveWindow`, 3회 복구를 시도한 뒤에도 멈춰 있는 라이브 플레이리스트.
-- **Bitmovin Player**: 3회 재로드를 시도한 뒤에도 실패한 재생, 또는 재로드할 소스가 없는 경우.
+본편 재생이 중단되었고 SDK가 이를 복구할 수 없으면, `playback unrecoverable`로 시작하는 메시지와 함께 `onError`가 호출됩니다. VOD에서는 본편을 다시 로드하거나 사용자에게 오류를 표시하세요.
 
-VOD에서는 본편을 다시 로드하거나 사용자에게 오류를 표시하세요. `setIgnoreAdBreakInPIPMode(false)`인 경우 광고 플레이어와 본편 플레이어 어댑터가 앱의 player를 함께 사용하므로, 광고 실패 1건이 두 번 보고될 수 있습니다.
+`setIgnoreAdBreakInPIPMode(false)`인 경우 광고 실패 1건이 `onError`에 두 번 보고될 수 있습니다.
 :::
 
 ```kotlin
@@ -109,8 +107,11 @@ val adsManagerListener = object : FlowerAdsManagerListener {
             } else if (isContentEnd) {
                 // TODO GUIDE: post-roll 광고가 실패한 시점 - VOD 재생이 완전히 종료되었습니다.
                 //             onCompleted와 동일한 재생 종료 이후 작업을 수행하세요.
+            } else {
+                // NOTE: mid-roll 광고 실패 - 보통 본편은 이미 다시 재생 중입니다.
+                //       재개는 안전장치이며 이미 재생 중이어도 문제가 없습니다 (Bitmovin: player.play()).
+                player.playWhenReady = true
             }
-            // NOTE: mid-roll 광고 실패 - SDK가 이미 본편을 재개했으므로 할 일이 없습니다.
         }
     }
 

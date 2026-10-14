@@ -49,20 +49,17 @@ Respect every fact below. Do not "fix" the SDK's behavior from the app.
    The content therefore always starts from the first onCompleted()/onError().
 4. onError() is called when an ad fails to play. onCompleted() may follow it, so both
    callbacks must be guarded by the same isContentPrepared flag. On a mid-roll error the
-   SDK seeks the content back by rewindDuration and resumes it BEFORE it calls onError();
-   the app still calls play() on the content in onError() as a safety net (play() only,
-   no seek or reload; it continues from the rewound position). After a post-roll error
+   content is normally already playing again; resuming is a harmless safety net, so the
+   app still calls play() on the content in onError() (play() only, no seek or reload). After a post-roll error
    the content stays ended.
-5. Mid-roll: the SDK requests it requestTimeout + minPrepareDuration (default 5000 + 5000 ms)
-   before its position, and calls onPrepare() when the content reaches the position.
+5. Mid-roll: the SDK calls onPrepare() when the content reaches the mid-roll position.
    On onPrepare() the SDK pauses the content. When the break ends (onCompleted/onError),
    the SDK seeks the content back by rewindDuration (default 5000 ms) and resumes it.
    The same mid-roll does not play again after this rewind.
 6. Post-roll: requested only after the app calls notifyContentEnded(). The content stays
    ended afterwards. If the VMAP has no post-roll, NO listener callback follows
    notifyContentEnded().
-7. Seeking past a mid-roll position does not play the skipped mid-roll. After an ad break,
-   further mid-rolls are not requested for (ad duration + 60 seconds).
+7. Seeking past a mid-roll position does not play the skipped mid-roll.
 8. The SDK identifies the player when requestVodAd() is called. Supported: HLS.js,
    Bitmovin Player, dash.js, Shaka Player. With any other player (e.g. Video.js), or when
    getPlayer() returns null, the SDK inserts no ads and calls NO listener callback.

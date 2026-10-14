@@ -30,7 +30,7 @@ function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 | hasLeftApp | boolean | 사용자가 앱을 떠날 때 `true`, 돌아올 때 `false` |
 
 :::note
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 :::
 
 ### setIgnoreAdBreakInPIPMode
@@ -52,9 +52,9 @@ function setIgnoreAdBreakInPIPMode(ignore: boolean): Promise<void>;
 
 ## PIP 모드에서의 광고 (기본값)
 
-PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 따라서 광고 재생 중 사용자가 앱을 떠나면 앱은 PIP에 진입하지 않으며, SDK는 앱이 알려주어야만 사용자가 떠났다는 것을 알 수 있습니다. 그러므로 앱에서는 PIP 진입 여부와 관계없이 사용자가 앱을 떠나고 돌아올 때마다 `notifyUserLeftApp`으로 반드시 알려주어야 합니다. 그래야 사용자가 앱을 떠나면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다.
+PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 광고 재생 중에는 본편을 PIP로 전환하지 마세요. PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 이때 앱은 PIP에 진입하지 않으므로 SDK는 앱이 알려주어야만 사용자가 떠났다는 것을 알 수 있습니다. 그래서 앱은 PIP 진입 여부와 관계없이 사용자가 앱을 떠나고 돌아오는 것을 `notifyUserLeftApp`으로 알려, 사용자가 떠나면 광고가 일시정지되고 돌아오면 재개되도록 합니다.
 
-*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않습니다.
 *   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
 *   사용자가 돌아올 때까지 mid-roll 및 post-roll 브레이크를 요청하지 않습니다.
 *   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, 채널 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
@@ -127,12 +127,12 @@ await setIgnoreAdBreakInPIPMode(false);
 
 iOS의 `playerType: 'bitmovin'`은 항상 SDK 자체 광고 플레이어를 사용하며, 인라인 브레이크(`requestAd()`)도 모든 플레이어에서 마찬가지입니다. 인라인 브레이크 전후의 콘텐츠 일시정지와 재개는 여전히 앱이 담당합니다.
 
-콘텐츠에 대한 규칙은 기본 모드와 같습니다. 첫 시작 전에는 첫 `completed` 또는 `error`까지 일시정지 상태로 붙잡아 두고, 시작된 뒤에는 일시정지, 탐색, 재로드하지 마세요. mid-roll 실패로 `error`가 오면 콘텐츠에 아무것도 하지 마세요. SDK가 이미 실패한 광고를 버리고 콘텐츠를 재개 지점으로 player에 되돌려 놓아 재생 중입니다. 이 모드에서는 광고 플레이어와 콘텐츠 플레이어 어댑터가 player를 함께 사용하므로, 광고 실패 1건이 `error` 이벤트 두 번으로 나타날 수 있습니다. `notifyContentEnded()`를 호출하는 지점(아래 참고)에서 콘텐츠 종료도 표시해 두어, post-roll `error`가 콘텐츠를 재개하지 않게 하세요. [VOD 광고 구현](../ad-insertion/vod/vod-ad-implementation.md#handling-error)을 참고하세요.
+콘텐츠에 대한 규칙은 기본 모드와 같습니다. 첫 시작 전에는 첫 `completed` 또는 `error`까지 일시정지 상태로 붙잡아 두고, 시작된 뒤에는 일시정지, 탐색, 재로드하지 마세요. mid-roll 실패로 `error`가 오면 SDK가 이미 콘텐츠를 되돌려 놓은 상태입니다. 중지, 탐색, 재로드는 하지 말고, 안전장치로 콘텐츠를 재개하세요(`videoRef.current?.resume()`, Bitmovin은 `player.play()`). 이미 재생 중이어도 문제없습니다. 이 모드에서는 광고 실패 1건이 `error` 이벤트 두 번으로 나타날 수 있습니다. `notifyContentEnded()`를 호출하는 지점(아래 참고)에서 콘텐츠 종료도 표시해 두어, post-roll `error`가 콘텐츠를 재개하지 않게 하세요. [VOD 광고 구현](../ad-insertion/vod/vod-ad-implementation.md#handling-error)을 참고하세요.
 
 ### 앱의 플레이어에서 광고가 재생되는 방식
 
 1. 브레이크가 시작되면 SDK는 `<Video>` 뒤의 네이티브 플레이어에서 본편 앞에 광고 아이템을 넣고, 플레이어는 광고로 이동합니다.
-2. 브레이크가 끝나면 SDK는 본편을 재개 지점(중단된 위치에서 되감기 시간만큼 앞선 위치)에 **새로운 플레이어 아이템**으로 다시 넣습니다. iOS의 `react-native-video`에서는 본편 URL로 만든 새로운 `AVPlayerItem`이며, Android의 `react-native-video`에서는 원래의 미디어 아이템을 재개 지점부터 시작하도록 클리핑하여 다시 추가하고, Android의 Bitmovin에서는 원래의 소스를 재개 지점의 시작 오프셋으로 다시 로드합니다.
+2. 브레이크가 끝나면 SDK는 본편을 재개 지점(중단된 위치에서 되감기 시간만큼 앞선 위치)에 **새로운 플레이어 아이템**으로 다시 넣습니다.
 
 ### 플레이어 이벤트 처리
 

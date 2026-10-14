@@ -31,7 +31,7 @@ Flower Player에 대한 자세한 내용은 [Flower Player 소개](../about-flow
 - **재생 중 실패:** 재생 중 프리롤이 실패하면 리스너는 `onError()`를 받으며, Flower Player는 채널을 직접 로드하지 않습니다. [광고 이벤트 수신](#광고-이벤트-수신)에서 설명한 대로 채널을 다시 시작하세요.
 - **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 사용자가 앱을 떠나면 일시정지되고 돌아오면 재개됩니다. 이를 `FlowerSdk.notifyUserLeftApp()`으로 알려야 합니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
 - **채널 전환:** 새 `FlowerLinearTvAdConfig`로 다른 채널을 로드하면 이전 채널의 광고 세션이 정지되고 새 채널의 프리롤을 요청합니다.
-- **같은 채널에 다시 진입:** SDK는 마지막으로 진입한 채널(`channelId`)을 기억합니다. 같은 채널의 광고 설정을 다시 설정하면 `prerollAdTagUrl`이 설정되어 있더라도 Flower Player는 프리롤을 건너뛰고 채널을 재생합니다. 기억된 채널은 `stop()`이나 `release()`로는 지워지지 않으며, VOD 광고나 인라인 광고를 요청하면 지워집니다. 예를 들어 A → B → A로 전환하면 A의 프리롤이 다시 재생되고, A → VOD → A도 마찬가지입니다. SDK가 화면과 관계없이 채널을 기억하므로, 그 사이에 VOD 광고나 인라인 광고 요청 없이 플레이어 화면을 나갔다가 같은 채널로 돌아와도 프리롤을 건너뜁니다.
+- **같은 채널에 다시 진입:** 채널 변경이 없으면 프리롤을 생략합니다. 채널 변경 없이 광고 설정을 다시 설정하면 `prerollAdTagUrl`이 설정되어 있더라도 Flower Player는 프리롤을 생략하고 채널을 재생합니다. `stop()`이나 `release()`는 채널 변경으로 보지 않으며, VOD 광고나 인라인 광고를 요청하면 채널 변경으로 봅니다. 예를 들어 A → B → A로 전환하면 A의 프리롤이 다시 재생되고, A → VOD → A도 마찬가지입니다. 사용자가 플레이어 화면을 나갔다가 같은 채널로 돌아오는 경우에도 마찬가지입니다.
 
 ## 광고 이벤트 수신
 
@@ -80,7 +80,7 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 player.addAdListener(adsManagerListener)
 ```
 
-재시작용 `FlowerLinearTvAdConfig`는 `prerollAdTagUrl`을 포함해 처음 시작할 때와 완전히 같은 값으로 만드세요. 시청자가 프리롤을 다시 보지는 않습니다. 재시작하는 채널이 마지막으로 진입한 채널이므로 Flower Player가 프리롤을 건너뛰고 채널을 재생하기 때문입니다. 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다.
+재시작용 `FlowerLinearTvAdConfig`는 `prerollAdTagUrl`을 포함해 처음 시작할 때와 완전히 같은 값으로 만드세요. 시청자가 프리롤을 다시 보지는 않습니다. 채널 변경이 없으므로 Flower Player가 프리롤을 생략하고 채널을 재생하기 때문입니다([프리롤 광고](#pre-roll-ads) 참고). 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다.
 
 ## 전체 예시
 
@@ -144,7 +144,7 @@ class PlaybackActivity : Activity() {
         // arg3: extraParams, (Optional) Additional information pre-agreed for targeting
         // arg4: adTagHeaders, (Optional) HTTP header information to add for ad requests
         // arg5: channelStreamHeaders, (Optional) HTTP header information to add for original stream requests
-        // Use the same values on a restart: the Flower Player skips the pre-roll of the channel entered last.
+        // Use the same values on a restart: without a channel change, the Flower Player skips the pre-roll.
         val adConfig = FlowerLinearTvAdConfig(
             adTagUrl = "https://ad_request",
             prerollAdTagUrl = "https://preroll_ad_request",

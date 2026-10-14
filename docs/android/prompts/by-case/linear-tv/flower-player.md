@@ -55,10 +55,10 @@ HOW THE SDK BEHAVES IN THIS CASE
   away from the app (reported with FlowerSdk.notifyUserLeftApp(true/false), whether or not the
   app enters PIP) and resumed when the user comes back. Loading another channel requests that
   channel's pre-roll.
-- The SDK remembers the channel (channelId) entered last. When the same channel's ad config is
-  set again, the Flower Player skips the pre-roll even if prerollAdTagUrl is set, and loads the
-  channel stream. stop() / release() do not clear the remembered channel; requestVodAd() /
-  requestAd() do. A -> B -> A plays A's pre-roll again.
+- If the channel has not changed, the pre-roll is skipped: when the ad config is set again
+  without a channel change, the Flower Player skips the pre-roll even if prerollAdTagUrl is set,
+  and loads the channel stream. stop() / release() are not a channel change; requestVodAd() /
+  requestAd() are. A -> B -> A plays A's pre-roll again.
 - Loading another channel with a new config stops the previous channel's ad session.
 - onError(): an ad failed to play or the channel stream can no longer be played. Recover by
   stopping the player and the SDK ads manager, then loading the channel again as in step 5.
@@ -67,8 +67,7 @@ HOW THE SDK BEHAVES IN THIS CASE
   (destroy() also stops the ads manager). This also covers a pre-roll that fails while playing:
   the Flower Player does not load the channel by itself in that case.
   Load the channel again with the same FlowerLinearTvAdConfig, including prerollAdTagUrl: the
-  restarted channel is the one entered last, so the Flower Player skips its pre-roll and loads
-  the channel stream.
+  channel has not changed, so the Flower Player skips the pre-roll and loads the channel stream.
 
 ========================================
 IMPLEMENTATION
@@ -148,8 +147,8 @@ DO
 - Use FlowerLinearTvAdConfig for live/FAST channels; pass it with the media item / source.
 - Register listeners with player.addAdListener().
 - On onError(), on the main thread, stop the player and the ads manager, then load the channel
-  again as in step 5 with the same FlowerLinearTvAdConfig, including prerollAdTagUrl. The SDK
-  skips the pre-roll of the channel entered last.
+  again as in step 5 with the same FlowerLinearTvAdConfig, including prerollAdTagUrl. Without a
+  channel change, the SDK skips the pre-roll.
 DO NOT
 - Do not call changeChannelUrl() yourself, and do not add a FlowerAdView to the layout.
 - Do not write MediaItem.fromUri(url, adConfig) — that overload does not exist; pass the config

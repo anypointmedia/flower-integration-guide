@@ -51,15 +51,16 @@ HOW THE SDK BEHAVES IN THIS CASE
   ads manager (player.flowerAdView.adsManager.stop()), release the item
   (replaceCurrentItem(with: nil)), and start the channel again the same way:
   replaceCurrentItem(with:adConfig:) with a new AVPlayerItem + play(), with exactly the same
-  FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl. The SDK remembers the
-  channel (channelId) entered last and skips its pre-roll when the same channel's ad config is
-  set again, so the viewer does not see the pre-roll twice and the player loads the channel
-  right away. (A -> B -> A, or a VOD/inline ad request in between, plays the pre-roll again;
-  stop() and leaving the screen do not clear the remembered channel.) A break cut short by stop() may still report onCompleted afterwards, so keep
-  onCompleted idempotent (UI-only).
+  FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl. If the channel has not
+  changed, the pre-roll is skipped: the viewer does not see the pre-roll twice and the player
+  loads the channel right away. (A -> B -> A, or a VOD/inline ad request in between, plays the
+  pre-roll again; stop() and leaving the screen are not a channel change.) A break cut short by
+  stop() may still report onCompleted afterwards, so keep onCompleted idempotent (UI-only).
+  This applies to every onError: an ad error, a message starting with "playback unrecoverable"
+  (content playback stopped and the SDK cannot recover it), and an internal SDK error.
 - A pre-roll playback error also arrives as onError. FlowerAVPlayer then does NOT load the
-  channel, and it keeps its internal pre-roll listener registered, which would act again on
-  the next ad events of the same player. So when onError arrives before the channel item was
+  channel, and that player stays set up for its pre-roll and would act again on the next ad
+  events. So when onError arrives before the channel item was
   loaded (player.currentItem == nil), restart in a NEW FlowerAVPlayer.
 - While the user is away from the app (FlowerSdk.notifyUserLeftApp(true), see the PIP mode
   support case), stream ads keep playing and only the ad UI is hidden; a pre-roll that is
@@ -126,7 +127,10 @@ IMPLEMENTATION
        func onPrepare(adDurationMs: Int32) {}
        func onPlay() { /* hide your own controls */ }
        func onCompleted() { /* show them again */ }
-       func onError(error: FlowerError?) { DispatchQueue.main.async { self.onAdError() } }
+       func onError(error: FlowerError?) {
+           // Every onError restarts the channel, including "playback unrecoverable".
+           DispatchQueue.main.async { self.onAdError() }
+       }
        func onAdBreakSkipped(reason: Int32) {}
        func onAdBreakPrepare(adInfos: NSMutableArray) {}
        func onAdPlay(adInfo: AdInfo) {}
@@ -154,8 +158,8 @@ IMPLEMENTATION
        }
        playLinearTv()                          // 3. same start: replaceCurrentItem(with:adConfig:) + play()
    }
-   The restart passes the same prerollAdTagUrl as the first start. The SDK skips the pre-roll
-   of the channel entered last, so the viewer does not see it again. Do not add a flag that
+   The restart passes the same prerollAdTagUrl as the first start. The channel has not changed,
+   so the SDK skips the pre-roll and the viewer does not see it again. Do not add a flag that
    drops prerollAdTagUrl on a restart.
 
 6. Release:

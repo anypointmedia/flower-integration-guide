@@ -133,14 +133,14 @@ Dispatched when any error happens in the Flower SDK.
 An `error` during an inline break leaves your content paused, because pausing it was your app's doing. Resume it from this branch as well as from `completed`, or the viewer is left on a frozen frame.
 :::
 
-`error` is sent when an ad fails to play, or when the content stops and the native SDK will not recover it — then `message` starts with `playback unrecoverable`, once per incident (not reported on iOS with `playerType: 'bitmovin'`). On Android it is also sent when the SDK's local proxy server fails to respond. A VOD ad request that fails, times out or returns no ads ends with `completed`, not `error`.
+`error` is sent when an ad fails to play. When content playback stops and the SDK cannot recover it, `error` is sent with a `message` starting with `playback unrecoverable` (not reported on iOS with `playerType: 'bitmovin'`). On Android it is also sent for an internal SDK error. A VOD ad request that fails, times out or returns no ads ends with `completed`, not `error`.
 
 What to do on `error` depends on the kind of session:
 
-*   **Linear TV / FAST**: stop the ads manager with `await stop(nativeId)`, then start the channel over — a new `changeChannelUrl()` with exactly the same parameters as the first start, `prerollAdTagUrl` included, and the new proxy URL it returns handled the same way as the first time. The viewer does not see the pre-roll again: the SDK skips the pre-roll of the channel entered last and sends `completed` right away. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
-*   **VOD**, by where the content is. When a break fails, the SDK brings the content back before this event is sent, so never resume, seek or re-source it here. `completed` may also arrive for the failed break, in either order.
+*   **Linear TV / FAST**, for every `error` including `playback unrecoverable` and an internal SDK error: end the ad session with `await stop(nativeId)`, then start the channel over — a new `changeChannelUrl()` with exactly the same parameters as the first start, `prerollAdTagUrl` included, and the new proxy URL it returns handled the same way as the first time. The channel has not changed, so the pre-roll is skipped; see [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
+*   **VOD**, by where the content is. Never stop, seek or re-source the content here. `completed` may also arrive for the failed break, in either order.
     *   Not started yet (pre-roll): start the held content, exactly as on `completed`.
-    *   Started and not ended (mid-roll): nothing — the content is already playing again from the rewind duration before the interruption point.
+    *   Started and not ended (mid-roll): the SDK has normally brought the content back already; resume it as a safety net — `videoRef.current?.resume()` (Bitmovin: `player.play()`), harmless if it is already playing.
     *   Ended (post-roll): nothing to resume — playback is over.
     *   `playback unrecoverable`: the content itself stopped. Reload it or show an error.
 *   **Inline**: resume your content and call `stop(nativeId)`, as on `completed`.

@@ -78,7 +78,7 @@ function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 | ---| ---| --- |
 | hasLeftApp | boolean | 사용자가 앱을 떠날 때 `true`, 돌아올 때 `false` |
 
-`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated 되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작합니다.
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -98,7 +98,7 @@ function setIgnoreAdBreakInPIPMode(ignore: boolean): Promise<void>;
 function stop(nativeId: string): Promise<void>;
 ```
 
-`nativeId`의 광고 매니저를 중지합니다. 현재 광고 브레이크와 광고 세션이 함께 종료됩니다.
+현재 광고 브레이크와 함께 `nativeId`의 광고 세션을 종료합니다.
 
 *   **Linear TV / FAST**: 로컬 프록시가 종료되므로 프록시 URL은 더 이상 응답하지 않고, 이후의 브레이크도 재생되지 않습니다. 채널을 계속 재생하려면 [`changeChannelUrl`](./linear-channels-fast.md#changechannelurl)을 다시 호출하고 새 프록시 URL을 재생하세요.
 *   **VOD**: 콘텐츠는 자체 URL에서 계속 재생되지만, 새로 [`requestVodAd`](./vod.md)를 호출하기 전까지 이후의 브레이크(Mid-roll, Post-roll)는 재생되지 않습니다.

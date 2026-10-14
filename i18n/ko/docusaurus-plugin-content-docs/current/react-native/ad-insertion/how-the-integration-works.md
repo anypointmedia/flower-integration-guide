@@ -74,7 +74,7 @@ Mount <Video> on the original URL and wait for onLoad before calling this.
 | VOD | `requestVodAd()` | 앱 — 준비된 뒤 `play()` 호출을 기다림 |
 | Inline / Interstitial | `requestAd()` | 앱 — 준비된 뒤 `play()` 호출을 기다림 |
 
-VOD 브레이크의 경우 `prepare` 이벤트에서 `play()`를 호출합니다. SDK는 프리롤을 위해 콘텐츠를 일시정지하지 않으므로, 첫 `completed`(또는 `error`)까지 콘텐츠를 일시정지 상태로 붙잡아 두세요. 그 이후에는 콘텐츠를 건드리지 마세요 — mid-roll 전후의 콘텐츠 일시정지와 재개는 SDK가 처리합니다. mid-roll `error`도 마찬가지로, SDK가 이벤트를 보내기 전에 콘텐츠를 되돌려 놓습니다. [`error` 처리](./vod/vod-ad-implementation.md#handling-error)를 참고하세요. 인라인 브레이크의 경우 `prepare` 이벤트에서 콘텐츠를 일시정지하고 `play()`를 호출하며, `completed`에서 재개합니다. [광고 이벤트](../api/ad-event.md)를 참고하세요.
+VOD 브레이크의 경우 `prepare` 이벤트에서 `play()`를 호출합니다. SDK는 프리롤을 위해 콘텐츠를 일시정지하지 않으므로, 첫 `completed`(또는 `error`)까지 콘텐츠를 일시정지 상태로 붙잡아 두세요. 그 이후에는 콘텐츠를 건드리지 마세요 — mid-roll 전후의 콘텐츠 일시정지와 재개는 SDK가 처리합니다. mid-roll `error`에서는 SDK가 이미 콘텐츠를 되돌려 놓은 상태이며, 앱은 탐색이나 재로드 없이 안전장치로 재개만 합니다(이미 재생 중이어도 문제없음). [`error` 처리](./vod/vod-ad-implementation.md#handling-error)를 참고하세요. 인라인 브레이크의 경우 `prepare` 이벤트에서 콘텐츠를 일시정지하고 `play()`를 호출하며, `completed`에서 재개합니다. [광고 이벤트](../api/ad-event.md)를 참고하세요.
 
 ## URL 재작성 vs 오버레이 재생
 
@@ -94,4 +94,4 @@ VOD 브레이크의 경우 `prepare` 이벤트에서 `play()`를 호출합니다
 | `play`, `notifyContentEnded` | reject — 해당 id로 채널·VOD·인라인 요청이 시작된 적이 없음 |
 | `stop`, `release` | 조용히 resolve — 정리 경로에서 세션 상태를 추적하지 않고 호출 가능 |
 
-런타임 광고 오류는 Promise를 reject하지 않습니다. 대신 `error` 광고 이벤트로 전달됩니다 — [광고 이벤트](../api/ad-event.md#error)를 참고하세요. Linear TV / FAST 채널에서는 `stop()` 후 새 `changeChannelUrl()`로 채널을 다시 시작해 복구하고, VOD에서는 콘텐츠 시작 전에 프리롤이 실패했다면 콘텐츠를 시작하고(mid-roll이 실패한 경우에는 SDK가 이미 콘텐츠를 되돌려 놓음), 메시지가 `playback unrecoverable`로 시작하면 콘텐츠를 다시 로드합니다.
+런타임 광고 오류는 Promise를 reject하지 않습니다. 대신 `error` 광고 이벤트로 전달됩니다 — [광고 이벤트](../api/ad-event.md#error)를 참고하세요. Linear TV / FAST 채널에서는 `stop()` 후 새 `changeChannelUrl()`로 채널을 다시 시작해 복구하고, VOD에서는 콘텐츠 시작 전에 프리롤이 실패했다면 콘텐츠를 시작하고, mid-roll이 실패했다면 안전장치로 콘텐츠를 재개하며(보통 SDK가 이미 되돌려 놓음), 메시지가 `playback unrecoverable`로 시작하면 콘텐츠를 다시 로드합니다.

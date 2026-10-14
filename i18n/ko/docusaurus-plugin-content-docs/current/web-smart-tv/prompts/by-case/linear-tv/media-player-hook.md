@@ -65,24 +65,20 @@ HOW THE SDK BEHAVES IN THIS CASE
    stop(). With the default setIgnoreAdBreakInPIPMode(true), the pre-roll is paused while
    the user is away from the app (reported with FlowerSdk.notifyUserLeftApp(true)) and
    resumed when the user comes back (notifyUserLeftApp(false)).
-   The SDK remembers the channel (channelId) entered last, SDK-wide. When changeChannelUrl()
-   is called with that same channelId, it skips the pre-roll even if prerollAdTagUrl is
-   passed, and calls onCompleted() right after changeChannelUrl() returns, as when there is
-   no pre-roll ad. stop() does not clear the remembered channel; requestVodAd() and
-   requestAd() do. A -> B -> A plays A's pre-roll again.
+   Calling changeChannelUrl() again without a channel change skips the pre-roll even if
+   prerollAdTagUrl is passed, and the SDK calls onCompleted()
+   right after changeChannelUrl() returns. A -> B -> A plays A's pre-roll again.
 7. changeChannelExtraParams(extraParams) updates targeting for the next ad requests of
    the current channel.
 8. onError() is the signal to recover the channel: call flowerAdView.adsManager.stop(),
    release the player, and start the channel again (a new changeChannelUrl() call, load the
    URL it returns, play). The restart passes exactly the same arguments as the first start,
    prerollAdTagUrl included, and handles the returned URL the same way (temporary pre-roll
-   listener, load on its first onCompleted()). The SDK skips the pre-roll of the channel
-   entered last (item 6), so the viewer does not see it again and the stream starts at
-   once. stop() ends any ad break in progress, and the SDK can still call onCompleted() for
-   that break after the restart has registered its listener. That only does UI work in the
-   main listener, or starts the held stream in the temporary one, so it is harmless.
-   A pre-roll that fails is reported through onCompleted() (item 6), so the temporary
-   pre-roll listener does not call stop() in onError(); it only starts the stream.
+   listener, load on its first onCompleted()). The channel has not changed, so the
+   pre-roll is skipped (item 6): the viewer does not see it again and the stream starts at
+   once. The SDK can still call onCompleted() for an ad break that stop() ended, so keep
+   the main onCompleted() UI-only. The temporary pre-roll listener's onError() only starts
+   the stream (no stop()).
 9. On a webOS TV the SDK reads the LGUDID through webOS.service.request (webOSTV.js must
    be loaded); on a Tizen TV it reads the TIFA through webapis.adinfo. Without them the
    SDK falls back to its own device identifier. Supported: webOS TV >= 23, Tizen >= 7.0.
@@ -144,8 +140,8 @@ STEP 5 — Start or change a channel
   }
 
   // Used for the first start, a channel change, and a restart after onError(). A restart
-  // passes the same arguments, prerollAdTagUrl included: the SDK skips the pre-roll of the
-  // channel entered last and calls onCompleted() right away.
+  // passes the same arguments, prerollAdTagUrl included: if the channel has not
+  // changed, the pre-roll is skipped and the SDK calls onCompleted() right away.
   function playChannel(channel) {
       currentChannel = channel;
       clearPendingPreroll();
@@ -233,8 +229,8 @@ DO:
 - On onError(), call stop(), release the player, and start the channel again with a new
   changeChannelUrl() call. Never reload the URL returned before the error.
 - On that restart, pass exactly the same arguments as the first start, prerollAdTagUrl
-  included, and handle the returned URL the same way. The SDK skips the pre-roll of the
-  channel entered last, so the viewer does not see it again.
+  included, and handle the returned URL the same way. If the channel has not
+  changed, the pre-roll is skipped, so the viewer does not see it again.
 
 DO NOT:
 - Start or reload playback in the main listener's onCompleted(): stop() can still call it.

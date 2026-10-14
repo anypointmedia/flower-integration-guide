@@ -47,14 +47,14 @@ HOW THE SDK BEHAVES IN THIS CASE
   and, after the break, resumes it rewindDuration earlier than where it stopped.
 - Post-roll: requested only when notifyContentEnded() is called. The Flower Player does not call
   it by itself. FlowerMedia3ExoPlayer and FlowerBitmovinPlayer expose their ads manager as
-  player.flowerAdView.adsManager (public since SDK 2.9.19), so the app can call
+  player.flowerAdView.adsManager, so the app can call
   notifyContentEnded() on it. FlowerExoPlayer2 does not expose it, so post-roll is not played
   with FlowerExoPlayer2 — use the MediaPlayerHook approach if post-roll is required.
 - If the pre-roll fails while playing (onError() before any onCompleted()), the Flower Player
   does NOT start the content by itself. The app must recover (see IMPLEMENTATION 5).
-- If a mid-roll fails, the SDK stops the ad and queues its rewind and resume of the content
-  before it calls onError(). The app still resumes the content with player.play() as a safety
-  net, so the content never stays paused. After a post-roll error the content has ended.
+- If a mid-roll fails, the app resumes the content with player.play() (no seek, no reload).
+  The content is normally already playing again; resuming is a harmless safety net.
+  After a post-roll error the content has ended.
 
 ========================================
 IMPLEMENTATION

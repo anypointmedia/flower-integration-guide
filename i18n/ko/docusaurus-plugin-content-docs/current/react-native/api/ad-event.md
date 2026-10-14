@@ -133,14 +133,14 @@ Flower SDK에서 오류가 발생했을 때 발생합니다.
 인라인 브레이크 도중 `error`가 발생하면, 콘텐츠를 일시정지한 주체가 앱이므로 콘텐츠는 멈춘 상태로 남습니다. `completed`뿐 아니라 이 분기에서도 콘텐츠를 재개하지 않으면 시청자가 멈춘 화면에 남게 됩니다.
 :::
 
-`error`는 광고 재생에 실패했을 때, 또는 콘텐츠 재생이 중단되었고 네이티브 SDK가 이를 복구하지 않을 때 전달됩니다. 후자의 경우 `message`는 `playback unrecoverable`로 시작하며, 장애 1건당 한 번 전달됩니다(iOS의 `playerType: 'bitmovin'`에서는 보고되지 않음). Android에서는 SDK의 로컬 프록시 서버가 응답하지 못할 때도 전달됩니다. VOD 광고 요청이 실패하거나, 타임아웃되거나, 광고가 없으면 `error`가 아니라 `completed`로 끝납니다.
+`error`는 광고 재생에 실패했을 때 전달됩니다. 본편 재생이 멈추고 SDK가 이를 복구할 수 없을 때도 `playback unrecoverable`로 시작하는 `message`와 함께 `error`가 전달됩니다(iOS의 `playerType: 'bitmovin'`에서는 보고되지 않음). Android에서는 SDK 내부 오류가 발생했을 때도 전달됩니다. VOD 광고 요청이 실패하거나, 타임아웃되거나, 광고가 없으면 `error`가 아니라 `completed`로 끝납니다.
 
 `error` 시 해야 할 일은 세션 종류에 따라 다릅니다:
 
-*   **Linear TV / FAST**: `await stop(nativeId)`로 광고 매니저를 중지한 뒤 채널을 다시 시작합니다 — `prerollAdTagUrl`을 포함해 첫 시작과 완전히 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 반환된 새 프록시 URL은 첫 시작과 같은 방식으로 처리합니다. 시청자에게 프리롤이 다시 표시되지는 않습니다. SDK가 마지막으로 진입한 채널의 프리롤을 건너뛰고 바로 `completed`를 보내기 때문입니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
-*   **VOD**: 콘텐츠의 상태에 따라 다릅니다. 브레이크가 실패하면 SDK가 이 이벤트를 보내기 전에 콘텐츠를 되돌려 놓으므로, 여기서 재개, seek, 소스 변경을 하지 마세요. 실패한 브레이크에 대해 `completed`도 전달될 수 있으며 순서는 정해져 있지 않습니다.
+*   **Linear TV / FAST**(`playback unrecoverable`과 SDK 내부 오류를 포함한 모든 `error`): `await stop(nativeId)`로 광고 세션을 종료한 뒤 채널을 다시 시작합니다 — `prerollAdTagUrl`을 포함해 첫 시작과 완전히 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 반환된 새 프록시 URL은 첫 시작과 같은 방식으로 처리합니다. 채널 변경이 없으므로 프리롤은 생략됩니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
+*   **VOD**: 콘텐츠의 상태에 따라 다릅니다. 여기서 콘텐츠를 중지, seek, 소스 변경하지 마세요. 실패한 브레이크에 대해 `completed`도 전달될 수 있으며 순서는 정해져 있지 않습니다.
     *   아직 시작 전(프리롤): `completed`와 똑같이, 붙잡아 둔 콘텐츠를 시작합니다.
-    *   시작했고 아직 끝나지 않음(mid-roll): 할 일이 없습니다 — 콘텐츠는 이미 중단 지점보다 되감기 시간만큼 앞에서 다시 재생 중입니다.
+    *   시작했고 아직 끝나지 않음(mid-roll): 보통 SDK가 이미 콘텐츠를 되돌려 놓았습니다. 안전장치로 콘텐츠를 재개하세요 — `videoRef.current?.resume()`(Bitmovin: `player.play()`), 이미 재생 중이어도 문제없습니다.
     *   종료됨(post-roll): 재개할 것이 없습니다 — 재생이 끝났습니다.
     *   `playback unrecoverable`: 콘텐츠 자체가 멈췄습니다. 다시 로드하거나 오류를 표시하세요.
 *   **인라인**: `completed`와 마찬가지로 콘텐츠를 재개하고 `stop(nativeId)`를 호출합니다.

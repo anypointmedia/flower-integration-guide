@@ -6,11 +6,11 @@ sidebar_position: 1
 
 VOD 광고는 `requestVodAd()`로 요청합니다. 여기서는 아무것도 재작성되지 않습니다 — 콘텐츠는 원래 URL로 계속 재생되고, 각 광고 브레이크는 `prepare` 이벤트로 전달되며, 앱은 이때 `play()`를 호출합니다.
 
-콘텐츠와 관련해 앱이 할 일은 정확히 두 가지입니다. **처음 시작하기 전에는 붙잡아 두고**, **그 이후에는 건드리지 않는 것**입니다 — 브레이크가 실패했을 때도 마찬가지입니다.
+콘텐츠와 관련해 앱이 할 일은 정확히 두 가지입니다. **처음 시작하기 전에는 붙잡아 두고**, **그 이후에는 건드리지 않는 것**입니다 — 단, mid-roll이 실패했을 때 안전장치로 재개하는 것은 예외입니다.
 
 *   **처음 시작하기 전.** SDK는 프리롤을 위해 콘텐츠를 일시정지하지 않습니다. `<Video>`를 일시정지 상태로 마운트하고, `onLoad`에서 광고를 요청한 뒤, 첫 `completed` 또는 `error`에서 콘텐츠를 시작하세요. 프리롤이 없거나, 광고 응답이 비어 있거나, 요청이 실패해도 SDK는 `completed`를 보내므로 콘텐츠는 항상 시작됩니다.
 *   **콘텐츠가 시작된 이후.** 기본 설정([`setIgnoreAdBreakInPIPMode`](../../getting-started/pip-mode-support.md) `true`)에서 브레이크는 `<Video>` 위에 겹쳐진 SDK 자체 광고 플레이어에서 재생됩니다. mid-roll의 경우 SDK가 직접 콘텐츠를 일시정지하고, `completed`(또는 `error`) 시점에 되감기 시간(5초)만큼 되돌려 재개합니다. post-roll 이후에는 콘텐츠가 이미 끝났으므로 재개하지 않습니다. **콘텐츠가 시작된 뒤에는 일시정지, 탐색, 재로드하지 마세요.**
-*   **콘텐츠가 시작된 이후의 `error`.** 로그만 남기세요. 브레이크가 실패하면 SDK가 `error`를 보내기 전에 콘텐츠를 되돌려 놓으므로, mid-roll이 실패했을 때 콘텐츠는 이미 다시 재생 중입니다: 재개도, 탐색도, 소스 변경도 하지 마세요. 콘텐츠가 끝났다면(post-roll 실패) 역시 할 일이 없습니다. 예외는 메시지가 `playback unrecoverable`로 시작하는 `error`로, 콘텐츠 자체가 멈춘 경우입니다. [`error` 처리](#handling-error)를 참고하세요.
+*   **콘텐츠가 시작된 이후의 `error`.** 로그를 남기세요. mid-roll이 실패하면 SDK가 이미 콘텐츠를 되돌려 놓은 상태입니다. 중지, 탐색, 소스 변경은 하지 말고, 안전장치로 콘텐츠를 재개하세요(`videoRef.current?.resume()`, 이미 재생 중이어도 문제없음). 콘텐츠가 끝났다면(post-roll 실패) 재개할 것이 없습니다. 예외는 메시지가 `playback unrecoverable`로 시작하는 `error`로, 콘텐츠 자체가 멈춘 경우입니다. [`error` 처리](#handling-error)를 참고하세요.
 
 ## 광고 브레이크 생명주기
 
@@ -98,8 +98,11 @@ export function VodPlayer({
         } else if (event.message?.startsWith('playback unrecoverable')) {
           // 콘텐츠 자체가 멈췄고 SDK가 복구하지 않습니다:
           // 콘텐츠를 다시 로드하거나 오류를 표시하세요.
+        } else if (!contentEnded.current) {
+          // mid-roll 실패: 보통 SDK가 이미 콘텐츠를 되돌려 놓았습니다.
+          // 안전장치로 재개합니다(이미 재생 중이어도 문제없음). 탐색, 소스 변경 없음.
+          videoRef.current?.resume();
         }
-        // mid-roll 실패: SDK가 이미 콘텐츠를 재개했습니다. 재개, 탐색, 소스 변경 없음.
         // post-roll 실패: 콘텐츠가 끝났으므로 재개할 것이 없습니다.
       }
     });
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
 :::caution 콘텐츠는 시작 전에만 붙잡아 두고, 시작 후에는 건드리지 마세요
 SDK는 프리롤을 위해 콘텐츠를 붙잡아 두지 않습니다. `paused` 없이 마운트하면 프리롤 아래에서 콘텐츠가 함께 재생되어 두 소리가 동시에 들립니다. 위 예제처럼 첫 `completed` 또는 `error`까지 콘텐츠를 붙잡아 두세요.
 
-콘텐츠가 시작된 뒤에는 `prepare`, `play`, `completed`, `error`에서 `paused` prop(또는 Bitmovin 플레이어의 `pause()`, `seek()`, `load()`)을 조작하지 마세요. 이 시점들은 SDK가 담당합니다. mid-roll을 위해 콘텐츠를 일시정지하고, `completed` 시점에 되감은 뒤 재개합니다. iOS의 `playerType: 'bitmovin'`도 마찬가지로, SDK가 Bitmovin 플레이어를 통해 콘텐츠를 일시정지하고 재개합니다. 브레이크가 실패했을 때도 앱이 할 일은 없습니다 — [아래](#handling-error)를 참고하세요.
+콘텐츠가 시작된 뒤에는 `prepare`, `play`, `completed`, `error`에서 `paused` prop(또는 Bitmovin 플레이어의 `pause()`, `seek()`, `load()`)을 조작하지 마세요. 이 시점들은 SDK가 담당합니다. mid-roll을 위해 콘텐츠를 일시정지하고, `completed` 시점에 되감은 뒤 재개합니다. iOS의 `playerType: 'bitmovin'`도 마찬가지로, SDK가 Bitmovin 플레이어를 통해 콘텐츠를 일시정지하고 재개합니다. 유일한 예외는 mid-roll 실패로, 이때 앱은 안전장치로 콘텐츠를 재개합니다 — [아래](#handling-error)를 참고하세요.
 
 `setIgnoreAdBreakInPIPMode(false)`인 경우 브레이크는 SDK가 `<Video nativeID={nativeId}>`에서 인계받은 player에서 재생됩니다. 콘텐츠가 시작된 뒤 `play()` 전후로 일시정지를 걸면 광고가 재생 중인 player에 적용되어 광고가 멈추고, `completed`가 전달되지 않으며, 콘텐츠도 돌아오지 않습니다. 이 모드에 대해서는 [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
 :::
@@ -176,23 +179,23 @@ SDK는 프리롤을 위해 콘텐츠를 붙잡아 두지 않습니다. `paused` 
 VOD에서 `error`는 다음 경우에 전달됩니다:
 
 *   **광고 재생 실패** — 프리롤, mid-roll, post-roll의 광고 미디어를 디코딩할 수 없거나 접근할 수 없는 경우.
-*   **콘텐츠가 멈췄고 SDK가 이를 복구하지 않는 경우.** 메시지는 `playback unrecoverable`로 시작합니다. 네이티브 플레이어 어댑터가 장애 1건당 한 번 보내며, 재생이 다시 진행되면 이후의 중단은 새 장애로 취급됩니다. iOS의 `playerType: 'bitmovin'`에서는 앱 측 Bitmovin 어댑터가 이를 보고하지 않습니다.
-*   **Android에서 SDK의 로컬 프록시 서버가 응답하지 못한 경우.** VOD 광고 미디어는 이 서버를 거쳐 캐시됩니다.
+*   **본편 재생이 멈추고 SDK가 이를 복구할 수 없는 경우.** 메시지는 `playback unrecoverable`로 시작합니다. iOS의 `playerType: 'bitmovin'`에서는 보고되지 않습니다.
+*   **Android에서 SDK 내부 오류가 발생한 경우.**
 
 VMAP/VAST 요청이 실패하거나 타임아웃되는 경우, 또는 광고가 없는 브레이크는 `error`가 아닙니다. 이때는 `completed`로 끝납니다(광고가 없으면 reason `1`의 `adBreakSkipped`가 먼저 옵니다).
 
-브레이크가 광고 오류로 실패하면 SDK는 먼저 광고를 중지하고 콘텐츠를 직접 되돌려 놓은 뒤, 그다음에 `error`를 보냅니다. 기본 설정에서는 mid-roll을 위해 일시정지했던 콘텐츠를 브레이크가 중단시킨 지점보다 되감기 시간만큼 앞에서 재개합니다. `setIgnoreAdBreakInPIPMode(false)`에서는 광고 플레이어가 실패한 광고를 버리고, `<Video>`에서 인계받은 player에 같은 위치로 콘텐츠를 되돌려 놓아 재생합니다. 따라서 `error` 시 앱이 할 일은 콘텐츠의 상태에 따라서만 달라집니다:
+브레이크가 광고 오류로 실패하면 두 모드 모두 SDK가 `error`를 보내기 전에 콘텐츠를 되돌려 놓습니다(되감은 위치에서 재생 중). 따라서 `error` 시 앱이 할 일은 콘텐츠의 상태에 따라서만 달라집니다:
 
 | 콘텐츠 | 실패한 대상 | 앱이 할 일 |
 | ---| ---| --- |
 | 아직 시작 전 | 프리롤 | `completed`와 마찬가지로 붙잡아 둔 콘텐츠를 시작 |
-| 시작했고 끝나지 않음 | Mid-roll | 없음 — 콘텐츠는 이미 다시 재생 중입니다. 재개, 탐색, 소스 변경 없음. |
+| 시작했고 끝나지 않음 | Mid-roll | 안전장치로 콘텐츠를 재개 — `videoRef.current?.resume()`(Bitmovin: `player.play()`), 이미 재생 중이어도 문제없음. 중지, 탐색, 소스 변경 없음. |
 | 종료됨(`onEnd` 발생) | Post-roll | 없음 — 재생이 끝났습니다 |
 | 멈춤 | 콘텐츠 자체(`playback unrecoverable`) | 콘텐츠를 다시 로드하거나 오류를 표시 |
 
 위 예제처럼 `notifyContentEnded()`를 호출하기 전에 `onEnd`에서 설정하는 ref로 종료 여부를 추적하세요.
 
-실패한 브레이크는 `completed`도 보낼 수 있으며, `error`보다 먼저 올 수도 나중에 올 수도 있습니다. 위의 `startContent()`처럼 두 분기 모두 같은 브레이크에 대해 실행되어도 안전하게 두세요. `setIgnoreAdBreakInPIPMode(false)`에서는 광고 플레이어와 콘텐츠 플레이어 어댑터가 player를 함께 사용하므로, 광고 실패 1건이 `error` 이벤트 두 번으로 나타날 수 있습니다.
+실패한 브레이크는 `completed`도 보낼 수 있으며, `error`보다 먼저 올 수도 나중에 올 수도 있습니다. 위의 `startContent()`처럼 두 분기 모두 같은 브레이크에 대해 실행되어도 안전하게 두세요. `setIgnoreAdBreakInPIPMode(false)`에서는 광고 실패 1건이 `error` 이벤트 두 번으로 나타날 수 있습니다.
 
 ## 프리롤, Mid-roll, Post-roll
 
@@ -201,7 +204,7 @@ VMAP/VAST 요청이 실패하거나 타임아웃되는 경우, 또는 광고가 
 | 브레이크 | 발생 시점 |
 | ---| --- |
 | 프리롤 | `requestVodAd()` 완료 직후, 앱이 아직 콘텐츠를 붙잡아 두고 있을 때의 `prepare` 이벤트 |
-| Mid-roll | 재생 위치가 브레이크 지점에 도달했을 때의 `prepare` 이벤트 (광고 요청은 약 10초 먼저 이루어짐) |
+| Mid-roll | 재생 위치가 브레이크 지점에 도달했을 때의 `prepare` 이벤트 |
 | Post-roll | `notifyContentEnded()` 호출 이후의 `prepare` 이벤트 |
 
 광고 응답에 프리롤이 없거나, 브레이크가 전혀 없거나, 요청이 실패하면 콘텐츠 시작 전에 `prepare`가 오지 않습니다. 대신 SDK가 `completed`를 보내며, 이것이 붙잡아 둔 콘텐츠를 시작하는 신호가 됩니다.
