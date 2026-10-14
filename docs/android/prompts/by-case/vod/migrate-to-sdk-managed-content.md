@@ -49,8 +49,9 @@ HOW THE SDK BEHAVES AFTER THE UPGRADE
 - Ad error (onError()): the SDK stops the failed ad and queues its own rewind and resume before
   it calls onError(). The app still resumes the content on a mid-roll error (no seek, no reload)
   as a safety net so it never stays paused; on a post-roll error it does not resume.
-- With setIgnoreAdBreakInPIPMode(true), an ad playing when the app enters PIP is paused and
-  resumed when the app returns (the app must report PIP with notifyPictureInPictureModeChanged).
+- With setIgnoreAdBreakInPIPMode(true), an ad playing when the user leaves the app is paused and
+  resumed when the user comes back (the app must report both with FlowerSdk.notifyUserLeftApp(),
+  whether or not it enters PIP).
 
 ========================================
 IMPLEMENTATION — find and fix
@@ -106,9 +107,11 @@ IMPLEMENTATION — find and fix
 8) AD_MODE = default:
    - Make sure FlowerAdView is in the layout on top of the player (MediaPlayerHook), same size,
      android:visibility="gone". Flower Players add it themselves.
-   - PIP: report enter/exit with FlowerSdk.notifyPictureInPictureModeChanged(), and do not enter
-     PIP while an ad is playing (track isAdPlaying: true in onPlay, false in onCompleted/onError).
-     enterPictureInPictureMode(PictureInPictureParams) requires API 26.
+   - PIP: report the user leaving with FlowerSdk.notifyUserLeftApp(true) in onUserLeaveHint()
+     before deciding on PIP, and the user returning with FlowerSdk.notifyUserLeftApp(false) in
+     onResume(); replace any call to the deprecated notifyPictureInPictureModeChanged(). Do not
+     enter PIP while an ad is playing (track isAdPlaying: true in onPlay, false in
+     onCompleted/onError). enterPictureInPictureMode(PictureInPictureParams) requires API 26.
    AD_MODE = ads-in-pip:
    - Call FlowerSdk.setIgnoreAdBreakInPIPMode(false) before requesting ads.
    - Keep the ad-aware handlers: check the current item is the content before treating

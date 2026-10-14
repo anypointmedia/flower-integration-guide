@@ -38,8 +38,9 @@ HOW THE SDK BEHAVES IN THIS CASE
 - When there is no ad or the request fails, the SDK calls onCompleted (after onAdBreakSkipped
   for "no ad") without onPrepare.
 - The ad ends with onCompleted, or onError on a playback error.
-- In PIP mode the ad is paused and resumed when the app returns (default
-  FlowerSdk.setIgnoreAdBreakInPIPMode(true)), if the app reports PIP transitions.
+- When the user leaves the app (PIP, home screen, another app), the ad is paused and resumed
+  when the user comes back (default FlowerSdk.setIgnoreAdBreakInPIPMode(true)), if the app
+  reports it with FlowerSdk.notifyUserLeftApp(true/false).
 
 ========================================
 IMPLEMENTATION
@@ -90,8 +91,9 @@ IMPLEMENTATION
    flowerAdView.adsManager.removeListener(adsManagerListener: listener)
    flowerAdView.adsManager.stop()
 
-6. If the app supports PIP, report transitions with
-   FlowerSdk.notifyPictureInPictureModeChanged(true/false) (see the PIP mode support case).
+6. Report the user leaving and returning with FlowerSdk.notifyUserLeftApp(true/false) from the
+   app lifecycle (didEnterBackground / willEnterForeground, or scenePhase in SwiftUI), whether
+   or not the app enters PIP (see the PIP mode support case).
 
 ========================================
 RULES

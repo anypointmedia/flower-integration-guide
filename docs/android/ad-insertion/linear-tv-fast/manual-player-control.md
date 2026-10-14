@@ -44,10 +44,10 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         CoroutineScope(Dispatchers.Main).launch {
             flowerAdView.adsManager.stop()
             player.stop()
-            // Start the channel again with a new changeChannelUrl(...) call, then load and play the returned URL.
-            // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+            // Start the channel again in the same way as the first start: a new changeChannelUrl(...) call with the same
+            // parameters, including prerollAdTagUrl. The SDK skips the pre-roll of the channel entered last.
             // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
-            playLinearTv(withPreroll = false)
+            playLinearTv()
         }
     }
 
@@ -59,7 +59,7 @@ flowerAdView.adsManager.addListener(adsManagerListener)
 ```
 
 :::info Recovering from `onError`
-`onError` is called when an ad fails to play or when the channel stream can no longer be played. Stop the ads manager with `stop()`, stop the content player, and start the channel again with a new `changeChannelUrl(...)` call. Do not reuse the URL returned before `stop()`. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Pass the same parameters as the first start except `prerollAdTagUrl` (`null`), and load and play the returned URL right away; there is no pre-roll to wait for. The listener stays registered, so it receives the events of the restarted channel. A break cut short by `stop()` may still report `onCompleted` afterwards, so keep `onCompleted` limited to UI work that is safe to run more than once.
+`onError` is called when an ad fails to play or when the channel stream can no longer be played. Stop the ads manager with `stop()`, stop the content player, and start the channel again with a new `changeChannelUrl(...)` call. Do not reuse the URL returned before `stop()`. Pass exactly the same parameters as the first start, including `prerollAdTagUrl`, and handle the returned URL in the same way: with `prerollAdTagUrl`, hold it until `onCompleted()` as described in [Pre-roll Ads](#pre-roll-ads). The viewer does not see the pre-roll again: the SDK skips the pre-roll of the channel entered last and reports `onCompleted()` right after `changeChannelUrl()` returns. The listener stays registered, so it receives the events of the restarted channel. A break cut short by `stop()` may still report `onCompleted` afterwards, so keep `onCompleted` limited to UI work that is safe to run more than once.
 
 When the channel stream stops and the SDK will not recover it, the player adapter calls `onError` once per incident with the message `playback unrecoverable (<reason>) - url: <url>` and the player's error as `cause`: for Media3 ExoPlayer / ExoPlayer2, a fatal player error that the SDK does not recover by itself, `BehindLiveWindow` when the SDK's automatic recovery from it is turned off, or a live playlist still stalled after 3 recovery attempts; for Bitmovin, after 3 reload attempts or with no source to reload. Recover in the same way, ideally with a fresh channel URL.
 :::
@@ -140,8 +140,9 @@ Without `prerollAdTagUrl`, load and play the returned URL right away, with the m
 
 - **Events:** The temporary listener receives `onPrepare()`, `onPlay()` when the pre-roll starts, and `onCompleted()` when it ends. `onAdBreakPrepare()`, `onAdPlay()`, `onAdUserAction()`, and `onAdBreakSkipped()` are not reported for a channel pre-roll.
 - **No ad or failure:** When the pre-roll response has no ad, the request fails, or the pre-roll fails while playing, the SDK reports `onCompleted()`, not `onError()`, so the channel starts as usual. Handle `onError()` on the temporary listener in the same way as a safeguard.
-- **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, a channel pre-roll is paused when the app enters PIP and resumed when it returns, in the same way as VOD ads. Report PIP changes with `FlowerSdk.notifyPictureInPictureModeChanged()`; see [PIP Mode Support](../../getting-started/pip-mode-support).
-- **Restart after `onError`:** A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Load and play the returned URL right away, keeping the main listener registered, as described in "Recovering from `onError`" above.
+- **PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, a channel pre-roll is paused when the user leaves the app and resumed when the user comes back, in the same way as VOD ads. Report this with `FlowerSdk.notifyUserLeftApp()`, whether or not the app enters PIP; see [PIP Mode Support](../../getting-started/pip-mode-support).
+- **Same channel again:** The SDK remembers the channel (`channelId`) entered last. When `changeChannelUrl()` is called with that same `channelId`, the SDK skips the pre-roll even if `prerollAdTagUrl` is passed, and reports `onCompleted()` shortly after `changeChannelUrl()` returns, in the same way as a pre-roll with no ad. The app therefore starts the channel exactly as on the first start. `stop()` does not clear the remembered channel; requesting VOD ads (`requestVodAd`) or inline ads (`requestAd`) does. For example, A → B → A plays A's pre-roll again, and A → VOD → A also plays it again. Because the SDK remembers the channel across screens, leaving the player screen and coming back to the same channel with no VOD or inline ad request in between also skips the pre-roll.
+- **Restart after `onError`:** Call `changeChannelUrl()` with the same parameters as the first start, including `prerollAdTagUrl`, and handle the returned URL in the same way, as described in "Recovering from `onError`" above. Since the channel is the one entered last, the viewer does not see the pre-roll again.
 - **Channel switch:** Each `changeChannelUrl()` call stops the previous channel's ad session, including a pre-roll that is still playing, and requests the new channel's pre-roll when `prerollAdTagUrl` is passed. A pre-roll stopped this way, or by `stop()`, does not report `onCompleted()`. Before the next `changeChannelUrl()` call and before `stop()`, remove a temporary listener that is still registered and register the main listener again; otherwise it would load the previous channel's URL when the next pre-roll ends.
 
 ## Linear Channel Ad Request Example
@@ -152,8 +153,8 @@ The example below follows the [Pre-roll Ads](#pre-roll-ads) flow.
 // Temporary listener while a channel pre-roll is pending (null otherwise)
 private var prerollListener: FlowerAdsManagerListener? = null
 
-// withPreroll: true for the first start of a channel and a channel switch, false for a restart after onError
-private fun playLinearTv(withPreroll: Boolean = true) {
+// Used for the first start of a channel, a channel switch, and a restart after onError
+private fun playLinearTv() {
     // A pre-roll stopped by a channel switch does not report onCompleted:
     // drop its temporary listener and make sure the original listener is registered.
     prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
@@ -171,8 +172,8 @@ private fun playLinearTv(withPreroll: Boolean = true) {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-    val prerollAdTagUrl: String? = if (withPreroll) "https://ad_request?target=preroll" else null
+    // Pass it on a restart as well: the SDK skips the pre-roll of the channel entered last and reports onCompleted.
+    val prerollAdTagUrl: String? = "https://ad_request?target=preroll"
 
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",

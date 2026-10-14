@@ -9,7 +9,7 @@ sidebar_label: 기존 VOD 연동 전환
 
 | 파라미터 | 예시 | 설명 |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | 업그레이드할 `@anypoint/flower-sdk-react-native` 버전 |
+| `{{SDK_VERSION}}` | `1.0.4` | 업그레이드할 `@anypoint/flower-sdk-react-native` 버전 |
 | `{{PLAYER_TYPE}}` | `react-native-video` \| `bitmovin` | VOD 콘텐츠를 재생하는 플레이어 라이브러리 |
 
 ````plain

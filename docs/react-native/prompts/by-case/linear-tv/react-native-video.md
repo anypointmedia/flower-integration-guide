@@ -9,7 +9,7 @@ Use this prompt to add Flower ads to a live channel or FAST stream played by `re
 
 | Parameter | Example | Description |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
+| `{{SDK_VERSION}}` | `1.0.4` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
 
 ````plain
 We are integrating the FLOWER SDK into our React Native app for a LINEAR TV / FAST
@@ -61,14 +61,22 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Every changeChannelUrl() call starts a new session: the SDK stops the one running for
   that nativeID (a pre-roll still playing included) and requests the pre-roll of the new
   call. Switching to a channel with its own prerollAdTagUrl holds its proxy url again.
-- By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses in PIP
-  and resumes on return, like a VOD ad, if the app reports both moments with
-  notifyPictureInPictureModeChanged().
+- By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses when the
+  user leaves the app and resumes on return, like a VOD ad, if the app reports both
+  moments with notifyUserLeftApp() (see the PIP prompt).
 - An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
   playlist it failed to manipulate), which can leave the player on a broken stream. The
   recovery is a restart: await stop(nativeId) - it stops the ads manager but, unlike
   release(), keeps the overlay and the subscription - then call changeChannelUrl() again
-  with the same params and set the NEW proxy url it returns as the source.
+  with exactly the same params (prerollAdTagUrl included) and handle the NEW proxy url it
+  returns as on the first start.
+- The SDK remembers the channel (channelId) entered last. changeChannelUrl() for that
+  same channel skips the pre-roll even with prerollAdTagUrl, and sends 'completed' right
+  after the call resolves, like a pre-roll with no ad. So a restart does not show the
+  pre-roll again, and a proxy url held until 'completed' plays exactly as on the first
+  start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear
+  it. It is one channel for the whole app, not one per nativeID (A -> B -> A plays A's
+  pre-roll again).
 - stop() ends any break in progress, and that break may still report 'completed' after
   the 'error', even after stop() resolved. The 'completed' handling must be idempotent.
 - All SDK state is keyed by nativeID, and every ad event carries it back. Several
@@ -142,12 +150,10 @@ Step 1 — Component skeleton and imports
 
 Step 2 — Start the channel: the first handover from onLoad (guarded), and the restart
 
-  // withPreroll is true for the first start only. A restart leaves the channel pre-roll
-  // out (prerollAdTagUrl omitted): the viewer has already seen it. So a restart holds
-  // nothing: the new proxy url plays at once instead of waiting for a 'completed' that
-  // the break cut short by stop() may report early.
-  const startChannel = useCallback(async (withPreroll: boolean) => {
-    const preroll = withPreroll ? config.prerollAdTagUrl : undefined;
+  // The same call for the first start and for every restart. On a restart the SDK skips
+  // the pre-roll of the channel entered last and sends 'completed' right away, so the
+  // held proxy url plays exactly as on the first start.
+  const startChannel = useCallback(async () => {
     const proxyUrl = await changeChannelUrl(nativeId, {
       videoUrl: config.videoUrl,
       adTagUrl: config.adTagUrl,
@@ -155,13 +161,11 @@ Step 2 — Start the channel: the first handover from onLoad (guarded), and the 
       extraParams: config.extraParams,                    // omit if not configured
       adTagHeaders: config.adTagHeaders,                  // omit if not configured
       channelStreamHeaders: config.channelStreamHeaders,  // omit if not configured
-      prerollAdTagUrl: preroll,                           // omit if not configured
+      prerollAdTagUrl: config.prerollAdTagUrl,            // omit if not configured
     });
-    if (preroll) {
+    if (config.prerollAdTagUrl) {
       pendingProxyUrl.current = proxyUrl;  // applied from 'completed'
     } else {
-      pendingProxyUrl.current = null;
-      setHeld(false);
       setSourceUri(proxyUrl);              // Phase 3: same player, new source
     }
   }, [nativeId, config]);
@@ -170,7 +174,7 @@ Step 2 — Start the channel: the first handover from onLoad (guarded), and the 
     if (handedOver.current) return;          // onLoad fires again after every swap
     handedOver.current = true;
     try {
-      await startChannel(true);
+      await startChannel();
     } catch (e: any) {
       handedOver.current = false;
       console.error(`changeChannelUrl failed: ${e.message}`);
@@ -185,7 +189,7 @@ Step 2 — Start the channel: the first handover from onLoad (guarded), and the 
     restarts.current += 1;
     try {
       await stop(nativeId);
-      await startChannel(false);
+      await startChannel();
     } catch (e: any) {
       console.error(`channel restart failed: ${e.message}`);
     } finally {
@@ -273,8 +277,9 @@ DO:
 - Call changeChannelUrl() from onLoad, guarded by a ref.
 - Remove your own subscriptions; release() does not remove them.
 - Treat runtime ad failures as 'error' events; they do not reject a promise.
-- On 'error', await stop(nativeId), then call changeChannelUrl() again with the same
-  params (without prerollAdTagUrl) and play the new proxy url. Cap the restarts.
+- On 'error', await stop(nativeId), then call changeChannelUrl() again with exactly the
+  same params, prerollAdTagUrl included, and handle the new proxy url as on the first
+  start. Cap the restarts.
 - Keep the 'completed' handling idempotent; a stopped break may still report it.
 
 DO NOT:
@@ -300,8 +305,10 @@ Android and iOS each:
 3. With prerollAdTagUrl: no channel audio under the pre-roll; the proxy url starts after
    'completed'. With a pre-roll tag that returns no ad, the channel still starts.
 4. Ad error: an 'error' is logged, stop() is called, then changeChannelUrl() runs once
-   more and the channel plays again from a NEW proxy url. A channel that keeps failing
-   stops restarting after MAX_RESTARTS.
+   more and the channel plays again from a NEW proxy url. With prerollAdTagUrl, the
+   pre-roll does not play again on the restart and the new proxy url is applied from the
+   'completed' that follows right away. A channel that keeps failing stops restarting
+   after MAX_RESTARTS.
 5. Two channels on screen: each has its own overlay and events carry the right nativeId.
 6. Unmount: release() is called, no overlay is left behind.
 Native SDK logs are in adb logcat (Android) and the Xcode console (iOS), not in Metro.

@@ -9,7 +9,7 @@ Use this prompt to show a standalone video ad that is not tied to a content play
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g. `2.3.17` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g. `2.3.18` | Flower SDK version provided to your project |
 | `PLACEMENT` | `inline` \| `interstitial` | Whether the ad shows in a page area or covers the whole screen |
 
 ```plain
@@ -48,9 +48,11 @@ HOW THE SDK BEHAVES IN THIS CASE
 5. requestAd() first stops the previous ad session of the same FlowerAdsManager. Calling
    it on a FlowerAdView that is running a VOD or linear session stops that session, so
    this ad needs its own FlowerAdView and container.
-6. If the app enters PIP mode while this ad plays (default mode), the SDK pauses the ad
-   and resumes it when the app leaves PIP; the app must report both transitions with
-   FlowerSdk.notifyPictureInPictureModeChanged().
+6. If the user leaves the app while this ad plays (another tab or app, the TV app in the
+   background, or PIP; default mode), the SDK pauses the ad and resumes it when the user
+   comes back. The app reports both with FlowerSdk.notifyUserLeftApp(true / false),
+   whether or not PIP starts (the deprecated notifyPictureInPictureModeChanged() is not
+   used). If the app already does this for its other ads, nothing is added here.
 
 ========================================
 IMPLEMENTATION

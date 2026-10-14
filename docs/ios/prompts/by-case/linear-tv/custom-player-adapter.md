@@ -44,6 +44,11 @@ HOW THE SDK BEHAVES IN THIS CASE
   SDK calls the adapter's pause() and resume(); both must be safe before changedUrl is loaded.
   A channel change (stop() + a new changeChannelUrl(...)) stops a pre-roll still playing and
   requests the new channel's pre-roll; drop the old temporary listener first.
+- The SDK remembers the channel (channelId) entered last. When changeChannelUrl(...) is called
+  with that same channelId (e.g. a restart after onError), the SDK skips the pre-roll even
+  though prerollAdTagUrl is passed, and calls onCompleted (and the adapter's resume()) right
+  after changeChannelUrl(...) returns, like a pre-roll with no ad. stop() does not clear the
+  remembered channel; requestVodAd and requestAd do. A -> B -> A plays A's pre-roll again.
 - The SDK calls the adapter from its own worker threads, synchronously. Every method must answer
   without waiting on the main thread (a main-queue hop that waits can deadlock).
 - The SDK keeps the adapter for the whole ad session. Releasing the app's reference does not
@@ -108,8 +113,8 @@ IMPLEMENTATION
        adTagHeaders: channel.adTagHeaders,
        channelStreamHeaders: channel.streamHeaders,
        prerollAdTagUrl: nil              // or the pre-roll tag; then load changedUrl only after
-                                         // the first onCompleted/onError. Always nil on a
-                                         // restart after onError (step 5).
+                                         // the first onCompleted/onError. Pass the same
+                                         // value on a restart after onError (step 5).
    )
    // load changedUrl into the player and play
 
@@ -118,9 +123,10 @@ IMPLEMENTATION
    hop to the main thread and restart the channel - flowerAdView.adsManager.stop(), stop and
    release the player's current item, make the old adapter stop touching the player, then
    step 4 again with a new adapter and a new changeChannelUrl(...) (the old loopback URL dies
-   with stop()). A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the
-   viewer has already seen it. So the restart passes prerollAdTagUrl: nil and loads changedUrl
-   right away, with no pre-roll wait. A break cut short by stop() may still report onCompleted afterwards, so keep
+   with stop()). The restart passes exactly the same parameters as the first start, including
+   prerollAdTagUrl, and handles changedUrl the same way (held until the first onCompleted/
+   onError if a pre-roll tag was passed). The SDK skips the pre-roll of the channel entered
+   last and calls onCompleted right away, so the viewer does not see it again. A break cut short by stop() may still report onCompleted afterwards, so keep
    onCompleted idempotent. Keep a simple retry limit (e.g. at most 3 restarts in a row). While waiting for
    a pre-roll, the first onCompleted/onError only loads changedUrl; it does not restart.
 
@@ -151,7 +157,7 @@ VERIFY
 - isPlaying() turns false while the stream is paused or buffering, and true again when it plays.
 - Channel change: the old adapter no longer reads or drives the player.
 - onError: the ads manager stops and the channel restarts from a new changeChannelUrl, without
-  a pre-roll.
+  the pre-roll playing again.
 
 ========================================
 OUTPUT

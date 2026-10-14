@@ -11,7 +11,7 @@ The prompt generates Kotlin code.
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 | `PLACEMENT` | `inline` \| `interstitial` | `inline`: the ad view fills a content area. `interstitial`: the ad view covers the whole screen |
 | `PAUSE_CONTENT` | `yes` \| `no` | Whether a content player is playing behind the ad and must be paused during it |

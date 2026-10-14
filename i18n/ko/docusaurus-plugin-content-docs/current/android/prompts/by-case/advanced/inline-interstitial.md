@@ -11,7 +11,7 @@ sidebar_label: 인라인 / 전면 광고
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.9.28` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.9.29` | 프로젝트에 제공된 Flower SDK 버전 |
 | `ENV` | `local` \| `dev` \| `prod` | `FlowerSdk.setEnv()`에 전달하는 값 |
 | `PLACEMENT` | `inline` \| `interstitial` | `inline`: 광고 뷰가 콘텐츠 영역을 채움. `interstitial`: 광고 뷰가 화면 전체를 덮음 |
 | `PAUSE_CONTENT` | `yes` \| `no` | 광고 뒤에서 본편 플레이어가 재생 중이라 광고 동안 일시정지해야 하는지 여부 |

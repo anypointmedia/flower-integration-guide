@@ -18,7 +18,7 @@ sidebar_position: 0
 | PIP 모드에서도 VOD 광고가 계속 재생되어야 하여, 광고를 앱의 HLS.js 또는 Bitmovin 플레이어 안에서 재생하는 경우 | [앱의 플레이어 안에서 재생되는 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
 | 이미 VOD 광고를 연동했으며, 광고 전후로 앱이 직접 일시정지, 재개, 탐색(seek)하거나 재생을 지연하는 경우 | [기존 VOD 연동 업데이트](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | 본편 플레이어 없이 페이지 영역 또는 전체 화면에 독립적인 동영상 광고를 노출하는 경우 | [인라인 광고와 전면 광고](./by-case/advanced/inline-interstitial.md) |
-| 사용자가 동영상을 PIP(Picture-in-Picture)로 전환할 수 있는 경우 | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |
+| 사용자가 앱을 떠나고(다른 탭이나 앱으로 전환, TV 앱이 백그라운드로 이동, PIP(Picture-in-Picture)) 돌아오는 것을 SDK에 알리고, 광고 재생 중에는 동영상이 PIP로 전환되지 않게 하는 경우 | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |
 
 케이스를 조합할 수도 있습니다. 예를 들어 VOD 프롬프트를 먼저 사용한 뒤, 그 결과물에 PIP 프롬프트를 적용하세요.
 

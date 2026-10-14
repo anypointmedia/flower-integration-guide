@@ -9,7 +9,7 @@ sidebar_label: 앱의 플레이어를 이용한 VOD
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.3.17` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.3.18` | 프로젝트에 제공된 Flower SDK 버전 |
 | `PLAYER` | `hls.js` \| `bitmovin` \| `dash.js` \| `shaka` | 앱에서 VOD 재생에 사용하는 플레이어 라이브러리 |
 
 ```plain

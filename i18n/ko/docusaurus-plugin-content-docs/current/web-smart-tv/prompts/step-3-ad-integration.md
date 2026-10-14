@@ -26,10 +26,10 @@ because it is needed later for cleanup in stopPlayback (removeListener).
 --------------------------------------------------
 If AD_TYPE is "linear-tv":
 
-On onError(), stop the ads manager, release the player, and restart the channel as it was
-first started, but with playLinearTv({ withPreroll: false }) (see PART 2). A restart leaves
-the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-Remove the listener first: stop() ends any ad break in progress and
+On onError(), stop the ads manager, release the player, and restart the channel exactly as
+it was first started, with playLinearTv() (see PART 2), prerollAdTagUrl included. The SDK
+skips the pre-roll of the channel (channelId) it entered last, so the viewer does not see it
+again. Remove the listener first: stop() ends any ad break in progress and
 can still call onCompleted() for it afterwards. Keep onCompleted() UI-only (never start or
 reload playback there). Optionally count restarts and give up after a few attempts.
 
@@ -41,7 +41,7 @@ For FlowerHls:
       onError(error) {
           console.error(error);
           stopPlayback();  // hls.removeAdListener() -> hls.destroy() (also calls the ads manager's stop()) - Step 4
-          playLinearTv({ withPreroll: false });  // restart, no pre-roll: new FlowerHls -> attachContainer -> setAdConfig -> addAdListener -> loadSource
+          playLinearTv();  // restart as the first start: new FlowerHls -> attachContainer -> setAdConfig -> addAdListener -> loadSource
       },
       onAdBreakSkipped(reason) {},
       onAdBreakPrepare(adInfos) {}
@@ -56,7 +56,7 @@ For MediaPlayerHook:
       onError(error) {
           console.error(error);
           stopPlayback();  // removeListener() -> adsManager.stop() -> player.destroy() - Step 4
-          playLinearTv({ withPreroll: false });  // restart, no pre-roll: new FlowerAdView and player -> changeChannelUrl() again -> load the returned URL -> play
+          playLinearTv();  // restart as the first start: new FlowerAdView and player -> changeChannelUrl() again -> load the returned URL -> play
       },
       onAdBreakSkipped(reason) {},
       onAdBreakPrepare(adInfos) {}
@@ -150,13 +150,14 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-hls":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
 
-  Put this in playLinearTv({ withPreroll = true } = {}): true for the first start and a channel
-  change, false for a restart after onError(). A restart leaves the channel pre-roll out
-  (prerollAdTagUrl omitted): the viewer has already seen it.
+  Put this in playLinearTv(): used for the first start, a channel change, and a restart after
+  onError(). A restart passes the same values, prerollAdTagUrl included: the SDK remembers the
+  channel (channelId) entered last and skips its pre-roll (stop()/destroy() do not clear it;
+  requestVodAd()/requestAd() do).
 
   hls.setAdConfig({
       adTagUrl: config.adTagUrl,
-      prerollAdTagUrl: withPreroll ? config.prerollAdTagUrl : undefined,   // Optional; omitted on a restart
+      prerollAdTagUrl: config.prerollAdTagUrl,   // Optional; kept on a restart
       channelId: config.channelId,
       extraParams: config.extraParams || {}
   });
@@ -168,11 +169,12 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
 
-  Put this in playLinearTv({ withPreroll = true } = {}), as above: a restart after onError()
-  passes withPreroll: false and loads the returned URL right away.
+  Put this in playLinearTv(), as above: a restart after onError() passes the same arguments,
+  prerollAdTagUrl included, and holds the stream the same way. The SDK skips the pre-roll of
+  the channel entered last and calls onCompleted() right after changeChannelUrl() returns.
 
   const mediaPlayerHook = { getPlayer() { return player; } };
-  const prerollAdTagUrl = (withPreroll && config.prerollAdTagUrl) || null;   // null on a restart
+  const prerollAdTagUrl = config.prerollAdTagUrl || null;   // kept on a restart
 
   const changedUrl = flowerAdView.adsManager.changeChannelUrl(
       config.contentUrl,                                       // Required
@@ -182,7 +184,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
       mediaPlayerHook,                                         // Required
       new Map(),                                               // adTagHeaders (Optional)
       new Map(),                                               // channelStreamHeaders (Optional)
-      prerollAdTagUrl                                          // Optional; null on a restart
+      prerollAdTagUrl                                          // Optional; kept on a restart
   );
 
   // Loads and plays the URL returned by changeChannelUrl().
@@ -196,7 +198,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
   }
 
   if (prerollAdTagUrl == null) {
-      // No pre-roll (none configured, or a restart after onError()): play right away,
+      // No pre-roll configured: play right away,
       // with adsManagerListener kept registered.
       loadChannel(changedUrl);
   } else {
@@ -307,10 +309,10 @@ CONSTRAINTS
 - HTML5 MediaPlayerAdapter uses enterChannel() API (not changeChannelUrl overload).
 - VOD is not available with FlowerHls approach.
 - Linear TV onError(): remove the listener, stop the ads manager (FlowerHls: hls.destroy() does it),
-  release the player, then restart the channel as at first start but without prerollAdTagUrl.
-  A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+  release the player, then restart the channel exactly as at first start, prerollAdTagUrl included.
+  The SDK skips the pre-roll of the channel entered last, so the viewer does not see it again.
 - Linear TV media-player-hook with prerollAdTagUrl: load the returned URL only from the temporary
-  pre-roll listener's first onCompleted()/onError(); with no pre-roll (or on a restart), right away.
+  pre-roll listener's first onCompleted()/onError(), on a restart too; with no pre-roll, right away.
 - VOD onError(): pre-roll error -> load the content; mid-roll error -> play() only (no seek/reload);
   post-roll error -> nothing to resume.
 ```

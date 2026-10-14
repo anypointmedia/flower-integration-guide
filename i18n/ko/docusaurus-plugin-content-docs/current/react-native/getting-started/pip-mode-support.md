@@ -4,11 +4,11 @@ sidebar_position: 4
 
 # PIP 모드 지원
 
-기본적으로 PIP(Picture-in-Picture) 모드에서는 광고를 재생하지 않으며, SDK는 PIP 모드를 스스로 감지하지 않습니다. 이를 제어하는 두 함수는 모두 패키지 루트에서 import합니다:
+기본적으로 PIP(Picture-in-Picture) 모드에서는 광고를 재생하지 않으며, SDK는 사용자가 앱을 떠났는지 스스로 감지하지 않습니다. 이를 제어하는 두 함수는 모두 패키지 루트에서 import합니다:
 
 ```ts
 import {
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
   setIgnoreAdBreakInPIPMode,
 } from '@anypoint/flower-sdk-react-native';
 ```
@@ -17,17 +17,21 @@ import {
 
 ## 메소드
 
-### notifyPictureInPictureModeChanged
+### notifyUserLeftApp
 
 ```ts
-function notifyPictureInPictureModeChanged(isInPictureInPictureMode: boolean): Promise<void>;
+function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 ```
 
-앱이 PIP 모드에 진입했거나(`true`) PIP 모드에서 돌아왔음(`false`)을 SDK에 알립니다.
+사용자가 앱을 떠났거나(`true`) — 홈 화면이나 다른 앱으로 이동했거나, 영상이 PIP 창으로 옮겨진 경우 — 앱으로 돌아왔음(`false`)을 SDK에 알립니다. 앱이 PIP에 진입하는지와 관계없이 알려주어야 합니다.
 
 | **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
-| isInPictureInPictureMode | boolean | PIP 모드 진입 시 `true`, 해제 시 `false` |
+| hasLeftApp | boolean | 사용자가 앱을 떠날 때 `true`, 돌아올 때 `false` |
+
+:::note
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
+:::
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -39,30 +43,33 @@ function setIgnoreAdBreakInPIPMode(ignore: boolean): Promise<void>;
 
 | **값** | **광고 플레이어** | **PIP 모드에서의 광고** |
 | ---| ---| --- |
-| `true` (기본값) | VOD 및 인라인 브레이크를 `<Video>` 위 오버레이의 SDK 자체 광고 플레이어에서 재생합니다. | 지원하지 않습니다. PIP 모드에 진입할 때 재생 중이던 광고는 일시정지되며, PIP 모드에서는 mid-roll 또는 post-roll 브레이크를 요청하지 않습니다. |
+| `true` (기본값) | VOD 및 인라인 브레이크를 `<Video>` 위 오버레이의 SDK 자체 광고 플레이어에서 재생합니다. | 지원하지 않습니다. 사용자가 앱을 떠날 때 재생 중이던 광고는 일시정지되며, 사용자가 돌아올 때까지 mid-roll 또는 post-roll 브레이크를 요청하지 않습니다. |
 | `false` | VOD 브레이크를 `<Video>`의 플레이어(Android와 iOS의 `react-native-video`, Android의 Bitmovin) 안에서 재생합니다. 광고를 본편 앞에 넣고, 광고가 끝나면 본편을 다시 넣습니다. 인라인 브레이크와 iOS Bitmovin의 VOD 브레이크는 여전히 SDK 자체 광고 플레이어에서 재생합니다. | 앱의 플레이어에서 재생되는 VOD 브레이크에 한해 지원합니다. PIP 모드에서도 광고가 계속 재생됩니다. |
 
 :::caution
-PIP 진입과 해제를 모두 `notifyPictureInPictureModeChanged`로 알려주어야 합니다. SDK는 PIP 모드를 스스로 감지하지 않습니다. 유일한 예외는 Android의 `playerType: 'bitmovin'`으로, SDK가 Bitmovin 자체의 PIP 이벤트를 받습니다.
+사용자가 앱을 떠나는 시점과 돌아오는 시점을 모두 `notifyUserLeftApp`으로 알려주어야 합니다. 앱이 PIP에 진입하는지와는 관계없습니다. 어떤 `playerType`에서도 SDK는 두 시점을 스스로 감지하지 않습니다.
 :::
 
 ## PIP 모드에서의 광고 (기본값)
 
-PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 따라서 광고가 재생 중이라면 앱에서는 `notifyPictureInPictureModeChanged`를 통해 PIP 변경 여부를 반드시 알려주어야 합니다. 그래야 PIP에 진입하면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다. 또한 앱에서는 광고가 재생 중일 때 PIP 모드로 바뀌더라도 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다.
+PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 따라서 광고 재생 중 사용자가 앱을 떠나면 앱은 PIP에 진입하지 않으며, SDK는 앱이 알려주어야만 사용자가 떠났다는 것을 알 수 있습니다. 그러므로 앱에서는 PIP 진입 여부와 관계없이 사용자가 앱을 떠나고 돌아올 때마다 `notifyUserLeftApp`으로 반드시 알려주어야 합니다. 그래야 사용자가 앱을 떠나면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다.
 
-*   광고 재생 중 앱이 `notifyPictureInPictureModeChanged(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
-*   앱이 `notifyPictureInPictureModeChanged(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
-*   앱이 PIP 모드인 동안에는 mid-roll 및 post-roll 브레이크를 요청하지 않습니다.
-*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. PIP 모드에서도 계속 재생되며 광고 UI만 숨겨집니다. 단, 채널 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
+*   사용자가 돌아올 때까지 mid-roll 및 post-roll 브레이크를 요청하지 않습니다.
+*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, 채널 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
 
 어떤 화면이 PIP로 전환되는지는 SDK가 아니라 OS와 앱이 결정합니다. iOS에서는 PIP 컨트롤러가 연결된 플레이어 레이어, 즉 본편 플레이어가, Android에서는 Activity 전체가 PIP로 전환됩니다. 광고 재생 중에는 본편 `<Video>`가 PIP로 전환되지 않도록 하세요.
 
+React Native의 `AppState`는 PIP 여부와 관계없이 사용자가 앱을 떠나는 시점(`background`)과 돌아오는 시점(`active`)을 알려줍니다. 앱 전환기를 여는 경우처럼 일시적인 상태인 `inactive`는 무시하세요.
+
 ```tsx
 import React, {useEffect, useState} from 'react';
+import {AppState} from 'react-native';
 import Video from 'react-native-video';
 import {
   addAdEventListenerFor,
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
 } from '@anypoint/flower-sdk-react-native';
 
 export function VodPlayer({nativeId, contentUrl}: {nativeId: string; contentUrl: string}) {
@@ -79,22 +86,30 @@ export function VodPlayer({nativeId, contentUrl}: {nativeId: string; contentUrl:
     return () => subscription.remove();
   }, [nativeId]);
 
+  // PIP 진입 여부와 관계없이 사용자가 앱을 떠나고 돌아오는 시점을 알립니다.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'background') {
+        notifyUserLeftApp(true).catch(() => {});
+      } else if (state === 'active') {
+        notifyUserLeftApp(false).catch(() => {});
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   return (
     <Video
       nativeID={nativeId}
       source={{uri: contentUrl}}
       // 광고 재생 중에는 본편이 PIP로 전환되지 않도록 합니다.
       enterPictureInPictureOnLeave={!adPlaying}
-      // PIP 진입과 해제를 모두 알립니다.
-      onPictureInPictureStatusChanged={({isActive}) =>
-        notifyPictureInPictureModeChanged(isActive).catch(() => {})
-      }
     />
   );
 }
 ```
 
-앱이 다른 방법(예: Android의 자체 네이티브 코드)으로 PIP에 진입한다면, 그곳에서도 같은 방식으로 `notifyPictureInPictureModeChanged`를 호출하세요.
+`notifyUserLeftApp`은 앱 전체에 적용되므로 앱 전체에 `AppState` 구독 하나면 충분하며, 플레이어 컴포넌트 안에 둘 필요는 없습니다.
 
 ## PIP 모드에서 광고 지원하기
 

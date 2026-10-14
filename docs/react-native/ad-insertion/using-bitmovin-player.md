@@ -113,7 +113,7 @@ useEffect(() => {
 Do not turn on `playbackConfig.isAutoplayEnabled` to get around the hold: it starts the channel under the pre-roll.
 :::
 
-The [Linear TV / FAST with the Bitmovin Player prompt](../prompts/by-case/linear-tv/bitmovin.md) contains the complete component, including the `onReady` play logic and the `error` restart, which leaves the pre-roll out.
+The [Linear TV / FAST with the Bitmovin Player prompt](../prompts/by-case/linear-tv/bitmovin.md) contains the complete component, including the `onReady` play logic and the `error` restart, which repeats the first start's call unchanged — the SDK skips the pre-roll of the channel entered last.
 
 ## Expo Modules
 

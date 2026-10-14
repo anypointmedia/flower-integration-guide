@@ -9,7 +9,7 @@ Use this prompt to add pre-roll, mid-roll and post-roll ads to on-demand content
 
 | Parameter | Example | Description |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
+| `{{SDK_VERSION}}` | `1.0.4` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
 
 ````plain
 We are integrating the FLOWER SDK into our React Native app for VOD content played by

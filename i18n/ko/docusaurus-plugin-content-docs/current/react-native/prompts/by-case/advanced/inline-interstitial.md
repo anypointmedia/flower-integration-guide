@@ -9,7 +9,7 @@ sidebar_label: 인라인 / 전면 광고
 
 | 파라미터 | 예시 | 설명 |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
+| `{{SDK_VERSION}}` | `1.0.4` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
 | `{{PLAYER_TYPE}}` | `react-native-video` \| `bitmovin` | 오버레이가 마운트될 뷰를 소유한 플레이어 라이브러리 |
 | `{{TRIGGER}}` | 예: "when the episode ends" | 앱 흐름에서 브레이크가 들어갈 위치 |
 
@@ -53,7 +53,7 @@ HOW THE SDK BEHAVES IN THIS CASE
 - playerType still matters: it decides which kind of view is looked up. With 'bitmovin'
   the id goes on an empty overlay <View nativeID> above <PlayerView>.
 - With the default setIgnoreAdBreakInPIPMode(true), an ad playing when the app reports
-  PIP is paused until the app reports it is back.
+  notifyUserLeftApp(true) is paused until the app reports notifyUserLeftApp(false).
 
 ========================================
 SETUP — only if the package is not installed yet
@@ -192,8 +192,8 @@ Android and iOS each:
 3. No ad (adBreakSkipped, reason 1): the content resumes immediately.
 4. Ad error: the content resumes; nothing stays frozen.
 5. Full-screen case: the overlay covers the whole screen.
-6. PIP (if the app supports it): with the default mode, an ad playing when PIP is
-   reported pauses, and resumes when the app comes back.
+6. Leaving the app (if the app reports it with notifyUserLeftApp): with the default mode,
+   an ad playing when the user leaves pauses, and resumes when the user comes back.
 7. Unmount during a break: release() runs and the overlay goes with it.
 
 ========================================

@@ -137,7 +137,7 @@ Flower SDK에서 오류가 발생했을 때 발생합니다.
 
 `error` 시 해야 할 일은 세션 종류에 따라 다릅니다:
 
-*   **Linear TV / FAST**: `await stop(nativeId)`로 광고 매니저를 중지한 뒤 채널을 다시 시작합니다 — `prerollAdTagUrl`을 제외한 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 반환된 새 프록시 URL을 바로 소스로 설정합니다. 재시작할 때는 채널 프리롤을 넣지 않습니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 봤기 때문입니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
+*   **Linear TV / FAST**: `await stop(nativeId)`로 광고 매니저를 중지한 뒤 채널을 다시 시작합니다 — `prerollAdTagUrl`을 포함해 첫 시작과 완전히 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 반환된 새 프록시 URL은 첫 시작과 같은 방식으로 처리합니다. 시청자에게 프리롤이 다시 표시되지는 않습니다. SDK가 마지막으로 진입한 채널의 프리롤을 건너뛰고 바로 `completed`를 보내기 때문입니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
 *   **VOD**: 콘텐츠의 상태에 따라 다릅니다. 브레이크가 실패하면 SDK가 이 이벤트를 보내기 전에 콘텐츠를 되돌려 놓으므로, 여기서 재개, seek, 소스 변경을 하지 마세요. 실패한 브레이크에 대해 `completed`도 전달될 수 있으며 순서는 정해져 있지 않습니다.
     *   아직 시작 전(프리롤): `completed`와 똑같이, 붙잡아 둔 콘텐츠를 시작합니다.
     *   시작했고 아직 끝나지 않음(mid-roll): 할 일이 없습니다 — 콘텐츠는 이미 중단 지점보다 되감기 시간만큼 앞에서 다시 재생 중입니다.

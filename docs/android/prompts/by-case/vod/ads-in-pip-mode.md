@@ -11,7 +11,7 @@ The prompt generates Kotlin code and assumes the MediaPlayerHook integration fro
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | The content player your app uses |
 
 ```plain
@@ -53,7 +53,8 @@ HOW THE SDK BEHAVES IN THIS CASE
   before any content was loaded, the playlist contains only ads, so STATE_ENDED fires on an ad item.
   After the post-roll, the content comes back at its end, so STATE_ENDED can be reported again.
 - In PIP, ads keep playing; mid-roll and post-roll are still requested. The SDK hides the ad UI
-  (skip / learn more) while the app reports PIP mode.
+  (skip / learn more) while the app reports that the user left the app
+  (FlowerSdk.notifyUserLeftApp(true)).
 - Pre-roll, onPrepare/play(), and "start content on the first onCompleted()/onError()" work the
   same as in the default mode.
 
@@ -111,9 +112,11 @@ IMPLEMENTATION
      bitmovin:
        val contentPositionMs = (player.currentTime * 1000).toLong()
 
-7) PIP: keep calling FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode) from
-   onPictureInPictureModeChanged. Entering PIP during an ad is fine in this mode (the ad keeps
-   playing). enterPictureInPictureMode(PictureInPictureParams) still needs API 26
+7) PIP: keep reporting the user leaving and returning, whether or not the app enters PIP:
+   FlowerSdk.notifyUserLeftApp(true) from onUserLeaveHint() (before entering PIP) and
+   FlowerSdk.notifyUserLeftApp(false) from onResume(). Replace any call to the deprecated
+   FlowerSdk.notifyPictureInPictureModeChanged(). Entering PIP during an ad is fine in this mode
+   (the ad keeps playing). enterPictureInPictureMode(PictureInPictureParams) still needs API 26
    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O).
 
 ========================================
@@ -138,7 +141,8 @@ VERIFY
   interrupted point; saved/displayed content position is correct.
 - Mid-roll ad error: the content comes back and keeps playing (it does not stay paused); it is
   not reloaded.
-- Enter PIP during a mid-roll: the ad keeps playing in the PIP window; exit PIP: UI returns.
+- Enter PIP during a mid-roll: the ad keeps playing in the PIP window; return to full screen: UI
+  returns.
 - Post-roll: requested once; STATE_ENDED after the post-roll does not trigger it again.
 - No ad / ad request failure: the content starts normally.
 

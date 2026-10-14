@@ -6,9 +6,11 @@ sidebar_position: 2
 
 PIP(Picture-in-Picture) 모드와 관련해 아래의 두 가지 옵션을 제공합니다:
 
-#### `FlowerSdk.notifyPictureInPictureModeChanged`
+#### `FlowerSdk.notifyUserLeftApp`
 
-PIP 모드가 되거나(`true`) 해제되면(`false`) 이를 SDK에 알려주는 역할입니다.
+사용자가 앱을 떠나거나(`true`) 앱으로 돌아오면(`false`) 이를 SDK에 알려주는 역할입니다. 앱을 떠난 경우는 홈 화면이나 다른 앱으로 이동했거나, 앱의 영상이 PIP 창으로 옮겨진 경우입니다.
+
+`FlowerSdk.notifyPictureInPictureModeChanged`는 deprecated 되었으며 `notifyUserLeftApp`로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -16,23 +18,25 @@ PIP 모드가 되거나(`true`) 해제되면(`false`) 이를 SDK에 알려주는
 
 | **값** | **광고 플레이어** | **PIP 모드에서의 광고** |
 | ---| ---| --- |
-| `true` (기본값) | VOD 광고(프리롤, Mid-roll, Post-roll)와 인라인 광고를 SDK의 별도 광고 플레이어에서 재생하며, 본편 위에 표시합니다. | 지원하지 않습니다. PIP 모드에 진입할 때 재생 중이던 광고는 일시정지되며, PIP 모드에서는 Mid-roll 또는 Post-roll Ad Break를 요청하지 않습니다. |
+| `true` (기본값) | VOD 광고(프리롤, Mid-roll, Post-roll)와 인라인 광고를 SDK의 별도 광고 플레이어에서 재생하며, 본편 위에 표시합니다. | 지원하지 않습니다. 사용자가 앱을 떠날 때(`notifyUserLeftApp(true)`) 재생 중이던 광고는 일시정지되며, 사용자가 앱을 떠나 있는 동안에는 Mid-roll 또는 Post-roll Ad Break를 요청하지 않습니다. |
 | `false` | 지원하는 플레이어의 경우, 플레이어의 현재 아이템을 광고 아이템으로 교체해(AVQueuePlayer는 큐에서 본편 앞에 광고 아이템을 넣어) 앱의 플레이어 안에서 광고를 재생합니다. | 지원합니다. PIP 모드에서도 광고가 계속 재생됩니다. |
 
 `setIgnoreAdBreakInPIPMode`는 광고를 요청하기 전에 호출하세요. 광고 플레이어는 광고를 요청할 때 결정됩니다.
 
 :::caution
-`notifyPictureInPictureModeChanged`로 PIP 진입과 해제를 모두 반드시 알려주어야 합니다. SDK는 PIP 모드를 스스로 감지하지 않습니다.
+`notifyUserLeftApp`로 사용자가 앱을 떠날 때와 돌아올 때를 모두 반드시 알려주어야 합니다. SDK는 이를 스스로 감지하지 않습니다. PIP 진입 여부와 관계없이 앱 생명주기에서 알려주세요.
 :::
 
 ## PIP 모드에서의 광고 (기본값)
 
-PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 따라서 광고가 재생 중이라면 앱에서는 `notifyPictureInPictureModeChanged`를 통해 PIP 변경 여부를 반드시 알려주어야 합니다. 그래야 PIP에 진입하면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다. 또한 앱에서는 광고가 재생 중일 때 PIP 모드로 바뀌더라도 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다.
+PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 따라서 앱에서는 사용자가 앱을 떠날 때와 돌아올 때 `notifyUserLeftApp`를 통해 반드시 알려주어야 합니다. 그래야 사용자가 앱을 떠나면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다. 또한 앱에서는 광고가 재생 중일 때 사용자가 앱을 떠나더라도 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다.
 
-*   광고 재생 중 앱이 `notifyPictureInPictureModeChanged(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
-*   앱이 `notifyPictureInPictureModeChanged(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
-*   앱이 PIP 모드인 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
-*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. PIP 모드에서도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
+광고 재생 중에는 본편 플레이어가 PIP로 전환되지 않으므로, 광고 재생 중 사용자가 앱을 떠나도 PIP 콜백(`AVPictureInPictureControllerDelegate` 등)은 호출되지 않습니다. 대신 앱 생명주기에서 알려주세요. 앱이 백그라운드로 전환되면 `notifyUserLeftApp(true)`를, 다시 포그라운드로 돌아오면 `notifyUserLeftApp(false)`를 호출합니다.
+
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
+*   사용자가 앱을 떠나 있는 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
+*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 앱을 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
 
 어떤 영상이 PIP로 전환되는지는 SDK가 아니라 앱이 결정합니다. iOS에서는 앱이 PIP 컨트롤러를 연결한 `AVPlayerLayer` 또는 `AVPlayerViewController`, 즉 본편 플레이어가 PIP로 전환됩니다. 광고 재생 중에는 본편 플레이어의 PIP를 시작하지 말고, 광고 구간이 끝날 때까지 자동 PIP 전환도 꺼 두세요.
 
@@ -43,6 +47,32 @@ class YourViewController: UIViewController {
     var pipController: AVPictureInPictureController?
     var isAdPlaying = false
     ...
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // TODO GUIDE: PIP 진입 여부와 관계없이,
+        //             사용자가 앱을 떠날 때와 돌아올 때 Flower SDK에 알림
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(onDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(onWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    @objc private func onDidEnterBackground() {
+        FlowerSdk.notifyUserLeftApp(true)
+    }
+
+    @objc private func onWillEnterForeground() {
+        FlowerSdk.notifyUserLeftApp(false)
+    }
 }
 
 extension YourViewController: FlowerAdsManagerListener {
@@ -73,18 +103,6 @@ extension YourViewController: FlowerAdsManagerListener {
     ...
 }
 
-extension YourViewController: AVPictureInPictureControllerDelegate {
-    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        // TODO GUIDE: PIP 모드 전환을 Flower SDK에 알림
-        FlowerSdk.notifyPictureInPictureModeChanged(true)
-    }
-
-    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        // TODO GUIDE: PIP 모드 전환을 Flower SDK에 알림
-        FlowerSdk.notifyPictureInPictureModeChanged(false)
-    }
-}
-
 extension YourViewController {
     // TODO GUIDE: 사용자가 앱의 PIP 버튼을 누르더라도 광고 재생 중에는 PIP를 시작하지 않음
     @objc func onPipButtonTapped() {
@@ -95,8 +113,10 @@ extension YourViewController {
 ```
 
 :::note 본편을 `AVPlayerViewController`로 표시하는 경우
-`canStartPictureInPictureAutomaticallyFromInline`(iOS 14.2 이상)은 자동 PIP 전환만 끄며, 앱의 PIP 버튼을 막더라도 `AVPlayerViewController`의 기본 PIP 버튼은 비활성화되지 않습니다. 본편을 `AVPlayerViewController`에서 재생한다면 광고 재생 중(`onPlay`)에는 `allowsPictureInPicturePlayback`도 `false`로 설정하고, `onCompleted`와 `onError`에서 다시 `true`로 설정하세요. `AVPlayerViewController`는 `AVPlayerViewControllerDelegate`(`playerViewControllerWillStartPictureInPicture`, `playerViewControllerDidStopPictureInPicture`)로 PIP 전환을 알려주므로, 이곳에서 같은 방식으로 `notifyPictureInPictureModeChanged`를 호출하세요.
+`canStartPictureInPictureAutomaticallyFromInline`(iOS 14.2 이상)은 자동 PIP 전환만 끄며, 앱의 PIP 버튼을 막더라도 `AVPlayerViewController`의 기본 PIP 버튼은 비활성화되지 않습니다. 본편을 `AVPlayerViewController`에서 재생한다면 광고 재생 중(`onPlay`)에는 `allowsPictureInPicturePlayback`도 `false`로 설정하고, `onCompleted`와 `onError`에서 다시 `true`로 설정하세요. 사용자가 앱을 떠나고 돌아오는 것은 `AVPlayerViewControllerDelegate`가 아니라 같은 방식으로 앱 생명주기에서 알려주세요.
 :::
+
+앱에서 scene delegate를 사용한다면 대신 `sceneDidEnterBackground(_:)`에서 `FlowerSdk.notifyUserLeftApp(true)`를, `sceneWillEnterForeground(_:)`에서 `FlowerSdk.notifyUserLeftApp(false)`를 호출해도 됩니다. SwiftUI에서는 `@Environment(\.scenePhase)`를 관찰해 `.background`일 때 `notifyUserLeftApp(true)`를, `.active`일 때 `notifyUserLeftApp(false)`를 호출하세요.
 
 ## PIP 모드에서 광고 지원하기
 

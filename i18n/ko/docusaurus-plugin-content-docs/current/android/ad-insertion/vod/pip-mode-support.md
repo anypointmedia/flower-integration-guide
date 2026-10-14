@@ -6,9 +6,9 @@ sidebar_position: 3
 
 PIP(Picture-in-Picture) 모드와 관련해 아래의 두 가지 옵션을 제공합니다:
 
-#### `FlowerSdk.notifyPictureInPictureModeChanged`
+#### `FlowerSdk.notifyUserLeftApp`
 
-PIP 모드가 되거나(`true`) 해제되면(`false`) 이를 SDK에 알려주는 역할입니다.
+사용자가 앱을 떠나거나(`true`) 앱으로 돌아오면(`false`) 이를 SDK에 알려주는 역할입니다. 홈 화면이나 다른 앱으로 이동하는 경우와 앱의 영상이 PIP 창으로 전환되는 경우 모두 앱을 떠난 것에 해당합니다. `FlowerSdk.notifyPictureInPictureModeChanged`는 deprecated 되었으며 이 API로 대체되었습니다. 전달받은 값을 그대로 `notifyUserLeftApp`에 전달하므로 기존 호출도 계속 동작합니다.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -16,27 +16,29 @@ PIP 모드가 되거나(`true`) 해제되면(`false`) 이를 SDK에 알려주는
 
 | **값** | **광고 플레이어** | **PIP 모드에서의 광고** |
 | ---| ---| --- |
-| `true` (기본값) | VOD 광고(프리롤, Mid-roll, Post-roll)와 인라인 광고를 SDK의 별도 광고 플레이어에서 재생하며, 본편 위에 표시합니다. | 지원하지 않습니다. PIP 모드에 진입할 때 재생 중이던 광고는 일시정지되며, PIP 모드에서는 Mid-roll 또는 Post-roll Ad Break를 요청하지 않습니다. |
+| `true` (기본값) | VOD 광고(프리롤, Mid-roll, Post-roll)와 인라인 광고를 SDK의 별도 광고 플레이어에서 재생하며, 본편 위에 표시합니다. | 지원하지 않습니다. 사용자가 앱을 떠날 때 재생 중이던 광고는 일시정지되며, 사용자가 앱을 떠나 있는 동안에는 Mid-roll 또는 Post-roll Ad Break를 요청하지 않습니다. |
 | `false` | 지원하는 플레이어의 경우, 앱의 플레이어 playlist에서 본편 앞에 광고 아이템을 넣어 앱의 플레이어 안에서 VOD 광고를 재생합니다. 인라인 광고(`requestAd`)는 이 옵션과 관계없이 항상 SDK의 별도 광고 플레이어에서 재생됩니다. | VOD 광고는 지원합니다. PIP 모드에서도 광고가 계속 재생됩니다. |
 
 `setIgnoreAdBreakInPIPMode`는 광고를 요청하기 전에 호출하세요. 광고 플레이어는 광고를 요청할 때 결정됩니다.
 
 :::caution
-`notifyPictureInPictureModeChanged`로 PIP 진입과 해제를 모두 반드시 알려주어야 합니다. SDK는 PIP 모드를 스스로 감지하지 않습니다. Bitmovin Player의 경우 SDK가 Bitmovin의 `PictureInPictureEnter` / `PictureInPictureExit` 이벤트도 수신하므로, Bitmovin 플레이어 자체의 PIP 처리를 통해 PIP에 진입하면 SDK에 자동으로 알려집니다. 그 외의 경우, 예를 들어 앱이 `Activity.enterPictureInPictureMode()`를 직접 호출하는 경우에는 앱에서 직접 SDK에 알려야 합니다.
+앱이 PIP에 진입하는지와 관계없이, 사용자가 앱을 떠날 때와 앱으로 돌아올 때 모두 `notifyUserLeftApp`으로 반드시 알려주어야 합니다. Bitmovin Player를 포함해 어떤 플레이어에서도 SDK는 이를 스스로 감지하지 않습니다.
 :::
 
 ## PIP 모드에서의 광고 (기본값)
 
-PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 따라서 광고가 재생 중이라면 앱에서는 `notifyPictureInPictureModeChanged`를 통해 PIP 변경 여부를 반드시 알려주어야 합니다. 그래야 PIP에 진입하면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다. 또한 앱에서는 광고가 재생 중일 때 PIP 모드로 바뀌더라도 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다.
+PIP 모드에서는 기본적으로 광고를 지원하지 않습니다. 앱에서는 광고가 재생 중일 때 본편 플레이어를 PIP로 전환하지 않아야 합니다. 광고 재생 중 PIP 모드를 이용해 광고를 우회할 수 있기 때문입니다. 따라서 앱에서는 PIP 진입 여부와 관계없이 사용자가 앱을 떠나면 `notifyUserLeftApp`을 통해 반드시 알려주어야 합니다. 그래야 사용자가 앱을 떠나면 광고가 일시정지되고, 다시 앱으로 돌아오면 광고가 재개됩니다.
 
-*   광고 재생 중 앱이 `notifyPictureInPictureModeChanged(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
-*   앱이 `notifyPictureInPictureModeChanged(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
-*   앱이 PIP 모드인 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
-*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. PIP 모드에서도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
+*   광고 재생 중 앱이 `notifyUserLeftApp(true)`를 호출하면 SDK는 광고를 일시정지하고 광고 UI를 숨깁니다. 광고가 일시정지된 동안에는 진행 시간이 흐르지 않으며 쿼타일 트래킹 이벤트도 전송되지 않습니다.
+*   앱이 `notifyUserLeftApp(false)`를 호출하면 광고는 멈췄던 위치부터 다시 재생되어 끝까지 재생됩니다.
+*   사용자가 앱을 떠나 있는 동안에는 Mid-roll 및 Post-roll Ad Break를 요청하지 않습니다.
+*   스트림에 삽입되는 Linear TV 광고는 이 옵션의 영향을 받지 않습니다. 사용자가 앱을 떠나 있는 동안에도 계속 재생되며 광고 UI만 숨겨집니다. 단, Linear 채널의 프리롤(`prerollAdTagUrl`)은 VOD 광고와 동일하게 일시정지 및 재개됩니다.
 
 어떤 화면이 PIP로 전환되는지는 SDK가 아니라 OS와 앱이 결정합니다. Android에서는 Activity 전체가 PIP로 전환되므로 본편 플레이어를 PIP 화면에서 제외할 수 없습니다. 광고 재생 중에는 앱이 직접 PIP를 시작하지 말고(예: `onUserLeaveHint()`에서 진입하거나 `setAutoEnterEnabled(true)`를 사용하는 경우), 광고가 일시정지된 동안 PIP 화면에서 본편 플레이어를 재개하지 마세요. 광고가 끝나면 SDK가 본편을 직접 재개합니다.
 
 `Activity.enterPictureInPictureMode(PictureInPictureParams)`는 API 레벨 26(Android 8.0) 이상, `PictureInPictureParams.Builder.setAutoEnterEnabled()`는 API 레벨 31(Android 12) 이상에서 사용할 수 있습니다. Flower SDK는 더 낮은 API 레벨도 지원하므로 PIP에 진입하기 전에 API 레벨을 확인하세요.
+
+아래 예시에서는 `onUserLeaveHint()`에서 PIP 진입 여부를 정하기 전에 사용자가 앱을 떠났음을 알리고, `onResume()`에서 사용자가 돌아왔음을 알립니다. 사용자가 앱으로 돌아오면 Activity가 resume되며, PIP 창을 다시 전체 화면으로 확대하는 경우도 마찬가지입니다.
 
 **_Kotlin_**
 
@@ -54,6 +56,9 @@ class YourActivity : Activity() {
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
 
+        // TODO GUIDE: PIP 진입 여부와 관계없이 사용자가 앱을 떠났음을 Flower SDK에 알림
+        FlowerSdk.notifyUserLeftApp(true)
+
         // TODO GUIDE: 광고 재생 중에는 PIP에 진입하지 않음
         //             (enterPictureInPictureMode(PictureInPictureParams)는 API 26 이상 필요)
         if (!isAdPlaying && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -61,11 +66,11 @@ class YourActivity : Activity() {
         }
     }
 
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration?) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    override fun onResume() {
+        super.onResume()
 
-        // TODO GUIDE: PIP 모드 전환을 Flower SDK에 알림
-        FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode)
+        // TODO GUIDE: 사용자가 앱으로 돌아왔음을 Flower SDK에 알림
+        FlowerSdk.notifyUserLeftApp(false)
     }
 
     ...
@@ -89,6 +94,9 @@ public class YourActivity extends Activity {
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
 
+        // TODO GUIDE: PIP 진입 여부와 관계없이 사용자가 앱을 떠났음을 Flower SDK에 알림
+        FlowerSdk.notifyUserLeftApp(true);
+
         // TODO GUIDE: 광고 재생 중에는 PIP에 진입하지 않음
         //             (enterPictureInPictureMode(PictureInPictureParams)는 API 26 이상 필요)
         if (!isAdPlaying && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -97,11 +105,11 @@ public class YourActivity extends Activity {
     }
 
     @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, @Nullable Configuration newConfig) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+    protected void onResume() {
+        super.onResume();
 
-        // TODO GUIDE: PIP 모드 전환을 Flower SDK에 알림
-        FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode);
+        // TODO GUIDE: 사용자가 앱으로 돌아왔음을 Flower SDK에 알림
+        FlowerSdk.notifyUserLeftApp(false);
     }
 
     ...

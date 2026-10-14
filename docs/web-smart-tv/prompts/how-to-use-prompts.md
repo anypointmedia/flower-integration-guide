@@ -18,7 +18,7 @@ Each prompt under **Prompts by Case** covers one integration case only. It state
 | VOD ads must keep playing in PIP mode, so they play inside your HLS.js or Bitmovin player | [VOD Ads Played in the App's Player](./by-case/vod/ads-in-pip-mode.md) |
 | Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Update an Existing VOD Integration](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone video ad in a page area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
-| Your app lets the user put the video into Picture-in-Picture | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
+| Report the user leaving the app (another tab or app, the TV app in the background, or Picture-in-Picture) and coming back, and keep the video out of PIP during ads | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
 
 You can combine cases: for example, use the VOD prompt first, then the PIP prompt on its output.
 

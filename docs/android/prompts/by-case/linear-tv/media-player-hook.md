@@ -11,7 +11,7 @@ The prompt generates Kotlin code.
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | The channel player your app uses |
 | `USE_PREROLL` | `yes` \| `no` | Whether a pre-roll ad tag URL is used when entering a channel |
@@ -51,14 +51,22 @@ HOW THE SDK BEHAVES IN THIS CASE
   onPrepare(), onPlay() at its start and onCompleted() at its end (no onAdPlay() /
   onAdBreakSkipped() for it). No pre-roll ad, a failed request, or a pre-roll that fails while
   playing is also reported as onCompleted(), not onError().
-- With the default FlowerSdk.setIgnoreAdBreakInPIPMode(true), the pre-roll is paused while the app
-  is in PIP and resumed when it returns, like VOD ads.
+- With the default FlowerSdk.setIgnoreAdBreakInPIPMode(true), the pre-roll is paused while the
+  user is away from the app and resumed when the user comes back, like VOD ads. The app reports
+  this with FlowerSdk.notifyUserLeftApp(true/false), whether or not it enters PIP (see the PIP
+  Mode Support prompt).
 - A pre-roll stopped by the next changeChannelUrl() / adsManager.stop() reports nothing.
 - onError() on the main listener means an ad failed to play or the channel stream can no longer
   be played. Recover by stopping the ads manager (adsManager.stop()) and the player, then entering
-  the channel again with a NEW changeChannelUrl() call (step 5). A restart leaves the channel
-  pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it. A break cut short by
-  stop() may still report onCompleted() afterwards, so keep onCompleted() idempotent (UI-only).
+  the channel again with a NEW changeChannelUrl() call (step 5) with the same arguments, including
+  prerollAdTagUrl. A break cut short by stop() may still report onCompleted() afterwards, so keep
+  onCompleted() idempotent (UI-only).
+- The SDK remembers the channel (channelId) entered last. A changeChannelUrl() call for that same
+  channel skips the pre-roll even if prerollAdTagUrl is passed, and reports onCompleted() right
+  after the call returns (as for a pre-roll with no ad). So a restart after onError() does not
+  show the pre-roll again, and the app starts the stream exactly as on the first start.
+  adsManager.stop() does not clear the remembered channel; requestVodAd() / requestAd() do.
+  A -> B -> A plays A's pre-roll again.
 
 ========================================
 IMPLEMENTATION
@@ -102,18 +110,17 @@ IMPLEMENTATION
          // Optionally give up after a few consecutive restarts (e.g., 3) to avoid a restart loop.
          flowerAdView.adsManager.stop()
          player.stop()                            // bitmovin: player.unload()
-         enterChannel(currentChannel, withPreroll = false)   // step 5 again, without the pre-roll
+         enterChannel(currentChannel)   // step 5 again, same arguments (the SDK skips the pre-roll)
      }
 
-5) Enter a channel: enterChannel(channel, withPreroll: Boolean = true)
-   withPreroll is true for the first start of a channel and a channel switch, false for a restart
-   after onError(). A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the
-   viewer has already seen it.
+5) Enter a channel: enterChannel(channel)
+   Used for the first start of a channel, a channel switch, and a restart after onError(), always
+   with the same arguments for the same channel.
    First drop a temporary listener left by a previous channel's pending pre-roll:
      prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
      prerollListener = null
      flowerAdView.adsManager.addListener(adsManagerListener)   // listeners are a set: no duplicate
-     val prerollAdTagUrl = if (withPreroll) channel.prerollAdTagUrl else null   // null when USE_PREROLL = no
+     val prerollAdTagUrl = channel.prerollAdTagUrl   // null when USE_PREROLL = no
      val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
          channel.streamUrl,                       // original stream URL
          channel.adTagUrl,                        // issued by Anypoint Media
@@ -122,15 +129,15 @@ IMPLEMENTATION
          mediaPlayerHook,                         // typed MediaPlayerHook
          null,                                    // adTagHeaders (optional)
          null,                                    // channelStreamHeaders (optional)
-         prerollAdTagUrl,                         // String? - null when USE_PREROLL = no or on a restart
+         prerollAdTagUrl,                         // String? - null when USE_PREROLL = no; the same on a restart
      )
 
-   prerollAdTagUrl == null (USE_PREROLL = no, or a restart) -> play changedChannelUrl right away,
+   prerollAdTagUrl == null (USE_PREROLL = no) -> play changedChannelUrl right away,
    keeping the main listener registered:
      media3 / exoplayer2: player.setMediaItem(MediaItem.fromUri(changedChannelUrl)); player.prepare(); player.play()
      bitmovin:            player.load(SourceConfig.fromUrl(changedChannelUrl)); player.play()
 
-   prerollAdTagUrl != null (USE_PREROLL = yes, first start or channel switch) -> do NOT load
+   prerollAdTagUrl != null (USE_PREROLL = yes: first start, channel switch, or restart) -> do NOT load
    changedChannelUrl yet. Swap in a temporary listener and load the stream when the pre-roll ends:
      flowerAdView.adsManager.removeListener(adsManagerListener)
      val listener = object : FlowerAdsManagerListener {
@@ -150,7 +157,7 @@ IMPLEMENTATION
 6) Program change during playback (targeting update)
      flowerAdView.adsManager.changeChannelExtraParams(mapOf("myTargetingKey" to value))
 
-7) Channel switch: run step 5 for the new channel with withPreroll = true (changeChannelUrl()
+7) Channel switch: run step 5 for the new channel (changeChannelUrl()
    stops the previous channel's ad session itself, including a pending pre-roll, and requests
    the new channel's pre-roll).
 
@@ -169,17 +176,18 @@ DO
   MediaPlayerAdapter typed as Any).
 - On onError() of the main listener, on the main thread: adsManager.stop(), stop the player, then
   enter the channel again with a new changeChannelUrl(). Do not reuse the previous loopback URL.
-- On that restart pass the same arguments as the first start except prerollAdTagUrl = null. A
-  restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+- On that restart pass the same arguments as the first start, including prerollAdTagUrl, and
+  handle the returned URL in the same way. The SDK skips the pre-roll of the channel entered last.
 - Before the next changeChannelUrl() and before adsManager.stop(), remove a temporary pre-roll
   listener that is still registered and register the main listener again: a pre-roll stopped
   this way never reports onCompleted(), and the stale listener would load the old channel's URL
   when the next pre-roll ends.
 DO NOT
 - Do not use requestVodAd() / notifyContentEnded() for live channels.
-- Do not load the stream before the pre-roll ends when USE_PREROLL = yes (first start or channel
-  switch).
-- Do not swap in the temporary pre-roll listener or hold the stream on a restart after onError().
+- Do not load the stream before the pre-roll ends when USE_PREROLL = yes (first start, channel
+  switch, or restart after onError()).
+- Do not drop prerollAdTagUrl on a restart after onError(): the SDK already skips the pre-roll of
+  the channel entered last.
 - Do not call adsManager.play() for linear TV ad breaks.
 - Do not hand the loopback URL to another device (casting) — see the Screen Casting prompt.
 
@@ -190,8 +198,10 @@ VERIFY
 - Marker with no ad: onAdBreakSkipped(); original content continues.
 - USE_PREROLL = yes: pre-roll plays, then the channel starts; pre-roll error still starts the channel.
 - Ad or stream error (onError() on the main listener): the ads manager stops and the channel
-  restarts from a new changeChannelUrl() URL without the pre-roll: the stream plays right away and
-  the main listener stays registered.
+  restarts from a new changeChannelUrl() URL with the same arguments; the pre-roll is not shown
+  again (onCompleted() arrives right away), the stream plays, and the main listener is registered
+  again.
+- Channel A -> B -> A: A's pre-roll plays again.
 - Channel switch and leaving the screen stop the previous session without crashes.
 
 ========================================

@@ -9,7 +9,7 @@ Use this prompt when a live channel or FAST stream is played by `bitmovin-player
 
 | Parameter | Example | Description |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
+| `{{SDK_VERSION}}` | `1.0.4` | Version of `@anypoint/flower-sdk-react-native` to install. Ignored if the package is already installed. |
 
 ````plain
 We are integrating the FLOWER SDK into our React Native app for a LINEAR TV / FAST
@@ -57,14 +57,22 @@ HOW THE SDK BEHAVES IN THIS CASE
 - Every changeChannelUrl() call starts a new session: the SDK stops the one running for
   that id (a pre-roll still playing included) and requests the pre-roll of the new call.
   Switching to a channel with its own prerollAdTagUrl holds its proxy url again.
-- By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses in PIP
-  and resumes on return, like a VOD ad. Report PIP with notifyPictureInPictureModeChanged()
-  on iOS; on Android the SDK receives Bitmovin's own PIP events.
+- By default (setIgnoreAdBreakInPIPMode(true)) a running channel pre-roll pauses when the
+  user leaves the app and resumes on return, like a VOD ad, if the app reports both
+  moments with notifyUserLeftApp() on Android and iOS (see the PIP prompt).
 - An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
   playlist it failed to manipulate). The recovery is a restart: await stop(nativeId) -
   it stops the ads manager but, unlike release(), keeps the overlay and the
-  subscription - then call changeChannelUrl() again with the same params, load the NEW
-  proxy url it returns and play it from onReady as usual.
+  subscription - then call changeChannelUrl() again with exactly the same params
+  (prerollAdTagUrl included) and handle the NEW proxy url it returns as on the first
+  start: load it and play it from onReady as usual.
+- The SDK remembers the channel (channelId) entered last. changeChannelUrl() for that
+  same channel skips the pre-roll even with prerollAdTagUrl, and sends 'completed' right
+  after the call resolves, like a pre-roll with no ad. So a restart does not show the
+  pre-roll again, and a proxy url held until 'completed' plays exactly as on the first
+  start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear
+  it. It is one channel for the whole app, not one per id (A -> B -> A plays A's
+  pre-roll again).
 - stop() ends any break in progress, and that break may still report 'completed' after
   the 'error', even after stop() resolved. The 'completed' handling must be idempotent.
 - Bitmovin does not autoplay by default, and player.play() before a source is ready is a
@@ -166,12 +174,10 @@ Step 2 — Load whichever url is current, and play whenever a source is ready
 
 Step 3 — Start the channel: the first handover from onReady (once), and the restart
 
-  // withPreroll is true for the first start only. A restart leaves the channel pre-roll
-  // out (prerollAdTagUrl omitted): the viewer has already seen it. So a restart holds
-  // nothing: the new proxy url plays at once instead of waiting for a 'completed' that
-  // the break cut short by stop() may report early.
-  const startChannel = useCallback(async (withPreroll: boolean) => {
-    const preroll = withPreroll ? config.prerollAdTagUrl : undefined;
+  // The same call for the first start and for every restart. On a restart the SDK skips
+  // the pre-roll of the channel entered last and sends 'completed' right away, so the
+  // held proxy url plays exactly as on the first start.
+  const startChannel = useCallback(async () => {
     const proxyUrl = await changeChannelUrl(nativeId, {
       videoUrl: config.videoUrl,
       adTagUrl: config.adTagUrl,
@@ -180,13 +186,11 @@ Step 3 — Start the channel: the first handover from onReady (once), and the re
       extraParams: config.extraParams,                    // omit if not configured
       adTagHeaders: config.adTagHeaders,                  // omit if not configured
       channelStreamHeaders: config.channelStreamHeaders,  // omit if not configured
-      prerollAdTagUrl: preroll,                           // omit if not configured
+      prerollAdTagUrl: config.prerollAdTagUrl,            // omit if not configured
     });
-    if (preroll) {
-      pendingProxyUrl.current = proxyUrl;
+    if (config.prerollAdTagUrl) {
+      pendingProxyUrl.current = proxyUrl;   // loaded from 'completed'
     } else {
-      pendingProxyUrl.current = null;
-      setHeld(false);
       setSourceUri(proxyUrl);   // loaded by Step 2, played from onReady
     }
   }, [nativeId, config]);
@@ -195,7 +199,7 @@ Step 3 — Start the channel: the first handover from onReady (once), and the re
     if (handedOver.current) return;
     handedOver.current = true;
     try {
-      await startChannel(true);
+      await startChannel();
     } catch (e: any) {
       handedOver.current = false;
       console.error(`changeChannelUrl failed: ${e.message}`);
@@ -210,7 +214,7 @@ Step 3 — Start the channel: the first handover from onReady (once), and the re
     restarts.current += 1;
     try {
       await stop(nativeId);
-      await startChannel(false);
+      await startChannel();
     } catch (e: any) {
       console.error(`channel restart failed: ${e.message}`);
     } finally {
@@ -272,8 +276,9 @@ DO:
 - Use one string for usePlayer({nativeId}) and the overlay <View nativeID>.
 - Pass playerType: 'bitmovin' to changeChannelUrl().
 - Remove your own subscriptions; release() does not remove them.
-- On 'error', await stop(nativeId), then call changeChannelUrl() again with the same
-  params (without prerollAdTagUrl), load the new proxy url and play it. Cap the restarts.
+- On 'error', await stop(nativeId), then call changeChannelUrl() again with exactly the
+  same params, prerollAdTagUrl included, and handle the new proxy url as on the first
+  start. Cap the restarts.
 - Keep the 'completed' handling idempotent; a stopped break may still report it.
 
 DO NOT:
@@ -297,7 +302,9 @@ Android and iOS each:
 4. With prerollAdTagUrl: no channel audio under the pre-roll; the proxy url plays after
    'completed', also when the pre-roll returns no ad.
 5. Ad error: logged, stop() is called, then changeChannelUrl() runs once more and the
-   channel plays again from a NEW proxy url. After MAX_RESTARTS it stops restarting.
+   channel plays again from a NEW proxy url. With prerollAdTagUrl, the pre-roll does not
+   play again on the restart and the new proxy url is loaded from the 'completed' that
+   follows right away. After MAX_RESTARTS it stops restarting.
 6. Unmount: release() is called and no overlay remains.
 Known limit: on iOS a Bitmovin DASH break cannot use deferred ad start and plays the next
 item plainly; HLS is unaffected.

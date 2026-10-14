@@ -96,8 +96,11 @@ IMPLEMENTATION
    the FlowerAVPlayer case (pre-roll error -> start the content in a new FlowerAVPlayer once;
    mid-roll error -> player.play()).
 
-6. PIP: keep notifying FlowerSdk.notifyPictureInPictureModeChanged(true/false) from the PIP
-   delegate. Remove any code that blocks PIP while an ad plays (that belongs to the default mode).
+6. Leaving the app: keep calling FlowerSdk.notifyUserLeftApp(true) when the user leaves the app
+   and (false) when the user comes back, from the app lifecycle (didEnterBackground /
+   willEnterForeground, or scenePhase in SwiftUI). If the code still calls the deprecated
+   FlowerSdk.notifyPictureInPictureModeChanged, replace it with notifyUserLeftApp. Remove any
+   code that blocks PIP while an ad plays (that belongs to the default mode).
 
 ========================================
 RULES

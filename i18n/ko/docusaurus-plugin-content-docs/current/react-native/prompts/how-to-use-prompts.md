@@ -65,7 +65,7 @@ PIP 프롬프트는 다른 행의 프롬프트로 연동을 마친 뒤에 추가
 |-----------|--------|-------------|
 | `AD_TYPE` | `linear-tv` \| `vod` \| `interstitial` | 광고 콘텐츠 유형 |
 | `PLAYER_TYPE` | `react-native-video` \| `bitmovin` | 뷰를 소유한 플레이어 라이브러리 |
-| `SDK_VERSION` | 예: `1.0.3` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
+| `SDK_VERSION` | 예: `1.0.4` | 설치할 `@anypoint/flower-sdk-react-native` 버전 |
 
 ## AD_TYPE 선택
 

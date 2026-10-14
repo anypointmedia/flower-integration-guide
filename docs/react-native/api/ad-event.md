@@ -137,7 +137,7 @@ An `error` during an inline break leaves your content paused, because pausing it
 
 What to do on `error` depends on the kind of session:
 
-*   **Linear TV / FAST**: stop the ads manager with `await stop(nativeId)`, then start the channel over — a new `changeChannelUrl()` with the same parameters except `prerollAdTagUrl`, and the new proxy URL it returns as the source right away. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
+*   **Linear TV / FAST**: stop the ads manager with `await stop(nativeId)`, then start the channel over — a new `changeChannelUrl()` with exactly the same parameters as the first start, `prerollAdTagUrl` included, and the new proxy URL it returns handled the same way as the first time. The viewer does not see the pre-roll again: the SDK skips the pre-roll of the channel entered last and sends `completed` right away. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
 *   **VOD**, by where the content is. When a break fails, the SDK brings the content back before this event is sent, so never resume, seek or re-source it here. `completed` may also arrive for the failed break, in either order.
     *   Not started yet (pre-roll): start the held content, exactly as on `completed`.
     *   Started and not ended (mid-roll): nothing — the content is already playing again from the rewind duration before the interruption point.

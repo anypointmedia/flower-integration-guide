@@ -50,17 +50,20 @@ HOW THE SDK BEHAVES IN THIS CASE
 - onError (called off the main thread) means the channel cannot continue as it is: stop the
   ads manager (player.flowerAdView.adsManager.stop()), release the item
   (replaceCurrentItem(with: nil)), and start the channel again the same way:
-  replaceCurrentItem(with:adConfig:) with a new AVPlayerItem + play(). A restart leaves the
-  channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it. So the
-  restart's FlowerLinearTvAdConfig has no prerollAdTagUrl and the player loads the channel
-  right away. A break cut short by stop() may still report onCompleted afterwards, so keep
+  replaceCurrentItem(with:adConfig:) with a new AVPlayerItem + play(), with exactly the same
+  FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl. The SDK remembers the
+  channel (channelId) entered last and skips its pre-roll when the same channel's ad config is
+  set again, so the viewer does not see the pre-roll twice and the player loads the channel
+  right away. (A -> B -> A, or a VOD/inline ad request in between, plays the pre-roll again;
+  stop() and leaving the screen do not clear the remembered channel.) A break cut short by stop() may still report onCompleted afterwards, so keep
   onCompleted idempotent (UI-only).
 - A pre-roll playback error also arrives as onError. FlowerAVPlayer then does NOT load the
   channel, and it keeps its internal pre-roll listener registered, which would act again on
   the next ad events of the same player. So when onError arrives before the channel item was
   loaded (player.currentItem == nil), restart in a NEW FlowerAVPlayer.
-- In PIP mode, stream ads keep playing and only the ad UI is hidden; a pre-roll that is playing
-  is paused while in PIP and resumes when the app returns (default
+- While the user is away from the app (FlowerSdk.notifyUserLeftApp(true), see the PIP mode
+  support case), stream ads keep playing and only the ad UI is hidden; a pre-roll that is
+  playing is paused and resumes when the user comes back (notifyUserLeftApp(false)) (default
   FlowerSdk.setIgnoreAdBreakInPIPMode(true)).
 - The URL the proxy plays is a loopback URL: it cannot be cast (see the screen casting case).
 
@@ -98,12 +101,11 @@ IMPLEMENTATION
 
 3. Start the channel:
 
-   // withPreroll: true when a channel starts (first start or channel change), false on a
-   // restart after onError (step 5).
-   func playLinearTv(withPreroll: Bool = true) {
+   // Used for the first start, a channel change and a restart after onError (step 5).
+   func playLinearTv() {
        let adConfig = FlowerLinearTvAdConfig(
            adTagUrl: channel.adTagUrl,                  // issued by Anypoint Media
-           prerollAdTagUrl: withPreroll ? channel.prerollAdTagUrl : nil,  // USE_PREROLL no: always nil
+           prerollAdTagUrl: channel.prerollAdTagUrl,    // USE_PREROLL no: nil
            channelId: channel.channelId,                // registered in the Flower backend
            extraParams: channel.extraParams,            // [String: String]? targeting values
            adTagHeaders: channel.adTagHeaders,          // [String: String]? or nil
@@ -150,10 +152,11 @@ IMPLEMENTATION
            // UIKit: playerViewController.player = player
            // (SwiftUI: FlowerVideoPlayer(player:) picks up the new @State player)
        }
-       playLinearTv(withPreroll: false)        // 3. same start: replaceCurrentItem(with:adConfig:) + play()
+       playLinearTv()                          // 3. same start: replaceCurrentItem(with:adConfig:) + play()
    }
-   A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already
-   seen it. This holds with USE_PREROLL yes too.
+   The restart passes the same prerollAdTagUrl as the first start. The SDK skips the pre-roll
+   of the channel entered last, so the viewer does not see it again. Do not add a flag that
+   drops prerollAdTagUrl on a restart.
 
 6. Release:
 
@@ -191,9 +194,11 @@ VERIFY
 - Pre-roll with no ad or a request failure: the channel still starts.
 - Pre-roll playback error: the channel restarts in a new FlowerAVPlayer and plays.
 - onError while the channel plays: the ads manager stops and the channel restarts (at most 3
-  times in a row) without a pre-roll, even with USE_PREROLL yes.
+  times in a row) without the pre-roll playing again, even with USE_PREROLL yes.
 - Channel change: the new channel plays, no ad from the old channel appears.
-- PIP during a stream ad: the ad keeps playing, the ad UI is hidden; back in the app it shows.
+- USE_PREROLL yes, A -> B -> A: A's pre-roll plays again.
+- Leaving the app during a stream ad: the ad keeps playing, the ad UI is hidden; back in the
+  app it shows.
 - Leaving the screen stops the playback and the ads.
 
 ========================================

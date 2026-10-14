@@ -77,8 +77,10 @@ PART 3 — Picture-in-Picture Support (Optional)
 
 Available in Flower Android SDK version 2.8.0+.
 
-1. Enter PiP mode when user leaves the Activity — but NOT while an ad is playing
-   (PiP could otherwise be used to bypass the ad). Track the ad state in the
+1. Notify the SDK when the user leaves the Activity, then enter PiP mode — but NOT while an ad
+   is playing (PiP could otherwise be used to bypass the ad). Report the user leaving whether or
+   not the app enters PiP: during an ad the app does not enter PiP, so a report sent only on PiP
+   changes would never tell the SDK that the user left. Track the ad state in the
    FlowerAdsManagerListener registered in Step 3: set isAdPlaying = true in onPlay(),
    and isAdPlaying = false in onCompleted() and onError(). For linear-tv with media-player-hook
    and a pre-roll, set it in the temporary pre-roll listener of Step 3 as well.
@@ -90,6 +92,7 @@ Available in Flower Android SDK version 2.8.0+.
 
   override fun onUserLeaveHint() {
       super.onUserLeaveHint()
+      FlowerSdk.notifyUserLeftApp(true)   // always, before deciding on PiP
       if (isAdPlaying) return
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
           val params = PictureInPictureParams.Builder()
@@ -102,23 +105,36 @@ Available in Flower Android SDK version 2.8.0+.
   Do NOT enable PictureInPictureParams.Builder().setAutoEnterEnabled(true) (API 31) while an
   ad is playing, for the same reason.
 
-2. Notify the SDK about PiP state changes and toggle player controls:
+2. Notify the SDK when the user comes back (the Activity resumes, including when the PiP window
+   is expanded back to full screen), and toggle player controls on PiP changes.
+   FlowerSdk.notifyPictureInPictureModeChanged() is deprecated: use notifyUserLeftApp() instead.
 
   Kotlin:
+  override fun onResume() {
+      super.onResume()
+      FlowerSdk.notifyUserLeftApp(false)
+  }
+
   override fun onPictureInPictureModeChanged(
       isInPictureInPictureMode: Boolean,
       newConfig: Configuration?
   ) {
       super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
       playerView.useController = !isInPictureInPictureMode
-      FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode)
   }
 
   Java:
   @Override
-  public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
-      super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-      FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode);
+  protected void onUserLeaveHint() {
+      super.onUserLeaveHint();
+      FlowerSdk.notifyUserLeftApp(true);   // always, before deciding on PiP
+      // then enter PiP only if no ad is playing, as in 1.
+  }
+
+  @Override
+  protected void onResume() {
+      super.onResume();
+      FlowerSdk.notifyUserLeftApp(false);
   }
 3. AndroidManifest.xml — enable PiP for the Activity:
 
@@ -158,8 +174,9 @@ CONSTRAINTS
 - Always remove the ad listener BEFORE releasing the player.
 - For FlowerPlayer, use player.removeAdListener(). For others, use flowerAdView.adsManager.removeListener().
 - FlowerSdk.destroy() should only be called in Application.onTerminate(), NOT in Activity.onDestroy().
-- If the app supports PiP, call FlowerSdk.notifyPictureInPictureModeChanged() on both entering and
-  exiting PiP with every APPROACH — the SDK does not detect PiP by itself.
+- If the app supports PiP, call FlowerSdk.notifyUserLeftApp(true) when the user leaves the app and
+  FlowerSdk.notifyUserLeftApp(false) when the user comes back, with every APPROACH and whether or
+  not the app enters PiP — the SDK does not detect this by itself.
 - Do NOT enter PiP while an ad is playing, and check Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
   before calling enterPictureInPictureMode(PictureInPictureParams).
 ```

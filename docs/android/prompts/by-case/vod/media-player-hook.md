@@ -11,7 +11,7 @@ The prompt generates Kotlin code.
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | The content player your app already uses |
 
@@ -55,8 +55,9 @@ HOW THE SDK BEHAVES IN THIS CASE
   queues its own rewind and resume before it calls onError(), so the app's resume runs after
   them and is a safety net that keeps the content from staying paused.
 - The app must call flowerAdView.adsManager.play() in onPrepare() for every ad break.
-- Mid-roll and post-roll are not requested while the app is in PIP mode
-  (only if the app reports PIP with FlowerSdk.notifyPictureInPictureModeChanged).
+- Mid-roll and post-roll are not requested while the user is away from the app
+  (only if the app reports it with FlowerSdk.notifyUserLeftApp(true/false), whether or not it
+  enters PIP).
 
 ========================================
 IMPLEMENTATION

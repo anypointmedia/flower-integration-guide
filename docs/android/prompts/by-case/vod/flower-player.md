@@ -11,7 +11,7 @@ The prompt generates Kotlin code.
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | The player to wrap: `FlowerMedia3ExoPlayer`, `FlowerExoPlayer2`, or `FlowerBitmovinPlayer` |
 | `MEDIA3_VERSION` | e.g., `1.10.1` | Only for `media3`: the app's `androidx.media3` version |

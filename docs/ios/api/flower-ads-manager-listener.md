@@ -76,7 +76,7 @@ For VOD, a failed or timed-out VMAP/VAST request, or a break with no ads, is not
 
 Recommended handling (the event arrives off the main thread, so hop to the main thread before touching the player):
 
-- **Linear TV / FAST:** stop the ads manager with `stop()`, release the content player item, and start the channel again the same way it was first started. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. See [Manual Player Control](../ad-insertion/linear-tv-fast/manual-player-control).
+- **Linear TV / FAST:** stop the ads manager with `stop()`, release the content player item, and start the channel again the same way it was first started, with the same parameters, including `prerollAdTagUrl`. The SDK skips the pre-roll of the channel entered last, so the viewer does not see it again. See [Manual Player Control](../ad-insertion/linear-tv-fast/manual-player-control).
 - **VOD:** when an ad break fails, the SDK brings the content back before it calls `onError`: after a mid-roll, the content is already playing again from `rewindDuration` before the interruption point. Do not stop, seek, or reload the content for an ad error. For a pre-roll error, load and start the content. For a post-roll error, the content has already ended, so do not resume it. `onCompleted` may also be called for the failed break, in either order. For `playback unrecoverable`, reload the content or show an error. See [VOD Pre-roll, Mid-roll, Post-roll Ad Implementation](../ad-insertion/vod/vod-ad-implementation).
 
 ### onAdBreakSkipped

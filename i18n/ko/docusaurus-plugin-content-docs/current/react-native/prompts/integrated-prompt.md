@@ -62,7 +62,7 @@ android/build.gradle — buildscript.ext:
           media3Version = "1.8.0"
 
           // Optional: pins the underlying Android SDK version.
-          flowerSdkVersion = "2.9.28"
+          flowerSdkVersion = "2.9.29"
       }
   }
 
@@ -411,10 +411,15 @@ If AD_TYPE is "linear-tv" — logging and error recovery:
 
 An 'error' on a channel means the SDK could not keep its ads in the stream (for one, a
 playlist it failed to manipulate). Recover by starting the channel over: stop the ads
-manager, then call changeChannelUrl() again with the same params except prerollAdTagUrl
-and play the NEW proxy url it returns right away. A restart leaves the channel pre-roll
-out (prerollAdTagUrl omitted): the viewer has already seen it, so nothing is held.
+manager, then call changeChannelUrl() again with exactly the same params, prerollAdTagUrl
+included, and handle the NEW proxy url it returns as on the first start (Step 3-4).
 stop() keeps the overlay and the subscription; release() would drop them.
+
+Passing prerollAdTagUrl again is safe: the SDK remembers the channel (channelId) entered
+last, and changeChannelUrl() for that same channel skips the pre-roll and sends
+'completed' right after the call resolves, like a pre-roll with no ad. So the viewer does
+not see the pre-roll again, and a proxy url held until 'completed' plays as on the first
+start. stop() and initialize() keep that channel; requestVodAd() / requestAd() clear it.
 
   const restarting = useRef(false);
   const restarts = useRef(0);
@@ -425,12 +430,17 @@ stop() keeps the overlay and the subscription; release() would drop them.
     restarts.current += 1;
     try {
       await stop(nativeId);
-      // Same params as Step 3-4 except prerollAdTagUrl. A restart leaves the channel
-      // pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-      // No pre-roll hold: the new proxy url plays right away.
+      // Exactly the same params as Step 3-4, prerollAdTagUrl included.
       const proxyUrl = await changeChannelUrl(nativeId, {/* ...same as Step 3-4 */});
-      setSourceUri(proxyUrl);   // react-native-video; onLoad fires again, the guard holds
-      // bitmovin: player.load({url: proxyUrl, type: SourceType.HLS}); play from onReady
+      // Then the same handling as Step 3-4.
+      if (config.prerollAdTagUrl) {
+        // Held, as on the first start. 'completed' follows right away: the SDK skips
+        // the pre-roll of the channel entered last.
+        pendingProxyUrl.current = proxyUrl;
+      } else {
+        setSourceUri(proxyUrl);   // react-native-video; onLoad fires again, the guard holds
+        // bitmovin: player.load({url: proxyUrl, type: SourceType.HLS}); play from onReady
+      }
     } catch (e: any) {
       console.error(`channel restart failed: ${e.message}`);
     } finally {
@@ -537,11 +547,12 @@ If AD_TYPE is "linear-tv" — call from onLoad, guarded, then swap the source:
   setSourceUri(proxyUrl);   // react-native-video
   // bitmovin: player.load({url: proxyUrl, type: SourceType.HLS});
 
-PRE-ROLL: with a prerollAdTagUrl the pre-roll runs FIRST. Hold the proxy url in a ref and
-apply it from the 'completed' event rather than right away.
+PRE-ROLL: with a prerollAdTagUrl the pre-roll runs FIRST. Hold the proxy url in a ref
+(pendingProxyUrl) and apply it from the 'completed' event rather than right away.
 
 ERROR: on an 'error', restart the channel with stop() and a NEW changeChannelUrl() call,
-as in Step 3-3. The restart omits prerollAdTagUrl and does not hold the proxy url.
+as in Step 3-3. The restart passes the same params, prerollAdTagUrl included, and handles
+the proxy url the same way as the first start.
 
 If AD_TYPE is "vod" — call from onLoad. The content url is NEVER rewritten:
 
@@ -700,7 +711,8 @@ CONSTRAINTS
   is resuming it (videoRef.current?.resume() / bitmovin player.play()) on an 'error'
   while the content has started and not ended. After a post-roll 'error', do nothing.
 - For linear-tv, on 'error' await stop(nativeId), then call changeChannelUrl() again
-  without prerollAdTagUrl and play the new proxy url right away. Cap the restarts. Do NOT release() to recover.
+  with exactly the same params, prerollAdTagUrl included, and handle the new proxy url
+  as on the first start. Cap the restarts. Do NOT release() to recover.
 - For bitmovin, do NOT put the nativeID on <PlayerView>. Use a separate overlay <View>.
 - play() and notifyContentEnded() REJECT when no session was started for that nativeId.
   stop() and release() resolve silently.
