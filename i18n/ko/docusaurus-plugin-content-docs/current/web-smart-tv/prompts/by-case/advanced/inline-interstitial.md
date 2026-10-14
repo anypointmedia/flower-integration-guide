@@ -48,11 +48,6 @@ HOW THE SDK BEHAVES IN THIS CASE
 5. requestAd() first stops the previous ad session of the same FlowerAdsManager. Calling
    it on a FlowerAdView that is running a VOD or linear session stops that session, so
    this ad needs its own FlowerAdView and container.
-6. If the user leaves the app while this ad plays (another tab or app, the TV app in the
-   background, or PIP; default mode), the SDK pauses the ad and resumes it when the user
-   comes back. The app reports both with FlowerSdk.notifyUserLeftApp(true / false),
-   whether or not PIP starts. notifyPictureInPictureModeChanged() is deprecated and
-   replaced by notifyUserLeftApp(). Existing calls keep working. If the app already does this for its other ads, nothing is added here.
 
 ========================================
 IMPLEMENTATION
@@ -153,5 +148,5 @@ OUTPUT
 
 - Modify the code I paste; keep only the {{PLACEMENT}} branch.
 - List every changed file.
-- Do not add VOD, linear TV, or PIP-mode code.
+- Do not add VOD or linear TV code.
 ```

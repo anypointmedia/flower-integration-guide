@@ -400,8 +400,7 @@ If AD_TYPE is "vod" AND APPROACH is "media-player-hook":
       mediaPlayerHook                                          // Required
   );
 
-  // Do NOT load or play the content here. With the default
-  // FlowerSdk.setIgnoreAdBreakInPIPMode(true), the SDK does not pause the content for a
+  // Do NOT load or play the content here. The SDK does not pause the content for a
   // pre-roll, so content loaded here plays (with audio) under the pre-roll.
   // The content is loaded in onCompleted()/onError() through prepareContentSource().
 

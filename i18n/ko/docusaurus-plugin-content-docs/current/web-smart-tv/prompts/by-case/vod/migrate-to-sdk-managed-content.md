@@ -1,11 +1,11 @@
 ---
-sidebar_position: 4
+sidebar_position: 2
 sidebar_label: 기존 VOD 연동 업데이트
 ---
 
 # 기존 VOD 연동을 SDK가 본편을 관리하는 방식으로 업데이트
 
-이전 방식으로 VOD 광고를 연동하여 앱이 직접 본편이나 광고를 일시정지, 재개, 탐색(seek), 지연하고 있는 경우(예: `onPlay`에서 플레이어 일시정지, `onPrepare`에서 `play()` 지연, `onCompleted`에서 `videoElement.play()` 호출) 이 프롬프트를 사용하세요. 현재 기본 모드에서는 SDK가 Ad Break 전후의 본편을 직접 제어하므로, 이러한 앱 코드는 프리롤 아래에서 본편 소리가 들리거나 mid-roll이 늦게 시작되는 등의 문제를 일으킵니다. LLM이 해당 코드를 제거하고 `isContentPrepared` 패턴을 적용하도록 안내합니다. [VOD 광고 적용](../../../ad-insertion/vod/vod-ad-implementation.md) 페이지를 참고하세요.
+이전 방식으로 VOD 광고를 연동하여 앱이 직접 본편이나 광고를 일시정지, 재개, 탐색(seek), 지연하고 있는 경우(예: `onPlay`에서 플레이어 일시정지, `onPrepare`에서 `play()` 지연, `onCompleted`에서 `videoElement.play()` 호출) 이 프롬프트를 사용하세요. 이제 SDK가 Ad Break 전후의 본편을 직접 제어하므로, 이러한 앱 코드는 프리롤 아래에서 본편 소리가 들리거나 mid-roll이 늦게 시작되는 등의 문제를 일으킵니다. LLM이 해당 코드를 제거하고 `isContentPrepared` 패턴을 적용하도록 안내합니다. [VOD 광고 적용](../../../ad-insertion/vod/vod-ad-implementation.md) 페이지를 참고하세요.
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
@@ -37,8 +37,7 @@ PLAYER: {{PLAYER}}   (hls.js | bitmovin | dash.js | shaka)
 HOW THE SDK BEHAVES NOW
 ========================================
 
-1. By default (FlowerSdk.setIgnoreAdBreakInPIPMode(true)), VOD ads play in the SDK's own
-   video element over the content.
+1. VOD ads play in the SDK's own video element over the content.
 2. Pre-roll: the SDK does not pause the content, so content loaded right after
    requestVodAd() plays with audio under the pre-roll.
 3. The SDK calls onCompleted() after the pre-roll, and also when there is no pre-roll,
@@ -151,8 +150,6 @@ DO NOT:
 - Resume the content in onError() after a post-roll (isContentEnd).
 - Add setTimeout around flowerAdView.adsManager.play().
 - Change requestVodAd() arguments other than adding the optional trailing ones on request.
-- Switch to FlowerSdk.setIgnoreAdBreakInPIPMode(false) unless ads must play in PIP mode;
-  that mode needs different event handling and is a separate prompt.
 
 ========================================
 VERIFY
@@ -177,5 +174,5 @@ OUTPUT
 
 - Show each change as a before/after diff, grouped by the numbered items above.
 - List every changed file. Say explicitly which numbered items did not apply.
-- Do not add linear TV, interstitial, or PIP code.
+- Do not add linear TV or interstitial code.
 ```

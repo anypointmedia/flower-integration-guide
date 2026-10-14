@@ -326,13 +326,5 @@
   "sidebar.tutorialSidebar.category.web-prompts-by-case-advanced.link.generated-index.description": {
     "message": "인라인 광고와 전면 광고처럼 본편 플레이어와 연결되지 않는 광고 형식을 위한 프롬프트입니다.",
     "description": "The generated-index page description for category 'Advanced Ad Formats' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.web-prompts-by-case-common": {
-    "message": "공통",
-    "description": "The label for category 'Common' in sidebar 'tutorialSidebar'"
-  },
-  "sidebar.tutorialSidebar.category.web-prompts-by-case-common.link.generated-index.description": {
-    "message": "PIP 모드 지원처럼 모든 광고 유형에 공통으로 적용되는 기능을 위한 프롬프트입니다.",
-    "description": "The generated-index page description for category 'Common' in sidebar 'tutorialSidebar'"
   }
 }

@@ -140,8 +140,6 @@ A channel pre-roll is an ad that plays once when the viewer enters a channel, be
 
 **Channel change:** The first start of a channel and a switch to another channel use the pre-roll as configured. `changeChannelUrl()` for the next channel stops the current session, including a pre-roll still in progress, and requests the new channel's pre-roll. Coming back to a channel after another channel (A → B → A) plays A's pre-roll again. The stopped pre-roll does not call the temporary listener, so remove the previous temporary listener (and register the main listener again) before the new call, as the example does. Remove it as well before `stop()` when the viewer leaves the channel screen.
 
-**PIP:** With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the user leaves the app and resumed when the user comes back, like VOD ads. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
-
 ## Linear Channel Ad Request Example
 
 ### _HLS.js_

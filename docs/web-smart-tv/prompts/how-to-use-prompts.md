@@ -14,14 +14,9 @@ Each prompt under **Prompts by Case** covers one integration case only. It state
 |----------------|--------|
 | Linear channel / FAST stream played with HLS.js, and you can replace `Hls` with the SDK's wrapper | [Linear TV / FAST with FlowerHls](./by-case/linear-tv/flower-hls.md) |
 | Linear channel / FAST stream played with your own HLS.js, Bitmovin, dash.js or Shaka Player instance | [Linear TV / FAST with Manual Player Control](./by-case/linear-tv/media-player-hook.md) |
-| VOD with pre-roll, mid-roll and post-roll ads, played with HLS.js, Bitmovin, dash.js or Shaka Player (default ad mode) | [VOD Ads with Your Own Player](./by-case/vod/media-player-hook.md) |
-| VOD ads must keep playing in PIP mode, so they play inside your HLS.js or Bitmovin player | [VOD Ads Played in the App's Player](./by-case/vod/ads-in-pip-mode.md) |
-| VOD with the default ad mode where the content video can go into PIP, and ads are not shown in PIP: report the user leaving and coming back, and keep the content video out of PIP during ads | [VOD — PIP Without Ads (Default)](./by-case/vod/no-ads-in-pip-mode.md) |
+| VOD with pre-roll, mid-roll and post-roll ads, played with HLS.js, Bitmovin, dash.js or Shaka Player | [VOD Ads with Your Own Player](./by-case/vod/media-player-hook.md) |
 | Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Update an Existing VOD Integration](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone video ad in a page area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
-| Report the user leaving the app (another tab or app, the TV app in the background, or Picture-in-Picture) and coming back, and keep the video out of PIP during ads | [PIP Mode Support](./by-case/common/pip-mode-support.md) |
-
-You can combine cases: for example, use the VOD prompt first, then the PIP prompt on its output.
 
 ## Full Integration Prompts
 
@@ -53,7 +48,7 @@ Use individual step prompts when:
 | **Step 1** | `step-1-project-setup.md` | Add SDK dependency, configure network, initialize SDK | Build setup issues, SDK init problems |
 | **Step 2** | `step-2-ad-ui-and-player.md` | Set up ad display layer, create/wrap video player | Player wrapping issues, layout problems |
 | **Step 3** | `step-3-ad-integration.md` | Implement ad listener, request ads, start playback | Ad not showing, listener not firing, wrong ad config |
-| **Step 4** | `step-4-cleanup.md` | Resource cleanup, PiP support | Memory leaks, PiP not working |
+| **Step 4** | `step-4-cleanup.md` | Resource cleanup | Memory leaks |
 
 **Steps are incremental** — each step assumes the previous step is complete. Step 3's input should be the output of Step 2.
 

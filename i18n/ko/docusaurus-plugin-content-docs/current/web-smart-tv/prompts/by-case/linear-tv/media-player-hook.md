@@ -62,9 +62,7 @@ HOW THE SDK BEHAVES IN THIS CASE
    guide loads the returned URL only from a temporary pre-roll listener.
    A channel change (item 2) or stop() ends a pending pre-roll without calling that
    temporary listener, so remove it before the next changeChannelUrl() call and before
-   stop(). With the default setIgnoreAdBreakInPIPMode(true), the pre-roll is paused while
-   the user is away from the app (reported with FlowerSdk.notifyUserLeftApp(true)) and
-   resumed when the user comes back (notifyUserLeftApp(false)).
+   stop().
    Calling changeChannelUrl() again without a channel change skips the pre-roll even if
    prerollAdTagUrl is passed, and the SDK calls onCompleted()
    right after changeChannelUrl() returns. A -> B -> A plays A's pre-roll again.

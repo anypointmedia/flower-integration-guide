@@ -5,7 +5,7 @@ sidebar_label: VOD with Your Player
 
 # VOD Ads with Your Own Player (MediaPlayerHook)
 
-Use this prompt to add pre-roll, mid-roll and post-roll ads to VOD content played by your own HLS.js, Bitmovin, dash.js or Shaka Player instance, with the default ad mode (ads play in the SDK's own video element over the content). The prompt makes the LLM wire `requestVodAd`, the ad listener and content-end handling into your existing player code. See [VOD Ad Implementation](../../../ad-insertion/vod/vod-ad-implementation.md).
+Use this prompt to add pre-roll, mid-roll and post-roll ads to VOD content played by your own HLS.js, Bitmovin, dash.js or Shaka Player instance. The ads play in the SDK's own video element over the content. The prompt makes the LLM wire `requestVodAd`, the ad listener and content-end handling into your existing player code. See [VOD Ad Implementation](../../../ad-insertion/vod/vod-ad-implementation.md).
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
@@ -38,8 +38,7 @@ HOW THE SDK BEHAVES IN THIS CASE
 
 Respect every fact below. Do not "fix" the SDK's behavior from the app.
 
-1. By default (FlowerSdk.setIgnoreAdBreakInPIPMode(true)), the SDK plays VOD ads in its
-   own <video> element inside the FlowerAdView container, shown over the content.
+1. The SDK plays VOD ads in its own <video> element inside the FlowerAdView container, shown over the content.
    The SDK shows and hides the ad container itself.
 2. Pre-roll: the SDK does NOT pause the content. Content loaded before the pre-roll ends
    plays, with audio, under the ad. So the content must be loaded only on the first
@@ -274,6 +273,5 @@ OUTPUT
 - Modify the code I paste; do not rewrite unrelated parts.
 - Keep only the {{PLAYER}} branch of every snippet above.
 - List every changed file and summarize the change in each.
-- Do not add code for linear TV, FlowerHls, interstitial ads, or
-  setIgnoreAdBreakInPIPMode(false).
+- Do not add code for linear TV, FlowerHls, or interstitial ads.
 ```

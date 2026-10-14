@@ -1,11 +1,11 @@
 ---
-sidebar_position: 4
+sidebar_position: 2
 sidebar_label: Update an Existing VOD Integration
 ---
 
 # Update an Existing VOD Integration to SDK-Managed Content
 
-Use this prompt if your app already shows VOD ads with an older integration that pauses, resumes, seeks, or delays the content or the ad by itself (for example, pausing the player in `onPlay`, delaying `play()` in `onPrepare`, or calling `videoElement.play()` in `onCompleted`). With the current default mode, the SDK controls the content around ad breaks, so that app code now causes problems such as content audio under the pre-roll or a mid-roll starting late. The prompt makes the LLM remove that code and adopt the `isContentPrepared` pattern. See [VOD Ad Implementation](../../../ad-insertion/vod/vod-ad-implementation.md).
+Use this prompt if your app already shows VOD ads with an older integration that pauses, resumes, seeks, or delays the content or the ad by itself (for example, pausing the player in `onPlay`, delaying `play()` in `onPrepare`, or calling `videoElement.play()` in `onCompleted`). The SDK now controls the content around ad breaks, so that app code now causes problems such as content audio under the pre-roll or a mid-roll starting late. The prompt makes the LLM remove that code and adopt the `isContentPrepared` pattern. See [VOD Ad Implementation](../../../ad-insertion/vod/vod-ad-implementation.md).
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
@@ -37,8 +37,7 @@ PLAYER: {{PLAYER}}   (hls.js | bitmovin | dash.js | shaka)
 HOW THE SDK BEHAVES NOW
 ========================================
 
-1. By default (FlowerSdk.setIgnoreAdBreakInPIPMode(true)), VOD ads play in the SDK's own
-   video element over the content.
+1. VOD ads play in the SDK's own video element over the content.
 2. Pre-roll: the SDK does not pause the content, so content loaded right after
    requestVodAd() plays with audio under the pre-roll.
 3. The SDK calls onCompleted() after the pre-roll, and also when there is no pre-roll,
@@ -151,8 +150,6 @@ DO NOT:
 - Resume the content in onError() after a post-roll (isContentEnd).
 - Add setTimeout around flowerAdView.adsManager.play().
 - Change requestVodAd() arguments other than adding the optional trailing ones on request.
-- Switch to FlowerSdk.setIgnoreAdBreakInPIPMode(false) unless ads must play in PIP mode;
-  that mode needs different event handling and is a separate prompt.
 
 ========================================
 VERIFY
@@ -177,5 +174,5 @@ OUTPUT
 
 - Show each change as a before/after diff, grouped by the numbered items above.
 - List every changed file. Say explicitly which numbered items did not apply.
-- Do not add linear TV, interstitial, or PIP code.
+- Do not add linear TV or interstitial code.
 ```

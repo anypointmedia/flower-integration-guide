@@ -24,9 +24,7 @@ This guide walks you through the complete process of inserting ads into VOD cont
 > This allows you to start the main content after the pre-roll, and handle playback errors or skip events. This can be implemented as follows:
 
 :::caution Do not pause, seek, or reload the content player around a VOD ad break
-By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK plays VOD ads in its own video element, shown over the content. For a mid-roll, the SDK pauses the content when the ad break starts, and when the ad break ends, seeks the content back by `rewindDuration` (5 seconds by default) and resumes it. After a post-roll, the content has already ended, so it is not resumed. Do not pause, seek, or reload the content yourself around a VOD ad break, including in `onPlay` and `onError()` (see `onError()` below).
-
-With `setIgnoreAdBreakInPIPMode(false)`, the SDK plays the ads inside the HLS.js or Bitmovin player it received through `MediaPlayerHook`, so pausing the player stops the ad itself. See [PIP Mode Support](../../getting-started/pip-mode-support) for this mode.
+The SDK plays VOD ads in its own video element, shown over the content. For a mid-roll, the SDK pauses the content when the ad break starts, and when the ad break ends, seeks the content back by `rewindDuration` (5 seconds by default) and resumes it. After a post-roll, the content has already ended, so it is not resumed. Do not pause, seek, or reload the content yourself around a VOD ad break, including in `onPlay` and `onError()` (see `onError()` below).
 :::
 
 :::info When `onPrepare` is called for a mid-roll
@@ -102,7 +100,7 @@ When an ad break fails, the SDK brings the content back **before** it calls `onE
 - **Mid-roll error**: the SDK has already resumed the content `rewindDuration` before the point where the mid-roll interrupted it. Do not stop, seek, or reload the content. Resume it with `videoElement.play()` (Bitmovin: `player.play()`) as a safety net; this is harmless if it is already playing.
 - **Post-roll error**: the content has already ended. Do not resume it.
 
-`onCompleted()` may also be called for the same ad break, before or after `onError()`. Keep the `isContentPrepared` and `isContentEnd` checks so the content is never loaded twice. With `setIgnoreAdBreakInPIPMode(false)`, `onError()` can be called twice for one failure.
+`onCompleted()` may also be called for the same ad break, before or after `onError()`. Keep the `isContentPrepared` and `isContentEnd` checks so the content is never loaded twice.
 :::
 
 ### 3. Passing the Player – `MediaPlayerHook`
@@ -168,10 +166,6 @@ videoElement.addEventListener('ended', () => {
 });
 ```
 
-:::note
-With `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`, ads are played in the content player, so the `ended` event also occurs when each ad ends. Check that the current source is the content before calling `notifyContentEnded()`. See [PIP Mode Support](../../getting-started/pip-mode-support#handling-player-events).
-:::
-
 #### FlowerAdsManager.stop()
 
 Call this API when exiting VOD content. No parameters required.
@@ -190,7 +184,7 @@ Call this API used when resuming VOD content. No parameters required.
 Do not load the main VOD source on the player immediately after calling `requestVodAd(...)`.
 Instead, wait for the first `FlowerAdsManagerListener.onCompleted()` (or `onError()`), check whether the content has not yet been prepared (e.g., `isContentPrepared === false`), and only then load the VOD source and start playback.
 
-By default (`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`), the SDK does not pause the content for a pre-roll. If the VOD source is loaded right after `requestVodAd(...)`, the main content actually plays, with its audio, under the pre-roll ad.
+The SDK does not pause the content for a pre-roll. If the VOD source is loaded right after `requestVodAd(...)`, the main content actually plays, with its audio, under the pre-roll ad.
 
 The SDK calls `onCompleted()` even when there is no pre-roll, no ad is served, or the ad request fails, so the content always starts from this callback. After the content has been prepared, do not load, play, pause, or seek the content in `onCompleted()`, because the SDK resumes the content by itself after a mid-roll. In `onError()`, do not load, pause, or seek it either; handle it as described in [`onError()`](#2-receiving-ad-events-floweradsmanagerlistener) above.
 :::

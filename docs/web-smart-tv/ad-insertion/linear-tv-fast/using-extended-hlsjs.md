@@ -130,7 +130,6 @@ FlowerHls handles the pre-roll itself. `loadSource()` loads the stream and reque
 - Listeners registered with `addAdListener()` also receive `onPrepare()`, `onPlay()`, and `onCompleted()` for the pre-roll.
 - When there is no pre-roll ad, the ad request fails, or the pre-roll fails to play, the SDK calls `onCompleted()` (not `onError()`) and the stream resumes.
 - A channel change (`setAdConfig()` and `loadSource()` for the next channel) stops a pre-roll still in progress and requests the new channel's pre-roll. Coming back after another channel (A → B → A) plays A's pre-roll again.
-- With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the user leaves the app and resumed when the user comes back. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
 
 ## Linear Channel Ad Request Example
 

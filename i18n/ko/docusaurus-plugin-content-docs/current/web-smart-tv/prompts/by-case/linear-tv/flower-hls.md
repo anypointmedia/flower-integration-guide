@@ -161,23 +161,6 @@ STEP 5 — Cleanup
   }
   Call it when the player screen closes, on beforeunload, or in a React useEffect cleanup.
 
-STEP 6 — Report the user leaving the app and coming back
-
-  function reportUserLeftApp() {
-      const hasLeftApp = document.visibilityState === 'hidden'
-          || (hls && document.pictureInPictureElement === hls.media);
-      FlowerSdk.notifyUserLeftApp(hasLeftApp);
-  }
-  document.addEventListener('visibilitychange', reportUserLeftApp);
-  // Only if the app supports PIP; register on each new hls.media (after initHls()):
-  hls.media.addEventListener('enterpictureinpicture', reportUserLeftApp);
-  hls.media.addEventListener('leavepictureinpicture', reportUserLeftApp);
-  Report it whether or not PIP starts (another tab or app, the TV app in the background,
-  or PIP). Stream ads keep playing while the user is away (only the ad UI is hidden); a
-  channel pre-roll is paused while the user is away and resumed when the user comes back.
-  FlowerSdk.notifyPictureInPictureModeChanged() is deprecated and replaced by
-  notifyUserLeftApp(). Existing calls keep working.
-
 ========================================
 RULES
 ========================================

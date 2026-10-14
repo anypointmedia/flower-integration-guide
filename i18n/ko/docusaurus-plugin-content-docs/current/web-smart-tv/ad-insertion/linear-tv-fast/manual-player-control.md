@@ -141,8 +141,6 @@ flowerAdView.adsManager.addListener(adsManagerListener);
 
 **채널 전환:** 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다. 다음 채널에 대한 `changeChannelUrl()` 호출은 진행 중인 프리롤을 포함해 현재 세션을 중지하고, 새 채널의 프리롤을 요청합니다. 다른 채널을 거쳐 돌아오면(A → B → A) A의 프리롤이 다시 재생됩니다. 이렇게 중지된 프리롤은 임시 리스너를 호출하지 않으므로, 예시처럼 새 호출 전에 이전 임시 리스너를 제거하고 원래 리스너를 다시 등록하세요. 시청자가 채널 화면을 떠날 때도 `stop()` 전에 임시 리스너를 제거합니다.
 
-**PIP:** 기본 설정(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`)에서는 사용자가 앱을 떠나면 프리롤이 일시정지되고, 앱으로 돌아오면 재개됩니다. VOD 광고와 같은 동작입니다. [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
-
 ## 실시간 채널 광고 요청 예시
 
 ### _HLS.js_

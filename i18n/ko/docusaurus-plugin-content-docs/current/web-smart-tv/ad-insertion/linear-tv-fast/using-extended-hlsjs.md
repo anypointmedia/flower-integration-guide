@@ -131,7 +131,6 @@ hls.addAdListener(adsManagerListener);
 - `addAdListener()`로 등록한 리스너는 프리롤에 대해서도 `onPrepare()`, `onPlay()`, `onCompleted()`를 수신합니다.
 - 프리롤 광고가 없거나, 광고 요청이 실패하거나, 프리롤 재생에 실패하면 SDK는 `onError()`가 아닌 `onCompleted()`를 호출하고 스트림 재생을 재개합니다.
 - 채널을 전환하면(다음 채널로 `setAdConfig()`와 `loadSource()` 호출) 진행 중인 프리롤이 중지되고 새 채널의 프리롤을 요청합니다. 다른 채널을 거쳐 돌아오면(A → B → A) A의 프리롤이 다시 재생됩니다.
-- 기본 설정(`FlowerSdk.setIgnoreAdBreakInPIPMode(true)`)에서는 사용자가 앱을 떠나면 프리롤이 일시정지되고, 앱으로 돌아오면 재개됩니다. [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
 
 ## 실시간 채널 광고 요청 예시
 

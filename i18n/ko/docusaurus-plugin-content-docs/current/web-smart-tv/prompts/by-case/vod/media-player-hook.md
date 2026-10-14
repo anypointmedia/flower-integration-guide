@@ -5,7 +5,7 @@ sidebar_label: 앱의 플레이어를 이용한 VOD
 
 # 앱의 플레이어를 이용한 VOD 광고 (MediaPlayerHook)
 
-앱의 HLS.js, Bitmovin, dash.js, Shaka Player 인스턴스로 재생하는 VOD 콘텐츠에 프리롤, Mid-roll, Post-roll 광고를 기본 광고 모드(광고가 SDK의 별도 video 요소에서 본편 위에 재생됨)로 추가할 때 이 프롬프트를 사용하세요. LLM이 기존 플레이어 코드에 `requestVodAd`, 광고 리스너, 본편 종료 처리를 연결하도록 안내합니다. [VOD 광고 적용](../../../ad-insertion/vod/vod-ad-implementation.md) 페이지를 참고하세요.
+앱의 HLS.js, Bitmovin, dash.js, Shaka Player 인스턴스로 재생하는 VOD 콘텐츠에 프리롤, Mid-roll, Post-roll 광고를 추가할 때 이 프롬프트를 사용하세요. 광고는 SDK의 별도 video 요소에서 본편 위에 재생됩니다. LLM이 기존 플레이어 코드에 `requestVodAd`, 광고 리스너, 본편 종료 처리를 연결하도록 안내합니다. [VOD 광고 적용](../../../ad-insertion/vod/vod-ad-implementation.md) 페이지를 참고하세요.
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
@@ -38,8 +38,7 @@ HOW THE SDK BEHAVES IN THIS CASE
 
 Respect every fact below. Do not "fix" the SDK's behavior from the app.
 
-1. By default (FlowerSdk.setIgnoreAdBreakInPIPMode(true)), the SDK plays VOD ads in its
-   own <video> element inside the FlowerAdView container, shown over the content.
+1. The SDK plays VOD ads in its own <video> element inside the FlowerAdView container, shown over the content.
    The SDK shows and hides the ad container itself.
 2. Pre-roll: the SDK does NOT pause the content. Content loaded before the pre-roll ends
    plays, with audio, under the ad. So the content must be loaded only on the first
@@ -274,6 +273,5 @@ OUTPUT
 - Modify the code I paste; do not rewrite unrelated parts.
 - Keep only the {{PLAYER}} branch of every snippet above.
 - List every changed file and summarize the change in each.
-- Do not add code for linear TV, FlowerHls, interstitial ads, or
-  setIgnoreAdBreakInPIPMode(false).
+- Do not add code for linear TV, FlowerHls, or interstitial ads.
 ```
