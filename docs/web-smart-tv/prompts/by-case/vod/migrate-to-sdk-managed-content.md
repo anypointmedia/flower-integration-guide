@@ -45,7 +45,9 @@ HOW THE SDK BEHAVES NOW
    no ad, or the ad request fails. onError() is called when an ad fails to play, and
    onCompleted() may follow it. On a mid-roll error the content is normally
    already playing again; resuming is a harmless safety net, so the app calls play()
-   there (no seek or reload).
+   there (no seek or reload). onError() is also called with a message starting with
+   "playback unrecoverable" when the content stops and the SDK cannot recover it: the app
+   reloads the content or shows an error, without that play().
 4. Mid-roll: onPrepare() arrives when the content reaches the mid-roll position. The SDK
    pauses the content on onPrepare(), and when the break ends it seeks the content back by rewindDuration
    (default 5000 ms) and resumes it.
@@ -103,11 +105,15 @@ Search the pasted code for each pattern below and apply the change.
        }
        onError(error) {
            if (!isContentPrepared) { isContentPrepared = true; prepareContentSource(); }  // pre-roll error
+           else if (error?.message?.startsWith('playback unrecoverable')) {
+               // The content stopped and the SDK cannot recover it:
+               // reload the content or show an error. No safety-net play() here.
+           }
            else if (!isContentEnd) { videoElement.play(); }  // mid-roll error: play() only (bitmovin: player.play())
            // post-roll error (isContentEnd): playback is over - nothing to resume
        }
-   Remove any seek, currentTime assignment, or source reload from the old onError();
-   keep (or add) only the guarded play() above.
+   Remove any seek, currentTime assignment, or source reload from the old onError() for ad
+   errors; keep (or add) only the guarded play() and the "playback unrecoverable" branch above.
 
 5. App-side seek-back or resume-point logic after a mid-roll
    Remove it. If the product needs a different rewind, pass rewindDuration to
@@ -139,7 +145,9 @@ RULES
 
 DO NOT:
 - Add any new pause(), play(), seek, currentTime assignment, or source change around
-  ad events, other than the guarded play() in onError() after a mid-roll (change 4).
+  ad events, other than the guarded play() in onError() after a mid-roll and the
+  "playback unrecoverable" reload or error (change 4).
+- Call the safety-net play() for a "playback unrecoverable" onError().
 - Resume the content in onError() after a post-roll (isContentEnd).
 - Add setTimeout around flowerAdView.adsManager.play().
 - Change requestVodAd() arguments other than adding the optional trailing ones on request.
@@ -159,6 +167,8 @@ VERIFY
 - Ad error during a mid-roll: the content resumes about rewindDuration before the
   interruption point, without being reloaded.
 - Ad error during a post-roll: the content stays ended.
+- onError() with "playback unrecoverable": the content is reloaded or an error is shown;
+  play() is not called for it.
 - Leaving the screen during an ad: nothing starts playing afterwards.
 
 ========================================

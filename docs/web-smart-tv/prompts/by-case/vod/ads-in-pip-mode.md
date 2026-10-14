@@ -67,6 +67,9 @@ HOW THE SDK BEHAVES IN THIS CASE
     interrupted position minus rewindDuration); resuming is a harmless safety net. The app
     still calls play() in onError(): play() only, no seek or reload.
     onCompleted() may follow onError(). After a post-roll error the content stays ended.
+11. onError() is also called with a message starting with "playback unrecoverable" when the
+    content stops and the SDK cannot recover it: reload the content or show an error; do not
+    call play() for it.
 
 ========================================
 IMPLEMENTATION
@@ -119,6 +122,10 @@ STEP 5 — Listener
       },
       onError(error) {
           if (!isContentPrepared) { isContentPrepared = true; prepareContentSource(); }  // pre-roll error
+          else if (error?.message?.startsWith('playback unrecoverable')) {
+              // The content stopped and the SDK cannot recover it:
+              // reload the content or show an error. No safety-net play() here.
+          }
           else if (!isContentEnd) { videoElement.play(); }  // mid-roll error: play() only (bitmovin: player.play())
           // post-roll error (isContentEnd): playback is over - nothing to resume
       },
@@ -200,8 +207,10 @@ DO:
 
 DO NOT:
 - Pause, seek, or reload the player in onPrepare(), onPlay(), onCompleted(), onError().
-  The only player call in these callbacks is the guarded play() in onError() after a
-  mid-roll (isContentPrepared && !isContentEnd).
+  The only player calls in these callbacks are the guarded play() in onError() after a
+  mid-roll (isContentPrepared && !isContentEnd) and the reload for a "playback unrecoverable"
+  onError().
+- Call the safety-net play() for a "playback unrecoverable" onError().
 - Treat the first 'ended' / PlaybackFinished as the end of the content.
 - Call notifyContentEnded() more than once.
 - Save a resume position, send analytics, or rebuild track menus while an ad is the source.
@@ -219,6 +228,8 @@ VERIFY
 - Post-roll: plays once after the content ends; notifyContentEnded() is called once.
 - Ad error: pre-roll -> the content starts once; mid-roll -> the content comes back about
   5 s before the interruption point and plays; post-roll -> the content stays ended.
+- onError() with "playback unrecoverable": the content is reloaded or an error is shown;
+  play() is not called for it.
 - PIP: enter PIP during a mid-roll; the ad keeps playing in the PIP window and the content
   follows it. Exit PIP; the ad UI is shown again.
 - Analytics / resume points / track menus are not triggered by ad sources.

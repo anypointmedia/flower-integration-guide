@@ -70,7 +70,8 @@ HOW THE SDK BEHAVES IN THIS CASE
    right after changeChannelUrl() returns. A -> B -> A plays A's pre-roll again.
 7. changeChannelExtraParams(extraParams) updates targeting for the next ad requests of
    the current channel.
-8. onError() is the signal to recover the channel: call flowerAdView.adsManager.stop(),
+8. Every onError(), including a message starting with "playback unrecoverable", is the
+   signal to recover the channel: call flowerAdView.adsManager.stop(),
    release the player, and start the channel again (a new changeChannelUrl() call, load the
    URL it returns, play). The restart passes exactly the same arguments as the first start,
    prerollAdTagUrl included, and handles the returned URL the same way (temporary pre-roll

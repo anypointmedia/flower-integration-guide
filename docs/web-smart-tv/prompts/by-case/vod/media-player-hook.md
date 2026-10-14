@@ -51,7 +51,9 @@ Respect every fact below. Do not "fix" the SDK's behavior from the app.
    callbacks must be guarded by the same isContentPrepared flag. On a mid-roll error the
    content is normally already playing again; resuming is a harmless safety net, so the
    app still calls play() on the content in onError() (play() only, no seek or reload). After a post-roll error
-   the content stays ended.
+   the content stays ended. onError() is also called with a message starting with
+   "playback unrecoverable" when the content stops and the SDK cannot recover it: reload
+   the content or show an error; do not call play() for it.
 5. Mid-roll: the SDK calls onPrepare() when the content reaches the mid-roll position.
    On onPrepare() the SDK pauses the content. When the break ends (onCompleted/onError),
    the SDK seeks the content back by rewindDuration (default 5000 ms) and resumes it.
@@ -152,6 +154,9 @@ STEP 6 — Listener
               // Pre-roll error: load and start the content.
               isContentPrepared = true;
               prepareContentSource();
+          } else if (error?.message?.startsWith('playback unrecoverable')) {
+              // The content stopped and the SDK cannot recover it:
+              // reload the content or show an error. No safety-net play() here.
           } else if (!isContentEnd) {
               // Mid-roll error: resume the content - play() only, no seek or reload.
               // hls.js / dash.js / shaka: videoElement.play();  bitmovin: player.play();
@@ -227,6 +232,8 @@ DO:
 - Register the listener before requestVodAd().
 - Call notifyContentEnded() exactly once per content.
 - Remove the listener before stop().
+- In onError() with a message starting with "playback unrecoverable" (after the content was
+  prepared), reload the content or show an error.
 - In onError() after a mid-roll (isContentPrepared && !isContentEnd), call play() on the
   content as a safety net.
 
@@ -236,6 +243,7 @@ DO NOT:
 - Delay play() in onPrepare() (no setTimeout, no "ads start in 5 seconds" countdown).
 - Call play(), seek, or reload the content in onCompleted() after a mid-roll.
 - Seek or reload the content in onError() after a mid-roll, or resume it after a post-roll.
+- Call the safety-net play() for a "playback unrecoverable" onError().
 - Seek back after a mid-roll yourself (the SDK already rewinds by rewindDuration).
 - Use changeChannelUrl() or FlowerHls for VOD.
 - Use Video.js or another unsupported player: no ads and no callbacks would arrive,
@@ -254,6 +262,8 @@ VERIFY
   the end of playback; the content does not restart.
 - Ad playback error: the content starts (pre-roll) or resumes (mid-roll, from about 5 s
   before where it stopped) once, not twice; after a post-roll error it stays ended.
+- onError() with "playback unrecoverable": the app reloads the content or shows an error;
+  play() is not called for it.
 - Leave the screen during an ad: no content starts after leaving; no console errors.
 - Open a second title: ads are requested again and the previous session is fully stopped.
 

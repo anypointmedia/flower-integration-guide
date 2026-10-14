@@ -32,6 +32,7 @@ channel has not changed, the pre-roll is skipped, so the viewer does not see it
 again. Remove the listener first: stop() ends any ad break in progress and
 can still call onCompleted() for it afterwards. Keep onCompleted() UI-only (never start or
 reload playback there). Optionally count restarts and give up after a few attempts.
+Restart for every onError(), including a message starting with "playback unrecoverable".
 
 For FlowerHls:
   let adsManagerListener = {
@@ -100,6 +101,9 @@ If AD_TYPE is "vod" (media-player-hook only):
               // Pre-roll error: load and start the content.
               isContentPrepared = true;
               prepareContentSource();
+          } else if (error?.message?.startsWith('playback unrecoverable')) {
+              // The content stopped and the SDK cannot recover it:
+              // reload the content or show an error. No safety-net play() here.
           } else if (!isContentEnd) {
               // Mid-roll error: resume the content. Only play() - do NOT seek or reload.
               // The content is normally already playing again; resuming is a harmless
@@ -312,6 +316,7 @@ CONSTRAINTS
   If the channel has not changed, the pre-roll is skipped, so the viewer does not see it again.
 - Linear TV media-player-hook with prerollAdTagUrl: load the returned URL only from the temporary
   pre-roll listener's first onCompleted()/onError(), on a restart too; with no pre-roll, right away.
-- VOD onError(): pre-roll error -> load the content; mid-roll error -> play() only (no seek/reload);
+- VOD onError(): pre-roll error -> load the content; message starting with "playback unrecoverable"
+  -> reload the content or show an error (no play()); mid-roll error -> play() only (no seek/reload);
   post-roll error -> nothing to resume.
 ```

@@ -61,7 +61,8 @@ HOW THE SDK BEHAVES IN THIS CASE
    Stopping the ad session ends any ad break in progress, and the SDK can still call
    onCompleted() for that break afterwards; a listener removed before destroy() does not
    receive it. A destroyed FlowerHls cannot be reused.
-10. onError() is the signal to recover the channel: stop the ad session, release the player
+10. Every onError(), including a message starting with "playback unrecoverable", is the
+   signal to recover the channel: stop the ad session, release the player
    (destroy() does both), and start the channel again (new FlowerHls -> attachContainer ->
    setAdConfig -> addAdListener -> loadSource). The restart's setAdConfig() has exactly the
    same values as the first start, prerollAdTagUrl included. If the channel has not

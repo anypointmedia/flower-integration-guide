@@ -243,7 +243,7 @@ Both platforms need a Bitmovin licence key, supplied either through `usePlayer({
 
 ## Known Limitations
 
-*   **Deferred ad start is unavailable on iOS.** The Android adapter holds a loaded DASH break so it can be positioned before it is shown; that pair of calls is not on the iOS `MediaPlayerAdapter` protocol at all, so an iOS Bitmovin DASH break falls back to playing the next item plainly, exactly as the AVPlayer path does. HLS is unaffected.
+*   **On iOS with a DASH stream, a replacement ad may restart.** The ad can play for a second or two and then start again from its beginning. HLS is unaffected. This is an SDK-side limit, not something the app can fix.
 *   **Bitmovin documents live streams as unsupported in playlists**, which is the mechanism ad splicing uses. The Android E2E app exercises that path successfully, so the real limit is narrower than the sentence suggests — but it has not been measured on iOS.
 
 ## Verified Versions
