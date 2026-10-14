@@ -11,7 +11,7 @@ The prompt generates Kotlin code. If your player is not supported, you can also 
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 | `PLAYER_NAME` | e.g., `MyPlayer 3.2` | Your player class and version (used for `getPlayerType()` / `getPlayerVersion()`) |
 
@@ -101,7 +101,7 @@ IMPLEMENTATION
          adapter,                          // MediaPlayerAdapter overload
          null,                             // adTagHeaders
          null,                             // channelStreamHeaders
-         prerollAdTagUrl,                  // String? - optional channel pre-roll, null for none / on a restart
+         prerollAdTagUrl,                  // String? - optional channel pre-roll, null for none; the same on a restart
      )
    Without a pre-roll: player.open(changedChannelUrl); player.play()     // your player's API
    With a pre-roll (an ad played once on channel entry, before the live stream): the SDK
@@ -118,9 +118,10 @@ IMPLEMENTATION
    flowerAdView.adsManager.addListener(...); no adsManager.play() for linear TV.
    onError(): on the main thread, call flowerAdView.adsManager.stop(), stop your player, then
    enter the channel again as in step 4 (a NEW changeChannelUrl() call; do not reuse the old URL).
-   If the app passes a prerollAdTagUrl on the first start, pass null on this restart and play the
-   returned URL right away: a restart leaves the channel pre-roll out (prerollAdTagUrl omitted),
-   the viewer has already seen it. A break cut short by stop() may still report onCompleted() afterwards, so keep onCompleted()
+   Pass the same arguments as the first start, including prerollAdTagUrl, and handle the returned
+   URL in the same way. The SDK remembers the channel (channelId) entered last: for that channel it
+   skips the pre-roll and reports onCompleted() right after changeChannelUrl() returns, so the
+   viewer does not see the pre-roll again. A break cut short by stop() may still report onCompleted() afterwards, so keep onCompleted()
    idempotent. Optionally give up after a few consecutive restarts (e.g., 3).
 
 6) Cleanup: removeListener, flowerAdView.adsManager.stop(), release your player.

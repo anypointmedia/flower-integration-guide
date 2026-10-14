@@ -28,9 +28,10 @@ Flower Player에 대한 자세한 내용은 [Flower Player 소개](../about-flow
 
 - **이벤트:** `addAdListener()`로 등록한 리스너는 다른 광고와 같은 방식으로 프리롤 이벤트를 받습니다. 프리롤이 시작될 때 `onPlay()`, 끝날 때 `onCompleted()`가 호출됩니다.
 - **광고 없음 또는 요청 실패:** 프리롤 응답에 광고가 없거나(`onAdBreakSkipped()`) 요청이 실패하면 리스너는 `onCompleted()`를 받고 Flower Player가 채널을 시작합니다.
-- **재생 중 실패:** 재생 중 프리롤이 실패하면 리스너는 `onError()`를 받으며, Flower Player는 채널을 직접 로드하지 않습니다. [광고 이벤트 수신](#광고-이벤트-수신)에서 설명한 대로 프리롤 없이 채널을 다시 시작하세요.
-- **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 앱이 PIP 모드에 들어가면 일시정지되고 돌아오면 재개됩니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
+- **재생 중 실패:** 재생 중 프리롤이 실패하면 리스너는 `onError()`를 받으며, Flower Player는 채널을 직접 로드하지 않습니다. [광고 이벤트 수신](#광고-이벤트-수신)에서 설명한 대로 채널을 다시 시작하세요.
+- **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 사용자가 앱을 떠나면 일시정지되고 돌아오면 재개됩니다. 이를 `FlowerSdk.notifyUserLeftApp()`으로 알려야 합니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
 - **채널 전환:** 새 `FlowerLinearTvAdConfig`로 다른 채널을 로드하면 이전 채널의 광고 세션이 정지되고 새 채널의 프리롤을 요청합니다.
+- **같은 채널에 다시 진입:** SDK는 마지막으로 진입한 채널(`channelId`)을 기억합니다. 같은 채널의 광고 설정을 다시 설정하면 `prerollAdTagUrl`이 설정되어 있더라도 Flower Player는 프리롤을 건너뛰고 채널을 재생합니다. 기억된 채널은 `stop()`이나 `release()`로는 지워지지 않으며, VOD 광고나 인라인 광고를 요청하면 지워집니다. 예를 들어 A → B → A로 전환하면 A의 프리롤이 다시 재생되고, A → VOD → A도 마찬가지입니다. SDK가 화면과 관계없이 채널을 기억하므로, 그 사이에 VOD 광고나 인라인 광고 요청 없이 플레이어 화면을 나갔다가 같은 채널로 돌아와도 프리롤을 건너뜁니다.
 
 ## 광고 이벤트 수신
 
@@ -63,9 +64,9 @@ val adsManagerListener = object : FlowerAdsManagerListener {
             player.stop()
             player.release()
             // Start the channel again: a Flower Player, then setMediaItem with FlowerLinearTvAdConfig, prepare, and play.
-            // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+            // Use the same FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl.
             // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
-            playLinearTv(withPreroll = false)
+            playLinearTv()
         }
     }
 
@@ -79,7 +80,7 @@ val adsManagerListener = object : FlowerAdsManagerListener {
 player.addAdListener(adsManagerListener)
 ```
 
-재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. 재시작용 `FlowerLinearTvAdConfig`는 처음 시작할 때와 같은 값으로 만들되 `prerollAdTagUrl`을 빼서, Flower Player가 채널을 바로 재생하도록 하세요. 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다.
+재시작용 `FlowerLinearTvAdConfig`는 `prerollAdTagUrl`을 포함해 처음 시작할 때와 완전히 같은 값으로 만드세요. 시청자가 프리롤을 다시 보지는 않습니다. 재시작하는 채널이 마지막으로 진입한 채널이므로 Flower Player가 프리롤을 건너뛰고 채널을 재생하기 때문입니다. 채널을 처음 시작할 때와 다른 채널로 전환할 때는 설정한 대로 프리롤을 사용합니다.
 
 ## 전체 예시
 
@@ -110,8 +111,8 @@ class PlaybackActivity : Activity() {
         player.release()
     }
 
-    // withPreroll: true for the first start of a channel, false for a restart after onError
-    private fun playLinearTv(withPreroll: Boolean = true) {
+    // Used for the first start of a channel and a restart after onError
+    private fun playLinearTv() {
         // TODO GUIDE: Create ExoPlayer using standard ExoPlayer.Builder
         val exoPlayer = ExoPlayer.Builder(this)
             .setLoadControl(
@@ -143,10 +144,10 @@ class PlaybackActivity : Activity() {
         // arg3: extraParams, (Optional) Additional information pre-agreed for targeting
         // arg4: adTagHeaders, (Optional) HTTP header information to add for ad requests
         // arg5: channelStreamHeaders, (Optional) HTTP header information to add for original stream requests
-        // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+        // Use the same values on a restart: the Flower Player skips the pre-roll of the channel entered last.
         val adConfig = FlowerLinearTvAdConfig(
             adTagUrl = "https://ad_request",
-            prerollAdTagUrl = if (withPreroll) "https://preroll_ad_request" else null,
+            prerollAdTagUrl = "https://preroll_ad_request",
             channelId = "1",
             extraParams = mapOf(
                 "title" to "My Summer Vacation",
@@ -174,7 +175,7 @@ class PlaybackActivity : Activity() {
             }
             override fun onError(error: FlowerError?) {
                 // TODO GUIDE: Stop the player (and the ads manager) and restart the channel as shown in Receiving Ad Events,
-                //            with playLinearTv(withPreroll = false)
+                //            with playLinearTv()
             }
             override fun onAdBreakSkipped(reason: Int) {
                 // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped

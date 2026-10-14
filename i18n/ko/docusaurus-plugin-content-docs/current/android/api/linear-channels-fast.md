@@ -35,7 +35,7 @@ sidebar_position: 1
 
 ## 프리롤 광고 {#pre-roll-ads}
 
-`prerollAdTagUrl`을 설정해도 `changeChannelUrl()`은 스트림 URL을 바로 반환하며, SDK는 프리롤을 요청해 자체 광고 플레이어로 재생합니다. 프리롤이 끝날 때까지 반환된 URL을 로드하지 마세요. 임시 리스너를 등록하고, 그 리스너의 첫 `onCompleted()`(또는 `onError()`)에서 스트림을 시작합니다. 프리롤 광고가 없거나 프리롤이 실패한 경우에도 SDK는 `onCompleted()`를 보냅니다. `onError` 후 재시작할 때는 프리롤을 제외하며, 다른 채널로 `changeChannelUrl()`을 호출할 때마다 해당 채널의 프리롤을 요청합니다. `enterChannel()`에는 프리롤 매개변수가 없습니다. 전체 흐름과 예시는 [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control#pre-roll-ads)를 참고하세요.
+`prerollAdTagUrl`을 설정해도 `changeChannelUrl()`은 스트림 URL을 바로 반환하며, SDK는 프리롤을 요청해 자체 광고 플레이어로 재생합니다. 프리롤이 끝날 때까지 반환된 URL을 로드하지 마세요. 임시 리스너를 등록하고, 그 리스너의 첫 `onCompleted()`(또는 `onError()`)에서 스트림을 시작합니다. 프리롤 광고가 없거나 프리롤이 실패한 경우에도 SDK는 `onCompleted()`를 보냅니다. SDK는 마지막으로 진입한 채널(`channelId`)을 기억합니다. 같은 채널로 `changeChannelUrl()`을 호출하면 `prerollAdTagUrl`을 전달하더라도 프리롤을 건너뛰고 호출이 반환된 직후 `onCompleted()`를 보내므로, `onError` 후 재시작할 때는 `prerollAdTagUrl`을 포함해 같은 매개변수를 전달하고 같은 방식으로 스트림을 시작합니다. 기억된 채널은 `stop()`이 아니라 `requestVodAd()`나 `requestAd()`를 호출하면 지워집니다. 다른 채널로 `changeChannelUrl()`을 호출할 때마다 해당 채널의 프리롤을 요청합니다. `enterChannel()`에는 프리롤 매개변수가 없습니다. 전체 흐름과 예시는 [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control#pre-roll-ads)를 참고하세요.
 
 ## 작업 순서
 

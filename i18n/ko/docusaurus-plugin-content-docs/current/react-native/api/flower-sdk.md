@@ -11,7 +11,7 @@ import {
   initialize,
   play,
   notifyContentEnded,
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
   setIgnoreAdBreakInPIPMode,
   stop,
   release,
@@ -66,17 +66,19 @@ VOD 콘텐츠가 끝까지 재생되었음을 SDK에 알려 post-roll이 재생�
 
 해당 `nativeId`로 채널·VOD·인라인 요청이 시작된 적이 없으면 **reject**됩니다.
 
-### notifyPictureInPictureModeChanged
+### notifyUserLeftApp
 
 ```ts
-function notifyPictureInPictureModeChanged(isInPictureInPictureMode: boolean): Promise<void>;
+function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 ```
 
-앱이 PIP 모드에 진입했거나(`true`) PIP 모드에서 돌아왔음(`false`)을 SDK에 알립니다. 특정 `nativeId`가 아니라 앱 전체에 적용됩니다. 기본 설정인 `setIgnoreAdBreakInPIPMode(true)`에서는 PIP 진입 시 재생 중이던 광고가 일시정지되고 앱으로 돌아오면 재개됩니다. 단, 앱이 두 시점을 모두 알려야 합니다. [PIP 모드 지원](../getting-started/pip-mode-support.md)을 참고하세요.
+사용자가 앱을 떠났거나(`true`) — 홈 화면이나 다른 앱으로 이동했거나, 영상이 PIP 창으로 옮겨진 경우 — 앱으로 돌아왔음(`false`)을 SDK에 알립니다. 특정 `nativeId`가 아니라 앱 전체에 적용됩니다. 광고 재생 중에는 앱이 본편 플레이어를 PIP로 전환하지 않으므로, PIP 진입 여부와 관계없이 알려야 합니다. 기본 설정인 `setIgnoreAdBreakInPIPMode(true)`에서는 사용자가 앱을 떠날 때 재생 중이던 광고가 일시정지되고 사용자가 돌아오면 재개됩니다. 단, 앱이 두 시점을 모두 알려야 합니다. [PIP 모드 지원](../getting-started/pip-mode-support.md)을 참고하세요.
 
 | **파라미터** | **타입** | **설명** |
 | ---| ---| --- |
-| isInPictureInPictureMode | boolean | PIP 모드 진입 시 `true`, 해제 시 `false` |
+| hasLeftApp | boolean | 사용자가 앱을 떠날 때 `true`, 돌아올 때 `false` |
+
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)`는 deprecated되었으며 `notifyUserLeftApp`으로 대체되었습니다. 기존 호출도 계속 동작하며, 같은 값을 `notifyUserLeftApp`에 전달합니다.
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -88,7 +90,7 @@ function setIgnoreAdBreakInPIPMode(ignore: boolean): Promise<void>;
 
 | **파라미터** | **타입** | **설명** |
 | ---| ---| --- |
-| ignore | boolean | `true`(기본값): 광고는 콘텐츠 위의 SDK 자체 광고 플레이어에서 재생되고, PIP 모드에서는 VOD mid-roll과 post-roll을 요청하지 않으며, PIP 진입 시 재생 중이던 광고는 앱으로 돌아올 때까지 일시정지됩니다.<br/>`false`: VOD 브레이크는 앱의 플레이어(Android와 iOS의 `react-native-video`, Android의 Bitmovin)에서 재생되며 PIP 모드에서도 계속 재생됩니다. 인라인 브레이크와 iOS Bitmovin의 VOD 브레이크는 여전히 SDK 자체 광고 플레이어를 사용합니다. 브레이크가 앱의 플레이어에서 재생되는 경우 광고가 끝나면 콘텐츠가 새로운 플레이어 아이템으로 돌아오므로, 앱이 아이템 단위로 관찰하는 로직은 앱이 로드한 아이템이 아니라 콘텐츠를 기준으로 판단해야 합니다. |
+| ignore | boolean | `true`(기본값): 광고는 콘텐츠 위의 SDK 자체 광고 플레이어에서 재생되고, 사용자가 떠나 있는 동안에는 VOD mid-roll과 post-roll을 요청하지 않으며, 사용자가 앱을 떠날 때 재생 중이던 광고는 사용자가 돌아올 때까지 일시정지됩니다.<br/>`false`: VOD 브레이크는 앱의 플레이어(Android와 iOS의 `react-native-video`, Android의 Bitmovin)에서 재생되며 PIP 모드에서도 계속 재생됩니다. 인라인 브레이크와 iOS Bitmovin의 VOD 브레이크는 여전히 SDK 자체 광고 플레이어를 사용합니다. 브레이크가 앱의 플레이어에서 재생되는 경우 광고가 끝나면 콘텐츠가 새로운 플레이어 아이템으로 돌아오므로, 앱이 아이템 단위로 관찰하는 로직은 앱이 로드한 아이템이 아니라 콘텐츠를 기준으로 판단해야 합니다. |
 
 ### stop
 

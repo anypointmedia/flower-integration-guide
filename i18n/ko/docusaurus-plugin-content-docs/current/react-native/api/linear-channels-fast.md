@@ -57,7 +57,8 @@ export type ChannelParams = {
 *   SDK가 프리롤을 직접 시작합니다 — `prepare`, 이어서 `play` — 오버레이 안의 SDK 자체 광고 플레이어에서 재생하며, 그동안 콘텐츠 플레이어를 일시정지합니다. 앱은 프리롤을 위해 [`play`](./flower-sdk.md#play)를 호출하지 않습니다.
 *   프리롤이 끝나면 SDK가 `completed`를 보냅니다. 이때 보관한 프록시 URL을 소스로 설정하세요.
 *   프리롤 태그가 광고를 반환하지 않거나 요청 또는 재생이 실패해도 SDK는 `error`가 아니라 `completed`를 보내므로, 채널은 그대로 시작됩니다.
-*   `changeChannelUrl()`을 호출할 때마다 해당 `nativeId`에서 실행 중이던 세션이 중지되고(아직 재생 중인 프리롤 포함), 새 호출의 프리롤이 요청됩니다. 프리롤 없이 시작하려면 `error` 이후의 재시작처럼 `prerollAdTagUrl`을 생략하세요.
+*   `changeChannelUrl()`을 호출할 때마다 해당 `nativeId`에서 실행 중이던 세션이 중지되고(아직 재생 중인 프리롤 포함), 새 호출의 프리롤이 요청됩니다. 프리롤 없이 시작하려면 `prerollAdTagUrl`을 생략하세요.
+*   SDK는 마지막으로 진입한 채널(`channelId`)을 기억합니다. 같은 채널로 다시 호출하면 — 예를 들어 `error` 이후의 재시작 — `prerollAdTagUrl`이 있어도 프리롤을 건너뛰고, 광고가 없는 프리롤과 같은 방식으로 Promise가 resolve된 직후 `completed`를 보냅니다. 이 채널은 VOD 또는 인라인 광고를 요청할 때(`requestVodAd()`, `requestAd()`)만 잊혀지며, `stop()`이나 `initialize()`에서는 잊혀지지 않습니다. `nativeId`별이 아니라 앱 전체에서 하나의 채널만 기억합니다.
 
 [프리롤 광고](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#프리롤-광고)를 참고하세요.
 
@@ -65,7 +66,7 @@ export type ChannelParams = {
 
 해당 채널의 현재 광고 브레이크를 중단합니다. 콘텐츠 재생은 계속됩니다. [`stop`](./flower-sdk.md#stop)을 참고하세요.
 
-`error` 이벤트 이후의 `stop()`은 채널 재시작의 첫 단계입니다: 광고 매니저를 중지한 뒤 `prerollAdTagUrl` 없이 `changeChannelUrl()`을 다시 호출하고, 반환된 새 프록시 URL을 재생합니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
+`error` 이벤트 이후의 `stop()`은 채널 재시작의 첫 단계입니다: 광고 매니저를 중지한 뒤 `prerollAdTagUrl`을 포함해 첫 시작과 같은 파라미터로 `changeChannelUrl()`을 다시 호출하고, 반환된 새 프록시 URL을 첫 시작과 같은 방식으로 재생합니다. [오류 복구](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#오류-복구)를 참고하세요.
 
 ## 작업 절차
 
@@ -73,7 +74,7 @@ export type ChannelParams = {
 2. 광고 재생에 반응해야 한다면 [`addAdEventListenerFor`](./ad-event.md#addadeventlistenerfor)로 광고 이벤트를 구독합니다.
 3. `onLoad`가 발생하면 해당 `nativeID`로 `changeChannelUrl()`을 호출합니다.
 4. `<Video>`의 소스를 반환된 프록시 URL로 교체합니다. 플레이어는 재생성되지 않고 재사용됩니다. `prerollAdTagUrl`을 지정했다면 프록시 URL을 보관했다가, 프리롤이 끝났음을 알리는 `completed` 이벤트에서 교체합니다.
-5. [`error`](./ad-event.md#error) 이벤트가 발생하면 `await stop(nativeId)` 후 3–4단계를 반복합니다: `prerollAdTagUrl`을 제외한 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 새 프록시 URL을 바로 소스로 설정합니다. 재시작할 때는 채널 프리롤을 넣지 않습니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 봤기 때문이며, 따라서 기다릴 `completed`도 없습니다. 계속 실패하는 채널이 무한 반복되지 않도록 재시작 횟수에 상한을 두세요.
+5. [`error`](./ad-event.md#error) 이벤트가 발생하면 `await stop(nativeId)` 후 3–4단계를 반복합니다: `prerollAdTagUrl`을 포함해 완전히 같은 파라미터로 `changeChannelUrl()`을 새로 호출하고, 새 프록시 URL은 4단계와 같이 처리합니다. 시청자에게 프리롤이 다시 표시되지는 않습니다. SDK가 마지막으로 진입한 채널의 프리롤을 건너뛰고 바로 `completed`를 보내기 때문입니다. 계속 실패하는 채널이 무한 반복되지 않도록 재시작 횟수에 상한을 두세요.
 6. `<Video>`가 unmount될 때 [`release`](./flower-sdk.md#release)를 호출합니다.
 
 ```tsx

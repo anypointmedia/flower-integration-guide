@@ -57,7 +57,8 @@ With `prerollAdTagUrl`, the SDK plays a channel pre-roll before the channel itse
 *   The SDK starts the pre-roll by itself — `prepare`, then `play` — on its own ad player in the overlay, and pauses the content player while it runs. The app does not call [`play`](./flower-sdk.md#play) for it.
 *   When the pre-roll ends, the SDK sends `completed`. Set the held proxy URL as the source there.
 *   When the pre-roll tag returns no ad, or the request or playback fails, the SDK still sends `completed`, never `error`, so the channel still starts.
-*   Each `changeChannelUrl()` call stops the session that was running for that `nativeId`, a pre-roll still playing included, and requests the pre-roll of the new call. Omit `prerollAdTagUrl` to start without one — as a restart after an `error` does.
+*   Each `changeChannelUrl()` call stops the session that was running for that `nativeId`, a pre-roll still playing included, and requests the pre-roll of the new call. Omit `prerollAdTagUrl` to start without one.
+*   The SDK remembers the channel (`channelId`) entered last. A call for that same channel — a restart after an `error`, for one — skips the pre-roll even with `prerollAdTagUrl`, and sends `completed` right after the promise resolves, the same way as a pre-roll with no ad. The channel is forgotten only when a VOD or inline ad is requested (`requestVodAd()`, `requestAd()`), not on `stop()` or `initialize()`; it is one channel for the whole app, not one per `nativeId`.
 
 See [Pre-roll Ads](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#pre-roll-ads).
 
@@ -65,7 +66,7 @@ See [Pre-roll Ads](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#pr
 
 Stops the current ad break for one channel. Playback of the content itself continues. See [`stop`](./flower-sdk.md#stop).
 
-After an `error` event, `stop()` is the first half of a channel restart: stop the ads manager, then call `changeChannelUrl()` again without `prerollAdTagUrl` and play the new proxy URL it returns. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
+After an `error` event, `stop()` is the first half of a channel restart: stop the ads manager, then call `changeChannelUrl()` again with the same parameters as the first start, `prerollAdTagUrl` included, and play the new proxy URL it returns the same way as the first time. See [Recovering from an Error](../ad-insertion/linear-tv-fast/linear-tv-implementation.md#recovering-from-an-error).
 
 ## Work Process
 
@@ -73,7 +74,7 @@ After an `error` event, `stop()` is the first half of a channel restart: stop th
 2. Subscribe to ad events with [`addAdEventListenerFor`](./ad-event.md#addadeventlistenerfor) if your app needs to react to ad playback.
 3. Once `onLoad` fires, call `changeChannelUrl()` with that `nativeID`.
 4. Swap the `<Video>` source to the returned proxy URL. The player is reused, not rebuilt. With `prerollAdTagUrl`, hold the proxy URL and swap it in on the `completed` event that ends the pre-roll.
-5. On an [`error`](./ad-event.md#error) event, `await stop(nativeId)`, then repeat steps 3–4: a new `changeChannelUrl()` with the same parameters except `prerollAdTagUrl`, and its new proxy URL as the source right away. A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it, so there is no `completed` to wait for. Cap the number of restarts so a channel that keeps failing does not loop.
+5. On an [`error`](./ad-event.md#error) event, `await stop(nativeId)`, then repeat steps 3–4: a new `changeChannelUrl()` with exactly the same parameters, `prerollAdTagUrl` included, and its new proxy URL handled as in step 4. The viewer does not see the pre-roll again: the SDK skips the pre-roll of the channel entered last and sends `completed` right away. Cap the number of restarts so a channel that keeps failing does not loop.
 6. Call [`release`](./flower-sdk.md#release) when the `<Video>` unmounts.
 
 ```tsx

@@ -60,7 +60,10 @@ IMPLEMENTATION
 
 3. When casting ends and the user returns to local playback, start the channel again exactly as
    at screen start (changeChannelUrl(...) and play the returned URL, or
-   replaceCurrentItem(with:adConfig:) + play()).
+   replaceCurrentItem(with:adConfig:) + play()), with the same parameters, including
+   prerollAdTagUrl. If it is the channel entered last, the SDK skips its pre-roll (and, with
+   changeChannelUrl, calls onCompleted right away), so the channel starts without the pre-roll
+   playing again.
 
 ========================================
 RULES

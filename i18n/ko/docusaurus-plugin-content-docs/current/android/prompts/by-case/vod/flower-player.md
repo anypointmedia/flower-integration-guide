@@ -11,7 +11,7 @@ sidebar_label: Flower Player로 VOD 광고
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.9.28` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.9.29` | 프로젝트에 제공된 Flower SDK 버전 |
 | `ENV` | `local` \| `dev` \| `prod` | `FlowerSdk.setEnv()`에 전달하는 값 |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | 감쌀 플레이어: `FlowerMedia3ExoPlayer`, `FlowerExoPlayer2`, `FlowerBitmovinPlayer` |
 | `MEDIA3_VERSION` | 예: `1.10.1` | `media3`인 경우에만: 앱의 `androidx.media3` 버전 |

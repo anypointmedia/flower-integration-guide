@@ -11,7 +11,7 @@ import {
   initialize,
   play,
   notifyContentEnded,
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
   setIgnoreAdBreakInPIPMode,
   stop,
   release,
@@ -66,17 +66,19 @@ Tells the SDK the VOD content played to its end, so a post-roll can run. Wire it
 
 **Rejects** when no channel, VOD or inline request was started for `nativeId`.
 
-### notifyPictureInPictureModeChanged
+### notifyUserLeftApp
 
 ```ts
-function notifyPictureInPictureModeChanged(isInPictureInPictureMode: boolean): Promise<void>;
+function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 ```
 
-Tells the SDK the app went into (`true`) or came back from (`false`) PIP mode. App-wide, not per `nativeId`. With the default `setIgnoreAdBreakInPIPMode(true)`, an ad playing when the app enters PIP is paused and resumes when the app comes back — but only if the app reports both moments. See [PIP Mode Support](../getting-started/pip-mode-support.md).
+Tells the SDK the user left the app (`true`) — to the home screen, to another app, or with the video moved to a PIP window — or came back to it (`false`). App-wide, not per `nativeId`. Report it whether or not the app enters PIP: while an ad plays, the app keeps the content player out of PIP. With the default `setIgnoreAdBreakInPIPMode(true)`, an ad playing when the user leaves is paused and resumes when the user comes back — but only if the app reports both moments. See [PIP Mode Support](../getting-started/pip-mode-support.md).
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| isInPictureInPictureMode | boolean | `true` when entering PIP mode, `false` when exiting it |
+| hasLeftApp | boolean | `true` when the user leaves the app, `false` when the user comes back |
+
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -88,7 +90,7 @@ Selects how ads are played. App-wide, not per `nativeId`. Call it before request
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| ignore | boolean | `true` (the default): ads play on the SDK's own ad player over the content, VOD mid-rolls and post-rolls are not requested in PIP, and an ad playing when PIP starts is paused until the app comes back.<br/>`false`: VOD breaks play on the app's own player (`react-native-video` on Android and iOS, Bitmovin on Android) and keep playing in PIP. Inline breaks, and VOD breaks with Bitmovin on iOS, still use the SDK's own ad player. Where the break plays on the app's player, the content comes back afterwards as a new player item, so anything the app watches per item has to match the content rather than the item it loaded. |
+| ignore | boolean | `true` (the default): ads play on the SDK's own ad player over the content, VOD mid-rolls and post-rolls are not requested while the user is away, and an ad playing when the user leaves the app is paused until the user comes back.<br/>`false`: VOD breaks play on the app's own player (`react-native-video` on Android and iOS, Bitmovin on Android) and keep playing in PIP. Inline breaks, and VOD breaks with Bitmovin on iOS, still use the SDK's own ad player. Where the break plays on the app's player, the content comes back afterwards as a new player item, so anything the app watches per item has to match the content rather than the item it loaded. |
 
 ### stop
 

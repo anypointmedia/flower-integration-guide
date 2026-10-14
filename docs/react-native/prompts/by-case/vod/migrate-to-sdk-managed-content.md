@@ -9,7 +9,7 @@ Use this prompt when an existing VOD integration pauses the content on `prepare`
 
 | Parameter | Example | Description |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | Version of `@anypoint/flower-sdk-react-native` to upgrade to |
+| `{{SDK_VERSION}}` | `1.0.4` | Version of `@anypoint/flower-sdk-react-native` to upgrade to |
 | `{{PLAYER_TYPE}}` | `react-native-video` \| `bitmovin` | Player library that plays the VOD content |
 
 ````plain

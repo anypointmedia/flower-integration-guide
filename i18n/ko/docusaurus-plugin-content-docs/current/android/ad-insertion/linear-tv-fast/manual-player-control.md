@@ -44,10 +44,10 @@ val adsManagerListener = object : FlowerAdsManagerListener {
         CoroutineScope(Dispatchers.Main).launch {
             flowerAdView.adsManager.stop()
             player.stop()
-            // Start the channel again with a new changeChannelUrl(...) call, then load and play the returned URL.
-            // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
+            // Start the channel again in the same way as the first start: a new changeChannelUrl(...) call with the same
+            // parameters, including prerollAdTagUrl. The SDK skips the pre-roll of the channel entered last.
             // OPTIONAL GUIDE: limit consecutive restarts (e.g., 3 in a row) so a persistent error does not loop.
-            playLinearTv(withPreroll = false)
+            playLinearTv()
         }
     }
 
@@ -59,7 +59,7 @@ flowerAdView.adsManager.addListener(adsManagerListener)
 ```
 
 :::info `onError` 복구
-`onError`는 광고 재생에 실패했거나 채널 스트림을 더 이상 재생할 수 없을 때 호출됩니다. `stop()`으로 광고 매니저를 정지하고 콘텐츠 플레이어를 정지한 다음, 새 `changeChannelUrl(...)` 호출로 채널을 다시 시작하세요. `stop()` 이전에 반환된 URL은 재사용하지 마세요. 재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. 처음 시작할 때와 같은 매개변수를 전달하되 `prerollAdTagUrl`만 `null`로 두고, 기다릴 프리롤이 없으므로 반환된 URL을 바로 로드해 재생하세요. 리스너는 등록된 상태로 유지되므로, 다시 시작된 채널의 이벤트도 같은 리스너가 수신합니다. `stop()`으로 중단된 광고 구간이 그 뒤에 `onCompleted`를 보낼 수 있으므로, `onCompleted`에는 여러 번 실행되어도 안전한 UI 작업만 두세요.
+`onError`는 광고 재생에 실패했거나 채널 스트림을 더 이상 재생할 수 없을 때 호출됩니다. `stop()`으로 광고 매니저를 정지하고 콘텐츠 플레이어를 정지한 다음, 새 `changeChannelUrl(...)` 호출로 채널을 다시 시작하세요. `stop()` 이전에 반환된 URL은 재사용하지 마세요. `prerollAdTagUrl`을 포함해 처음 시작할 때와 완전히 같은 매개변수를 전달하고, 반환된 URL도 같은 방식으로 처리하세요. `prerollAdTagUrl`을 전달했다면 [프리롤 광고](#pre-roll-ads)에서 설명한 것처럼 `onCompleted()`까지 URL 로드를 미룹니다. 시청자가 프리롤을 다시 보지는 않습니다. SDK는 마지막으로 진입한 채널의 프리롤을 건너뛰고 `changeChannelUrl()`이 반환된 직후 `onCompleted()`를 보내기 때문입니다. 리스너는 등록된 상태로 유지되므로, 다시 시작된 채널의 이벤트도 같은 리스너가 수신합니다. `stop()`으로 중단된 광고 구간이 그 뒤에 `onCompleted`를 보낼 수 있으므로, `onCompleted`에는 여러 번 실행되어도 안전한 UI 작업만 두세요.
 
 채널 스트림 재생이 중단되었고 SDK가 이를 복구하지 않을 때, 플레이어 어댑터가 장애 1건당 한 번 `playback unrecoverable (<reason>) - url: <url>` 메시지와 플레이어의 오류를 `cause`로 담아 `onError`를 호출합니다. Media3 ExoPlayer / ExoPlayer2는 SDK가 자동 복구하지 않는 치명적 플레이어 오류, SDK의 `BehindLiveWindow` 자동 복구가 꺼져 있을 때의 `BehindLiveWindow`, 3회 복구를 시도한 뒤에도 멈춰 있는 라이브 플레이리스트가 해당하며, Bitmovin은 3회 재로드 시도 후 또는 재로드할 소스가 없는 경우입니다. 같은 방법으로 복구하되, 가능하면 새로 발급받은 채널 URL을 사용하세요.
 :::
@@ -140,8 +140,9 @@ Anypoint Media에서 발급받은 프리롤 광고 태그 URL을 `changeChannelU
 
 - **이벤트:** 임시 리스너는 `onPrepare()`, 프리롤이 시작될 때 `onPlay()`, 끝날 때 `onCompleted()`를 받습니다. 채널 프리롤에 대해서는 `onAdBreakPrepare()`, `onAdPlay()`, `onAdUserAction()`, `onAdBreakSkipped()`가 전달되지 않습니다.
 - **광고 없음 또는 실패:** 프리롤 응답에 광고가 없거나, 요청이 실패하거나, 재생 중 프리롤이 실패하면 SDK는 `onError()`가 아니라 `onCompleted()`를 보내므로 채널은 평소처럼 시작됩니다. 만일에 대비해 임시 리스너의 `onError()`도 같은 방식으로 처리하세요.
-- **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 앱이 PIP 모드에 들어가면 일시정지되고 돌아오면 재개됩니다. PIP 전환은 `FlowerSdk.notifyPictureInPictureModeChanged()`로 알려야 합니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
-- **`onError` 후 재시작:** 재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. 위의 "`onError` 복구"에서 설명한 것처럼 기존 리스너를 등록한 상태로 두고 반환된 URL을 바로 로드해 재생합니다.
+- **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 사용자가 앱을 떠나면 일시정지되고 돌아오면 재개됩니다. PIP 진입 여부와 관계없이 이를 `FlowerSdk.notifyUserLeftApp()`으로 알려야 합니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
+- **같은 채널에 다시 진입:** SDK는 마지막으로 진입한 채널(`channelId`)을 기억합니다. 같은 `channelId`로 `changeChannelUrl()`을 호출하면 `prerollAdTagUrl`을 전달하더라도 프리롤을 건너뛰고, 광고가 없는 프리롤과 같은 방식으로 `changeChannelUrl()`이 반환된 직후 `onCompleted()`를 보냅니다. 따라서 앱은 처음 시작할 때와 똑같이 채널을 시작하면 됩니다. 기억된 채널은 `stop()`으로는 지워지지 않으며, VOD 광고(`requestVodAd`)나 인라인 광고(`requestAd`)를 요청하면 지워집니다. 예를 들어 A → B → A로 전환하면 A의 프리롤이 다시 재생되고, A → VOD → A도 프리롤이 다시 재생됩니다. SDK가 화면과 관계없이 채널을 기억하므로, 그 사이에 VOD 광고나 인라인 광고 요청 없이 플레이어 화면을 나갔다가 같은 채널로 돌아와도 프리롤을 건너뜁니다.
+- **`onError` 후 재시작:** 위의 "`onError` 복구"에서 설명한 것처럼 `prerollAdTagUrl`을 포함해 처음 시작할 때와 같은 매개변수로 `changeChannelUrl()`을 호출하고, 반환된 URL도 같은 방식으로 처리합니다. 마지막으로 진입한 채널이므로 시청자가 프리롤을 다시 보지 않습니다.
 - **채널 전환:** `changeChannelUrl()`을 호출할 때마다 아직 재생 중인 프리롤을 포함해 이전 채널의 광고 세션이 정지되고, `prerollAdTagUrl`을 전달하면 새 채널의 프리롤을 요청합니다. 이렇게 정지되거나 `stop()`으로 정지된 프리롤은 `onCompleted()`를 보내지 않습니다. 다음 `changeChannelUrl()` 호출 전과 `stop()` 호출 전에, 아직 등록되어 있는 임시 리스너를 제거하고 기존 리스너를 다시 등록하세요. 그렇지 않으면 다음 프리롤이 끝날 때 임시 리스너가 이전 채널의 URL을 로드합니다.
 
 ## 실시간 채널 광고 요청 예시
@@ -152,8 +153,8 @@ Anypoint Media에서 발급받은 프리롤 광고 태그 URL을 `changeChannelU
 // 채널 프리롤 대기 중에 사용하는 임시 리스너 (대기 중이 아니면 null)
 private var prerollListener: FlowerAdsManagerListener? = null
 
-// withPreroll: 채널을 처음 시작하거나 전환할 때는 true, onError 후 재시작할 때는 false
-private fun playLinearTv(withPreroll: Boolean = true) {
+// 채널을 처음 시작할 때, 전환할 때, onError 후 재시작할 때 모두 사용합니다.
+private fun playLinearTv() {
     // 채널 전환으로 정지된 프리롤은 onCompleted를 보내지 않으므로,
     // 남아 있는 임시 리스너를 제거하고 원래 리스너가 등록되어 있도록 합니다.
     prerollListener?.let { flowerAdView.adsManager.removeListener(it) }
@@ -171,8 +172,8 @@ private fun playLinearTv(withPreroll: Boolean = true) {
     // arg6: channelStreamHeaders, (Optional) values included in headers for channel stream request
     // arg7: prerollAdTagUrl, (Optional) ad tag URL for pre-roll ads
     // (Optional) Set to null if pre-roll ads are not needed
-    // 재시작할 때는 채널 프리롤을 제외합니다(prerollAdTagUrl 생략). 시청자가 이미 프리롤을 보았기 때문입니다.
-    val prerollAdTagUrl: String? = if (withPreroll) "https://ad_request?target=preroll" else null
+    // 재시작할 때도 전달합니다. SDK가 마지막으로 진입한 채널의 프리롤을 건너뛰고 onCompleted를 보냅니다.
+    val prerollAdTagUrl: String? = "https://ad_request?target=preroll"
 
     val changedChannelUrl = flowerAdView.adsManager.changeChannelUrl(
         "https://XXX",

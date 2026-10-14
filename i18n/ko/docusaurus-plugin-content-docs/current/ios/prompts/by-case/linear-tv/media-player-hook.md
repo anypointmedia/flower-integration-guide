@@ -52,12 +52,18 @@ HOW THE SDK BEHAVES IN THIS CASE
 - onError on the main listener means the channel cannot continue as it is: stop the ads
   manager, release the content item, and start the channel again with a new
   changeChannelUrl(...) (the old loopback URL dies with the proxy). The listener is called off
-  the main thread. A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the
-  viewer has already seen it. So a restart has no pre-roll wait: no temporary pre-roll
-  listener, the new URL is loaded and played right away, and the main listener stays
-  registered.
-- In PIP mode, stream ads keep playing and only the ad UI is hidden; a pre-roll that is playing
-  is paused while in PIP and resumes when the app returns (default
+  the main thread. A restart passes exactly the same parameters as the first start, including
+  prerollAdTagUrl, and handles the returned URL the same way (held until onCompleted).
+- The SDK remembers the channel (channelId) entered last. When changeChannelUrl(...) is called
+  with that same channelId (e.g. a restart after onError), the SDK skips the pre-roll even
+  though prerollAdTagUrl is passed, and calls onCompleted right after changeChannelUrl(...)
+  returns, like a pre-roll with no ad. So the held URL starts right away and the viewer does
+  not see the pre-roll again. stop() does not clear the remembered channel; requestVodAd and
+  requestAd do. A -> B -> A plays A's pre-roll again; coming back to the same channel with no
+  other channel or ad request in between skips it.
+- While the user is away from the app (FlowerSdk.notifyUserLeftApp(true), see the PIP mode
+  support case), stream ads keep playing and only the ad UI is hidden; a pre-roll that is
+  playing is paused and resumes when the user comes back (notifyUserLeftApp(false)) (default
   FlowerSdk.setIgnoreAdBreakInPIPMode(true)).
 
 ========================================
@@ -98,12 +104,12 @@ IMPLEMENTATION
    func onAdPlay(adInfo: AdInfo) {}
    func onAdUserAction(action: String, adInfo: AdInfo) {}
 
-5. Start the channel. withPreroll is true when a channel starts (first start or channel
-   change) and false on a restart after onError (step 10):
-   func playLinearTv(withPreroll: Bool = true) {
+5. Start the channel. The same function is used for the first start, a channel change and a
+   restart after onError (step 10):
+   func playLinearTv() {
        // A pending pre-roll listener (step 7) of the previous channel: remove it and re-add the
        // main listener first. changeChannelUrl(...) stops that pre-roll without calling it.
-       let prerollAdTagUrl = withPreroll ? channel.prerollAdTagUrl : nil   // USE_PREROLL no: always nil
+       let prerollAdTagUrl = channel.prerollAdTagUrl   // USE_PREROLL no: nil
        let changedUrl = flowerAdView.adsManager.changeChannelUrl(
            videoUrl: channel.streamUrl,             // original stream URL (String)
            adTagUrl: channel.adTagUrl,              // issued by Anypoint Media
@@ -114,7 +120,7 @@ IMPLEMENTATION
            channelStreamHeaders: channel.streamHeaders,  // headers the stream needs, or nil
            prerollAdTagUrl: prerollAdTagUrl
        )
-       // prerollAdTagUrl nil (USE_PREROLL no, or a restart): load changedUrl now (step 6) and play.
+       // prerollAdTagUrl nil (USE_PREROLL no): load changedUrl now (step 6) and play.
        // prerollAdTagUrl set: do NOT load it yet. Swap listeners (step 7).
    }
 
@@ -123,7 +129,7 @@ IMPLEMENTATION
    PLAYER_TYPE AVPlayer:      player.replaceCurrentItem(with: AVPlayerItem(url: URL(string: changedUrl)!))
    player.play()
 
-7. Only when prerollAdTagUrl was passed (USE_PREROLL yes, never on a restart) - temporary
+7. Only when prerollAdTagUrl was passed (USE_PREROLL yes, also on a restart) - temporary
    pre-roll listener:
    private var prerollListener: PrerollListener?   // the pending pre-roll listener, if any
    flowerAdView.adsManager.removeListener(adsManagerListener: listener)
@@ -165,11 +171,12 @@ IMPLEMENTATION
        flowerAdView.adsManager.stop()   // 1. stop the ads manager (also ends the proxy)
        player.pause()                   // 2. release the content item
        // AVQueuePlayer: player.removeAllItems()   AVPlayer: player.replaceCurrentItem(with: nil)
-       playLinearTv(withPreroll: false) // 3. same start as before: new changeChannelUrl -> new item -> play
+       playLinearTv()                   // 3. same start as before: new changeChannelUrl -> new item -> play
    }
-   A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already
-   seen it. So the restart skips step 7: the new URL is loaded and played right away, and the
-   main listener stays registered. The temporary
+   The restart passes the same prerollAdTagUrl and goes through step 7 like the first start.
+   The SDK skips the pre-roll of the channel entered last and calls onCompleted right after
+   changeChannelUrl(...) returns, so the temporary listener loads the new URL right away. Do
+   not add a flag that drops prerollAdTagUrl on a restart. The temporary
    pre-roll listener (step 7) does NOT restart: the channel has not started yet, so its onError
    only loads the channel and swaps the listeners back.
 
@@ -204,8 +211,10 @@ VERIFY
   loads the previous channel.
 - Channel change and coming back to the screen work repeatedly without old ads.
 - onError: the ads manager is stopped and the channel restarts with a new changeChannelUrl
-  (at most 3 times in a row), without a pre-roll even with USE_PREROLL yes.
-- PIP during a stream ad: the ad keeps playing, the ad UI is hidden.
+  (at most 3 times in a row); with USE_PREROLL yes the pre-roll does not play again and the
+  channel starts right away.
+- USE_PREROLL yes, A -> B -> A: A's pre-roll plays again.
+- Leaving the app during a stream ad: the ad keeps playing, the ad UI is hidden.
 
 ========================================
 OUTPUT

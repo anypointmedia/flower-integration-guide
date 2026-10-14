@@ -99,18 +99,24 @@ PART 2 — Picture-in-Picture Support (Optional)
 
 Available in Flower iOS SDK version 2.2.0+.
 
-UIKit — implement AVPlayerViewControllerDelegate:
+Report the user leaving the app (home screen, another app, or the video moved to a PiP window)
+with FlowerSdk.notifyUserLeftApp(true), and coming back with FlowerSdk.notifyUserLeftApp(false).
+Report it from the app lifecycle, whether or not the app enters PiP: while an ad plays the
+content must not go into PiP, so PiP delegate callbacks never fire during an ad.
+FlowerSdk.notifyPictureInPictureModeChanged(_:) is deprecated (replaced by notifyUserLeftApp).
 
-  playerViewController.delegate = self
+UIKit — observe the app lifecycle in the playback view controller:
 
-  extension PlaybackViewController: AVPlayerViewControllerDelegate {
-      func playerViewControllerWillStartPictureInPicture(_ playerViewController: AVPlayerViewController) {
-          FlowerSdk.notifyPictureInPictureModeChanged(true)
-      }
-      func playerViewControllerDidStopPictureInPicture(_ playerViewController: AVPlayerViewController) {
-          FlowerSdk.notifyPictureInPictureModeChanged(false)
-      }
-  }
+  NotificationCenter.default.addObserver(self, selector: #selector(onDidEnterBackground),
+      name: UIApplication.didEnterBackgroundNotification, object: nil)
+  NotificationCenter.default.addObserver(self, selector: #selector(onWillEnterForeground),
+      name: UIApplication.willEnterForegroundNotification, object: nil)
+
+  @objc private func onDidEnterBackground() { FlowerSdk.notifyUserLeftApp(true) }
+  @objc private func onWillEnterForeground() { FlowerSdk.notifyUserLeftApp(false) }
+
+  (With a scene delegate, sceneDidEnterBackground(_:) -> true and
+  sceneWillEnterForeground(_:) -> false work the same way.)
 
   Enable PiP on player view controller:
   playerViewController.allowsPictureInPicturePlayback = true
@@ -124,9 +130,20 @@ UIKit — implement AVPlayerViewControllerDelegate:
   playerViewController.canStartPictureInPictureAutomaticallyFromInline to false, and set
   them back to true in onCompleted and onError (on the main thread).
 
-SwiftUI — FlowerVideoPlayer (a SwiftUI VideoPlayer) does not report PiP transitions, and the
-SDK never detects PiP by itself. If the app supports PiP, host an AVPlayerViewController
-(UIViewControllerRepresentable) and notify the SDK from its delegate as above.
+SwiftUI — observe scenePhase in the playback view:
+
+  @Environment(\.scenePhase) private var scenePhase
+  .onChange(of: scenePhase) { phase in
+      switch phase {
+      case .background: FlowerSdk.notifyUserLeftApp(true)
+      case .active: FlowerSdk.notifyUserLeftApp(false)
+      default: break
+      }
+  }
+
+  FlowerVideoPlayer (a SwiftUI VideoPlayer) has no PiP controls of its own. If the app supports
+  PiP, host an AVPlayerViewController (UIViewControllerRepresentable) and block its PiP while
+  an ad plays as above.
 
 ========================================
 PART 3 — Audio Session Configuration (Linear TV)
@@ -146,6 +163,7 @@ CONSTRAINTS
 - iOS SDK does NOT require an explicit destroy/release call.
 - For FlowerAVPlayer, replaceCurrentItem(with: nil) releases all resources.
 - For AVQueuePlayer, call removeAllItems() to release.
-- Notify PiP transitions (FlowerSdk.notifyPictureInPictureModeChanged) in every approach that
-  allows PiP, including FlowerAVPlayer. The SDK does not detect PiP by itself.
+- Notify the user leaving and returning (FlowerSdk.notifyUserLeftApp(true/false)) from the app
+  lifecycle in every approach, including FlowerAVPlayer, whether or not the app enters PiP.
+  The SDK does not detect it by itself.
 ```

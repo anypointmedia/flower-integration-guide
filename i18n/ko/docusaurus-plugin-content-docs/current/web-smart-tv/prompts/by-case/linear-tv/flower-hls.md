@@ -9,7 +9,7 @@ Linear 채널 또는 FAST 플레이어에서 HLS.js를 사용하며 가장 간�
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.3.17` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.3.18` | 프로젝트에 제공된 Flower SDK 버전 |
 | `USE_PREROLL` | `yes` \| `no` | 채널 프리롤용 광고 태그 URL(`prerollAdTagUrl`)을 발급받았는지 여부 |
 
 ```plain
@@ -64,10 +64,13 @@ HOW THE SDK BEHAVES IN THIS CASE
    receive it. A destroyed FlowerHls cannot be reused.
 10. onError() is the signal to recover the channel: stop the ad session, release the player
    (destroy() does both), and start the channel again (new FlowerHls -> attachContainer ->
-   setAdConfig -> addAdListener -> loadSource). A restart leaves the channel pre-roll out
-   (prerollAdTagUrl omitted): the viewer has already seen it. The restart's setAdConfig()
-   has the same values as the first start but no prerollAdTagUrl, so the stream plays
-   right away.
+   setAdConfig -> addAdListener -> loadSource). The restart's setAdConfig() has exactly the
+   same values as the first start, prerollAdTagUrl included. The SDK remembers the channel
+   (channelId) entered last, SDK-wide, and skips the pre-roll when the same channel is
+   loaded again, even on a new FlowerHls, so the viewer does not see it twice and the
+   stream plays right away. destroy()/stop() do not clear the remembered channel;
+   requestVodAd()/requestAd() do. A channel change back to a previous channel
+   (A -> B -> A) plays A's pre-roll again.
 11. On a webOS TV the SDK reads the LGUDID through webOS.service.request (webOSTV.js must
     be loaded); on a Tizen TV it reads the TIFA through webapis.adinfo. Without them the
     SDK falls back to its own device identifier. Supported: webOS TV >= 23, Tizen >= 7.0.
@@ -105,20 +108,19 @@ STEP 4 — Start a channel
 
   let currentChannel = null;
 
-  // withPreroll: true for the first start and a channel change, false for a restart after
-  // onError(). A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the
-  // viewer has already seen it.
-  function playChannel(channel, { withPreroll = true } = {}) {
+  // Used for the first start, a channel change, and a restart after onError(). A restart
+  // passes the same ad config, prerollAdTagUrl included: the SDK skips the pre-roll of the
+  // channel entered last.
+  function playChannel(channel) {
       currentChannel = channel;
       const adConfig = {
           adTagUrl: channel.adTagUrl,                 // issued by Anypoint Media
+          prerollAdTagUrl: channel.prerollAdTagUrl,   // USE_PREROLL = yes only; drop it for no
           channelId: channel.channelId,               // registered in the Flower backend
           extraParams: { serviceId: channel.serviceId, os: 'Web', adId: channel.adId },
           adTagHeaders: channel.adTagHeaders,         // optional
           channelStreamHeaders: channel.streamHeaders // optional
       };
-      // USE_PREROLL = yes only; USE_PREROLL = no drops this and the withPreroll option
-      if (withPreroll) adConfig.prerollAdTagUrl = channel.prerollAdTagUrl;
       hls.setAdConfig(adConfig);
 
       if (!adsManagerListener) {
@@ -141,13 +143,13 @@ STEP 4 — Start a channel
   Channel change: call playChannel(nextChannel) again (setAdConfig, then loadSource).
 
   // On onError(): stop the ad session and the player, then start the channel again
-  // without the pre-roll. Keep onCompleted() UI-only.
+  // exactly as the first time. Keep onCompleted() UI-only.
   // (Optional) Count restarts and give up after a few attempts so a broken channel does not loop.
   function restartChannel() {
       stopPlayback();                 // removeAdListener() -> destroy() (also stops the ad session)
       initHls();                      // a destroyed FlowerHls cannot be reused
-      // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-      playChannel(currentChannel, { withPreroll: false });   // setAdConfig -> addAdListener -> loadSource
+      // Same ad config, prerollAdTagUrl included: the SDK skips the pre-roll of this channel.
+      playChannel(currentChannel);    // setAdConfig -> addAdListener -> loadSource
   }
 
 STEP 5 — Cleanup
@@ -161,12 +163,21 @@ STEP 5 — Cleanup
   }
   Call it when the player screen closes, on beforeunload, or in a React useEffect cleanup.
 
-STEP 6 — PIP (only if the app supports PIP)
+STEP 6 — Report the user leaving the app and coming back
 
-  hls.media.addEventListener('enterpictureinpicture', () => FlowerSdk.notifyPictureInPictureModeChanged(true));
-  hls.media.addEventListener('leavepictureinpicture', () => FlowerSdk.notifyPictureInPictureModeChanged(false));
-  Stream ads keep playing in PIP (only the ad UI is hidden); a channel pre-roll is
-  paused in PIP and resumed on exit.
+  function reportUserLeftApp() {
+      const hasLeftApp = document.visibilityState === 'hidden'
+          || (hls && document.pictureInPictureElement === hls.media);
+      FlowerSdk.notifyUserLeftApp(hasLeftApp);
+  }
+  document.addEventListener('visibilitychange', reportUserLeftApp);
+  // Only if the app supports PIP; register on each new hls.media (after initHls()):
+  hls.media.addEventListener('enterpictureinpicture', reportUserLeftApp);
+  hls.media.addEventListener('leavepictureinpicture', reportUserLeftApp);
+  Report it whether or not PIP starts (another tab or app, the TV app in the background,
+  or PIP). Stream ads keep playing while the user is away (only the ad UI is hidden); a
+  channel pre-roll is paused while the user is away and resumed when the user comes back.
+  FlowerSdk.notifyPictureInPictureModeChanged() is deprecated; use notifyUserLeftApp().
 
 ========================================
 RULES
@@ -177,9 +188,9 @@ DO:
 - Load the Flower SDK script before HLS.js.
 - Remove the listener, then destroy() the player when leaving.
 - On onError(), restart the channel: remove the listener, destroy(), new FlowerHls, then
-  setAdConfig() and loadSource() as at the first start, but with no prerollAdTagUrl in the
-  ad config. A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer
-  has already seen it.
+  setAdConfig() and loadSource() exactly as at the first start, prerollAdTagUrl included.
+  The SDK skips the pre-roll of the channel entered last, so the viewer does not see it
+  again.
 
 DO NOT:
 - Start or reload playback in onCompleted(): stopping the ad session can still call it.
@@ -199,8 +210,8 @@ VERIFY
 - Channel change: the next channel plays with ads; no ad from the previous channel.
 - Leave the player: no network requests or audio continue.
 - onError() (e.g. make the stream fail): the old FlowerHls is destroyed, a new one loads
-  the channel again with ads and no pre-roll, and the old instance's late onCompleted()
-  does not restart it.
+  the channel again with the same ad config (prerollAdTagUrl included) and plays it with
+  ads and no pre-roll, and the old instance's late onCompleted() does not restart it.
 - On a TV, check the SDK log for the LGUDID / TIFA line.
 
 ========================================

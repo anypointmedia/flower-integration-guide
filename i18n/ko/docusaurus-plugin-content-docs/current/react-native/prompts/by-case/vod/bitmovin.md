@@ -9,7 +9,7 @@ sidebar_label: Bitmovin
 
 | 파라미터 | 예시 | 설명 |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
+| `{{SDK_VERSION}}` | `1.0.4` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
 
 ````plain
 We are integrating the FLOWER SDK into our React Native app for VOD content played by

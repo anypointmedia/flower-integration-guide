@@ -9,7 +9,7 @@ sidebar_label: react-native-video
 
 | 파라미터 | 예시 | 설명 |
 |-----------|---------|-------------|
-| `{{SDK_VERSION}}` | `1.0.3` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
+| `{{SDK_VERSION}}` | `1.0.4` | 설치할 `@anypoint/flower-sdk-react-native` 버전. 패키지가 이미 설치되어 있으면 무시됩니다. |
 
 ````plain
 We are integrating the FLOWER SDK into our React Native app for VOD content played by
@@ -67,8 +67,9 @@ HOW THE SDK BEHAVES IN THIS CASE
   the content already playing and changes nothing; it never seeks or re-sources.
 - POST-ROLL: requested only after notifyContentEnded(nativeId). The content has ended,
   so it is not resumed afterwards — not after 'completed', not after 'error'.
-- While the app reports PIP mode, mid-rolls and post-rolls are not requested, and an ad
-  playing when PIP starts is paused until the app comes back (see the PIP prompt).
+- While the app reports the user is away (notifyUserLeftApp(true)), mid-rolls and
+  post-rolls are not requested, and an ad playing when the user leaves is paused until
+  the user comes back (see the PIP prompt).
 
 ========================================
 SETUP — only if the package is not installed yet

@@ -25,7 +25,8 @@ GOAL
   never touch it after, except a plain resume on an 'error' while the content has not
   ended) and becomes robust to the content coming back as a new player item after each
   break.
-- PIP entry/exit is still reported to the SDK.
+- The user leaving the app and coming back is still reported to the SDK with
+  notifyUserLeftApp().
 - If the app cannot meet this mode's constraints, say so and keep the default mode.
 
 ========================================
@@ -132,17 +133,32 @@ Step 5 — Notify the end of the content exactly once
   relative to the resume point.
   contentEnded is also what keeps a post-roll 'error' from resuming the content (Step 3).
 
-Step 6 — Keep reporting PIP. The SDK hides the ad UI while it is told the app is in PIP,
-in every mode:
+Step 6 — Keep reporting the user leaving and coming back. The SDK hides the ad UI while
+it is told the user is away, in every mode. Report it once for the whole app, whether or
+not the app enters PIP:
 
-  react-native-video:
-    onPictureInPictureStatusChanged={({isActive}) =>
-      notifyPictureInPictureModeChanged(isActive).catch(() => {})}
+  import {AppState} from 'react-native';
+  import {notifyUserLeftApp} from '@anypoint/flower-sdk-react-native';
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'background') {
+        notifyUserLeftApp(true).catch(() => {});
+      } else if (state === 'active') {
+        notifyUserLeftApp(false).catch(() => {});
+      }
+      // 'inactive' is transient: ignore it.
+    });
+    return () => subscription.remove();
+  }, []);
+
+  If the app already reports PIP with the deprecated notifyPictureInPictureModeChanged,
+  replace those calls with this subscription. Same for every player, Bitmovin on Android
+  included.
   Ads keep playing in PIP in this mode, so the content player may enter PIP during a
   break (enterPictureInPictureOnLeave need not be turned off for ads).
-  Bitmovin on Android: the SDK receives Bitmovin's own PIP events; no call is needed.
   Bitmovin on iOS: breaks still play on the SDK's ad player, so follow the default-mode
-  PIP rules there (report PIP, keep the content out of PIP during an ad).
+  PIP rules there (keep the content out of PIP during an ad).
 
 ========================================
 RULES

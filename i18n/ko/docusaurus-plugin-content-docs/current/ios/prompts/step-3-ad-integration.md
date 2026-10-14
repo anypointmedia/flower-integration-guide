@@ -60,10 +60,10 @@ For FlowerPlayer (FlowerAVPlayer):
   onError (called off the main thread): hop to the main thread and restart the channel -
   player.flowerAdView.adsManager.stop(), player.replaceCurrentItem(with: nil) (this also
   clears the ad config), then start it again the same way: replaceCurrentItem(with:adConfig:)
-  with a new AVPlayerItem of the original stream URL + play(). A restart leaves the channel
-  pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it. So the restart's
-  FlowerLinearTvAdConfig has no prerollAdTagUrl (withPreroll: false in PART 2) and the
-  channel loads right away. If onError arrives before the
+  with a new AVPlayerItem of the original stream URL + play(), with the same
+  FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl (call playLinearTv()
+  from PART 2 again). The SDK skips the pre-roll of the channel entered last, so the viewer
+  does not see it again and the channel loads right away. If onError arrives before the
   channel item was loaded (player.currentItem == nil, i.e. a pre-roll playback error), restart
   in a NEW FlowerAVPlayer: FlowerAVPlayer does not load the channel after a pre-roll error and
   keeps its internal pre-roll listener registered. Keep a simple retry limit (e.g. at most 3
@@ -94,11 +94,12 @@ For MediaPlayerHook:
   onError (called off the main thread): hop to the main thread and restart the channel -
   flowerAdView.adsManager.stop() (this also ends the SDK proxy the current URL points at),
   release the content item (removeAllItems / replaceCurrentItem(with: nil)), then start it
-  again the same way: a new changeChannelUrl(...) -> a new AVPlayerItem -> play(). A restart
-  leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-  So the restart passes prerollAdTagUrl: nil (withPreroll: false in PART 2), has no pre-roll
-  wait (no temporary pre-roll listener), loads the new URL right away and keeps the main
-  listener registered. Keep a simple retry limit (e.g. at most 3 restarts in a row).
+  again the same way: a new changeChannelUrl(...) with exactly the same parameters, including
+  prerollAdTagUrl -> a new AVPlayerItem -> play() (call playLinearTv() from PART 2 again;
+  with a pre-roll URL, hold the returned URL until onCompleted as on the first start). The SDK
+  skips the pre-roll of the channel entered last and calls onCompleted right after
+  changeChannelUrl(...) returns, so the held URL starts right away and the viewer does not see
+  the pre-roll again. Keep a simple retry limit (e.g. at most 3 restarts in a row).
 
   SwiftUI:
   flowerAdView.adsManager.addListener(adsManagerListener: listener)
@@ -233,12 +234,13 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
   Omit optional parameters if not available.
-  withPreroll: true when a channel starts (first start or channel change), false on a restart
-  after onError.
+  Put this in playLinearTv() and use it for the first start, a channel change and a restart
+  after onError, always with the same values (the SDK skips the pre-roll of the channel
+  entered last).
 
   let adConfig = FlowerLinearTvAdConfig(
       adTagUrl: config.adTagUrl,                           // Required
-      prerollAdTagUrl: withPreroll ? config.prerollAdTagUrl : nil,  // Optional; nil on a restart
+      prerollAdTagUrl: config.prerollAdTagUrl,             // Optional; same value on a restart
       channelId: config.channelId,                         // Required
       extraParams: config.extraParams,                     // Required
       adTagHeaders: config.adTagHeaders ?? [:],            // Optional
@@ -251,8 +253,8 @@ If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
 If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
-  withPreroll: true when a channel starts (first start or channel change), false on a restart
-  after onError.
+  Put this in playLinearTv() and use it for the first start, a channel change and a restart
+  after onError, always with the same parameters, including prerollAdTagUrl.
 
   Create MediaPlayerHook:
   class MediaPlayerHookImpl: MediaPlayerHook {
@@ -262,7 +264,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
   }
 
   let hook = MediaPlayerHookImpl { self.player }
-  let prerollAdTagUrl = withPreroll ? config.prerollAdTagUrl : nil  // nil on a restart
+  let prerollAdTagUrl = config.prerollAdTagUrl             // same value on a restart
   let changedUrl = flowerAdView.adsManager.changeChannelUrl(
       videoUrl: config.contentUrl,                         // Required
       adTagUrl: config.adTagUrl,                           // Required
@@ -274,7 +276,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
       prerollAdTagUrl: prerollAdTagUrl                     // Optional
   )
   if prerollAdTagUrl == nil {
-      // No pre-roll (or a restart after onError): load the URL right away.
+      // No pre-roll: load the URL right away.
       loadChannel(changedUrl)
   } else {
       // Channel pre-roll: the SDK plays it once, before the channel, in its own ad player.
@@ -311,8 +313,12 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
     thread. The SDK ends the pre-roll with onCompleted, also when there is no pre-roll ad, the
     request failed or the pre-roll could not be played. Its onError does NOT restart the
     channel: the channel has not started yet.
-  - A restart after onError (withPreroll: false) has no pre-roll wait: it loads right away and
-    keeps the main listener registered.
+  - A restart after onError goes through the same path. The SDK remembers the channel
+    (channelId) entered last; when changeChannelUrl(...) is called with that same channelId, it
+    skips the pre-roll even though prerollAdTagUrl is passed and calls onCompleted right after
+    changeChannelUrl(...) returns, so the temporary listener loads the URL right away. stop()
+    does not clear the remembered channel; requestVodAd and requestAd do. A -> B -> A plays A's
+    pre-roll again. Do not add a flag that drops prerollAdTagUrl on a restart.
   - Before the next changeChannelUrl(...) (channel change) and before every stop() (restart,
     cleanup), if prerollListener is still set, remove it from adsManager, set prerollListener
     and pendingChannelUrl to nil, and add mainListener back (cleanup removes it right after).

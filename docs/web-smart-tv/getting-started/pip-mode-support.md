@@ -4,17 +4,19 @@ sidebar_position: 4
 
 # PIP Mode Support
 
-Flower SDK restricts CTA (Call To Action) functionality in PIP (Picture-in-Picture) mode, and does not play ads in PIP mode by default. To ensure correct behavior, the application must notify the SDK about PIP state changes.
+Flower SDK restricts CTA (Call To Action) functionality in PIP (Picture-in-Picture) mode, and by default does not play ads while the user is away from the app. To ensure correct behavior, the application must notify the SDK when the user leaves the app and when the user comes back.
 
 The SDK provides the following two options related to PIP mode:
 
-#### `FlowerSdk.notifyPictureInPictureModeChanged`
+#### `FlowerSdk.notifyUserLeftApp`
 
-Notifies the SDK when PIP mode is entered (`true`) or exited (`false`).
+Notifies the SDK when the user leaves the app (`true`) or comes back to it (`false`). The user leaves the app when they switch to another tab or app, when the TV app goes to the background, or when the video moves to a PIP window.
 
 ```javascript
-FlowerSdk.notifyPictureInPictureModeChanged(isInPictureInPictureMode)
+FlowerSdk.notifyUserLeftApp(hasLeftApp)
 ```
+
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -26,36 +28,40 @@ FlowerSdk.setIgnoreAdBreakInPIPMode(ignore)
 
 | **Value** | **Ad player** | **Ads in PIP mode** |
 | ---| ---| --- |
-| `true` (default) | The SDK plays VOD ads (pre-roll, mid-roll, post-roll) and inline ads in its own video element, shown over the content. | Not supported. An ad playing when the app enters PIP is paused, and Mid-roll or Post-roll Ad Breaks are not requested while in PIP. |
+| `true` (default) | The SDK plays VOD ads (pre-roll, mid-roll, post-roll) and inline ads in its own video element, shown over the content. | Not supported. An ad playing when the user leaves the app is paused, and Mid-roll or Post-roll Ad Breaks are not requested until the user comes back. |
 | `false` | For supported players, the SDK plays the ads inside the app's own player, by switching its source to the ads and back to the content. | Supported. Ads keep playing in PIP mode. |
 
 Call `setIgnoreAdBreakInPIPMode` before requesting ads. The ad player is chosen when ads are requested.
 
 :::caution
-You must notify PIP mode transitions using `notifyPictureInPictureModeChanged`, on both entering and exiting PIP. The SDK does not detect PIP mode by itself.
+You must notify the SDK with `notifyUserLeftApp`, both when the user leaves the app and when the user comes back, whether or not the video goes into PIP. The SDK does not detect this by itself.
 :::
 
 ## Ads in PIP Mode (Default)
 
-Ads are not supported in PIP mode by default. Therefore, if an ad is playing, the app must notify the SDK of PIP mode changes through `notifyPictureInPictureModeChanged`. Only then is the ad paused when the app enters PIP, and resumed when the user returns to the app. In addition, while an ad is playing, the app must not switch the content player into PIP, even if the app goes into PIP mode, because PIP mode could otherwise be used to bypass the ad.
+Ads are not supported in PIP mode by default. While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. So when the user leaves the app during an ad, PIP does not start at all. That is why the app reports the user leaving the app, not the start of PIP: when the user switches to another tab or app, or the TV app goes to the background, call `notifyUserLeftApp(true)`, and when the user comes back, call `notifyUserLeftApp(false)`. Only then is the ad paused while the user is away, and resumed when the user returns to the app.
 
-*   When the app calls `notifyPictureInPictureModeChanged(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
-*   When the app calls `notifyPictureInPictureModeChanged(false)`, the ad resumes from where it stopped and plays to completion.
-*   While the app is in PIP mode, Mid-roll and Post-roll Ad Breaks are not requested.
-*   Linear TV ads inserted into the stream are not affected by this option. They keep playing in PIP mode, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
+*   While the user is away from the app, Mid-roll and Post-roll Ad Breaks are not requested.
+*   Linear TV ads inserted into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
 
 Which video goes into PIP is decided by the app, not by the SDK. On the web, it is the `<video>` element the app requested PIP on, which is the content video. While an ad is playing, do not request PIP on the content video, and disable PIP on it until the ad break ends.
+
+On the web, the page becomes hidden (`visibilitychange`) when the user switches to another tab or app, or the TV app goes to the background. If the app lets the content video go into PIP outside ads, also report the user as away while the content video is in the PIP window.
 
 ```javascript
 const videoElement = document.querySelector('video');
 
-// TODO GUIDE: Notify Flower SDK about Picture-in-Picture mode changes
-videoElement.addEventListener('enterpictureinpicture', () => {
-    FlowerSdk.notifyPictureInPictureModeChanged(true);
-});
-videoElement.addEventListener('leavepictureinpicture', () => {
-    FlowerSdk.notifyPictureInPictureModeChanged(false);
-});
+// TODO GUIDE: Notify Flower SDK when the user leaves the app and comes back
+function reportUserLeftApp() {
+    const hasLeftApp = document.visibilityState === 'hidden'
+        || document.pictureInPictureElement === videoElement;
+    FlowerSdk.notifyUserLeftApp(hasLeftApp);
+}
+document.addEventListener('visibilitychange', reportUserLeftApp);
+videoElement.addEventListener('enterpictureinpicture', reportUserLeftApp);
+videoElement.addEventListener('leavepictureinpicture', reportUserLeftApp);
 
 // TODO GUIDE: Do not let the content video go into PIP while an ad is playing
 const adsManagerListener = {

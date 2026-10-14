@@ -11,7 +11,7 @@ sidebar_label: Flower Player로 Linear TV 광고
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.9.28` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.9.29` | 프로젝트에 제공된 Flower SDK 버전 |
 | `ENV` | `local` \| `dev` \| `prod` | `FlowerSdk.setEnv()`에 전달하는 값 |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | 감쌀 플레이어: `FlowerMedia3ExoPlayer`, `FlowerExoPlayer2`, `FlowerBitmovinPlayer` |
 | `MEDIA3_VERSION` | 예: `1.10.1` | `media3`인 경우에만: 앱의 `androidx.media3` 버전 |
@@ -51,8 +51,14 @@ HOW THE SDK BEHAVES IN THIS CASE
   app calls prepare() / play() as usual; the Flower Player holds them until the pre-roll is
   ready. The listener gets the pre-roll's onPlay() / onCompleted() like other ads. No pre-roll ad
   (onAdBreakSkipped()) or a failed request ends with onCompleted() and the channel starts. With
-  the default FlowerSdk.setIgnoreAdBreakInPIPMode(true) the pre-roll is paused while the app is
-  in PIP and resumed when it returns. Loading another channel requests that channel's pre-roll.
+  the default FlowerSdk.setIgnoreAdBreakInPIPMode(true) the pre-roll is paused while the user is
+  away from the app (reported with FlowerSdk.notifyUserLeftApp(true/false), whether or not the
+  app enters PIP) and resumed when the user comes back. Loading another channel requests that
+  channel's pre-roll.
+- The SDK remembers the channel (channelId) entered last. When the same channel's ad config is
+  set again, the Flower Player skips the pre-roll even if prerollAdTagUrl is set, and loads the
+  channel stream. stop() / release() do not clear the remembered channel; requestVodAd() /
+  requestAd() do. A -> B -> A plays A's pre-roll again.
 - Loading another channel with a new config stops the previous channel's ad session.
 - onError(): an ad failed to play or the channel stream can no longer be played. Recover by
   stopping the player and the SDK ads manager, then loading the channel again as in step 5.
@@ -60,9 +66,9 @@ HOW THE SDK BEHAVES IN THIS CASE
   bitmovin: there is no stop(); call player.flowerAdView.adsManager.stop() and player.unload()
   (destroy() also stops the ads manager). This also covers a pre-roll that fails while playing:
   the Flower Player does not load the channel by itself in that case.
-  A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen
-  it. Build the restart's FlowerLinearTvAdConfig without prerollAdTagUrl, so the Flower Player
-  loads the channel stream right away.
+  Load the channel again with the same FlowerLinearTvAdConfig, including prerollAdTagUrl: the
+  restarted channel is the one entered last, so the Flower Player skips its pre-roll and loads
+  the channel stream.
 
 ========================================
 IMPLEMENTATION
@@ -89,13 +95,11 @@ IMPLEMENTATION
    FlowerBitmovinPlayer / FlowerLinearTvAdConfig, tv.anypoint.flower.sdk.core.api.FlowerAdsManagerListener,
    tv.anypoint.flower.sdk.core.api.FlowerError
 
-3) Ad config per channel (values from the app's channel data). withPreroll is true for the first
-   start of a channel and a channel switch, false for a restart after onError().
-     fun buildAdConfig(channel: Channel, withPreroll: Boolean) = FlowerLinearTvAdConfig(
+3) Ad config per channel (values from the app's channel data). The same config is used for the
+   first start of a channel, a channel switch, and a restart after onError().
+     fun buildAdConfig(channel: Channel) = FlowerLinearTvAdConfig(
          adTagUrl = channel.adTagUrl,               // issued by Anypoint Media
-         // optional, null = no pre-roll. A restart leaves the channel pre-roll out
-         // (prerollAdTagUrl omitted): the viewer has already seen it.
-         prerollAdTagUrl = if (withPreroll) channel.prerollAdTagUrl else null,
+         prerollAdTagUrl = channel.prerollAdTagUrl, // optional, null = no pre-roll; the same on a restart
          channelId = channel.id,                    // registered in the Flower backend
          extraParams = mapOf("serviceId" to packageName, "os" to "Android", "adId" to advertisingId),
          adTagHeaders = null,                       // optional
@@ -114,15 +118,15 @@ IMPLEMENTATION
              CoroutineScope(Dispatchers.Main).launch {
                  // Optionally give up after a few consecutive restarts (e.g., 3) to avoid a restart loop.
                  player.stop()                  // also stops the SDK ads manager (bitmovin: see above)
-                 playChannel(currentChannel, withPreroll = false)   // step 5 again, without the pre-roll
+                 playChannel(currentChannel)    // step 5 again, same ad config
              }
          }
          override fun onAdBreakSkipped(reason: Int) { /* optional logging */ }
      }
      player.addAdListener(flowerAdsManagerListener)
 
-5) Load and play a channel: playChannel(channel, withPreroll: Boolean = true)
-     val adConfig = buildAdConfig(channel, withPreroll)
+5) Load and play a channel: playChannel(channel)
+     val adConfig = buildAdConfig(channel)
      media3 / exoplayer2:
          player.setMediaItem(MediaItem.fromUri(channel.streamUrl), adConfig)
          player.prepare()
@@ -131,7 +135,7 @@ IMPLEMENTATION
          player.load(SourceConfig.fromUrl(channel.streamUrl), adConfig)
          player.play()
    (media3 / exoplayer2 also offer setAdConfig(adConfig) followed by setMediaItem(mediaItem).)
-   To switch channels, call the same code with the new channel's URL and config (withPreroll = true).
+   To switch channels, call the same code with the new channel's URL and config.
 
 6) Cleanup
      media3 / exoplayer2: player.stop(); player.removeAdListener(flowerAdsManagerListener); player.release()
@@ -144,9 +148,8 @@ DO
 - Use FlowerLinearTvAdConfig for live/FAST channels; pass it with the media item / source.
 - Register listeners with player.addAdListener().
 - On onError(), on the main thread, stop the player and the ads manager, then load the channel
-  again as in step 5 with a FlowerLinearTvAdConfig that has the same values except
-  prerollAdTagUrl = null. A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the
-  viewer has already seen it.
+  again as in step 5 with the same FlowerLinearTvAdConfig, including prerollAdTagUrl. The SDK
+  skips the pre-roll of the channel entered last.
 DO NOT
 - Do not call changeChannelUrl() yourself, and do not add a FlowerAdView to the layout.
 - Do not write MediaItem.fromUri(url, adConfig) — that overload does not exist; pass the config
@@ -162,8 +165,9 @@ VERIFY
 - Channel plays; at an ad marker the ad break is replaced; onPlay()/onCompleted() fire.
 - Marker with no ad: onAdBreakSkipped() fires and the original stream keeps playing.
 - prerollAdTagUrl set: pre-roll plays first, then the channel starts.
-- Ad or stream error (onError()): the ad session stops and the channel is loaded again without
-  the pre-roll; the channel stream plays right away.
+- Ad or stream error (onError()): the ad session stops and the channel is loaded again with the
+  same config; the pre-roll is not shown again and the channel stream plays.
+- Channel A -> B -> A: A's pre-roll plays again.
 - Switching channels does not leave the previous ad session running.
 - Leaving the screen releases the player without crashes.
 

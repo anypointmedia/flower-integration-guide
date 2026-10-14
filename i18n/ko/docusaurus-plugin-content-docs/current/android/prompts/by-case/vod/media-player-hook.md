@@ -11,7 +11,7 @@ sidebar_label: 앱의 플레이어로 VOD 광고
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.9.28` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.9.29` | 프로젝트에 제공된 Flower SDK 버전 |
 | `ENV` | `local` \| `dev` \| `prod` | `FlowerSdk.setEnv()`에 전달하는 값 |
 | `PLAYER` | `media3` \| `exoplayer2` \| `bitmovin` | 앱이 현재 사용하는 본편 플레이어 |
 
@@ -55,8 +55,9 @@ HOW THE SDK BEHAVES IN THIS CASE
   queues its own rewind and resume before it calls onError(), so the app's resume runs after
   them and is a safety net that keeps the content from staying paused.
 - The app must call flowerAdView.adsManager.play() in onPrepare() for every ad break.
-- Mid-roll and post-roll are not requested while the app is in PIP mode
-  (only if the app reports PIP with FlowerSdk.notifyPictureInPictureModeChanged).
+- Mid-roll and post-roll are not requested while the user is away from the app
+  (only if the app reports it with FlowerSdk.notifyUserLeftApp(true/false), whether or not it
+  enters PIP).
 
 ========================================
 IMPLEMENTATION

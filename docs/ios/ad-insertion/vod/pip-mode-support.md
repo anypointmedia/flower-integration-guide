@@ -6,9 +6,11 @@ sidebar_position: 2
 
 The SDK provides the following two options related to PIP (Picture-in-Picture) mode:
 
-#### `FlowerSdk.notifyPictureInPictureModeChanged`
+#### `FlowerSdk.notifyUserLeftApp`
 
-Notifies the SDK when PIP mode is entered (`true`) or exited (`false`).
+Notifies the SDK when the user leaves the app (`true`): to the home screen, to another app, or the app's video moved to a PIP window. Notifies the SDK when the user comes back to the app (`false`).
+
+`FlowerSdk.notifyPictureInPictureModeChanged` is deprecated and replaced by `notifyUserLeftApp`. Existing calls keep working: it passes the same value to `notifyUserLeftApp`.
 
 #### `FlowerSdk.setIgnoreAdBreakInPIPMode`
 
@@ -16,23 +18,25 @@ Selects how ads are played. The default is `true`.
 
 | **Value** | **Ad player** | **Ads in PIP mode** |
 | ---| ---| --- |
-| `true` (default) | The SDK plays VOD ads (pre-roll, mid-roll, post-roll) and inline ads in its own ad player, shown over the content. | Not supported. An ad playing when the app enters PIP is paused, and Mid-roll or Post-roll Ad Breaks are not requested while in PIP. |
+| `true` (default) | The SDK plays VOD ads (pre-roll, mid-roll, post-roll) and inline ads in its own ad player, shown over the content. | Not supported. An ad playing when the user leaves the app (`notifyUserLeftApp(true)`) is paused, and Mid-roll or Post-roll Ad Breaks are not requested while the user is away. |
 | `false` | For supported players, the SDK plays the ads inside the app's own player: it replaces the player's current item with the ad items (with AVQueuePlayer, it queues them in front of the content). | Supported. Ads keep playing in PIP mode. |
 
 Call `setIgnoreAdBreakInPIPMode` before requesting ads. The ad player is chosen when ads are requested.
 
 :::caution
-You must notify PIP mode transitions using `notifyPictureInPictureModeChanged`, on both entering and exiting PIP. The SDK does not detect PIP mode by itself.
+You must notify the SDK using `notifyUserLeftApp`, both when the user leaves the app and when the user comes back. The SDK does not detect it by itself. Report it from the app lifecycle, whether or not the app enters PIP.
 :::
 
 ## Ads in PIP Mode (Default)
 
-Ads are not supported in PIP mode by default. Therefore, if an ad is playing, the app must notify the SDK of PIP mode changes through `notifyPictureInPictureModeChanged`. Only then is the ad paused when the app enters PIP, and resumed when the user returns to the app. In addition, while an ad is playing, the app must not switch the content player into PIP, even if the app goes into PIP mode, because PIP mode could otherwise be used to bypass the ad.
+Ads are not supported in PIP mode by default. Therefore, the app must notify the SDK through `notifyUserLeftApp` when the user leaves the app and comes back. Only then is the ad paused when the user leaves the app, and resumed when the user returns to the app. In addition, while an ad is playing, the app must not switch the content player into PIP, even if the user leaves the app, because PIP mode could otherwise be used to bypass the ad.
 
-*   When the app calls `notifyPictureInPictureModeChanged(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
-*   When the app calls `notifyPictureInPictureModeChanged(false)`, the ad resumes from where it stopped and plays to completion.
-*   While the app is in PIP mode, Mid-roll and Post-roll Ad Breaks are not requested.
-*   Linear TV ads inserted into the stream are not affected by this option. They keep playing in PIP mode, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
+Because the content player does not go into PIP while an ad is playing, PIP callbacks (such as `AVPictureInPictureControllerDelegate`) are not called when the user leaves during an ad. Report the user leaving from the app lifecycle instead: call `notifyUserLeftApp(true)` when the app goes to the background, and `notifyUserLeftApp(false)` when it comes back to the foreground.
+
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
+*   While the user is away from the app, Mid-roll and Post-roll Ad Breaks are not requested.
+*   Linear TV ads inserted into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A linear channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
 
 Which video goes into PIP is decided by the app, not by the SDK. On iOS, it is the `AVPlayerLayer` or `AVPlayerViewController` that the app attached its PIP controller to, which is the content player. While an ad is playing, do not start PIP of the content player, and turn off automatic PIP until the ad break ends.
 
@@ -43,6 +47,32 @@ class YourViewController: UIViewController {
     var pipController: AVPictureInPictureController?
     var isAdPlaying = false
     ...
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // TODO GUIDE: Notify Flower SDK when the user leaves the app and comes back,
+        //             whether or not the app enters PIP
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(onDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(onWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    @objc private func onDidEnterBackground() {
+        FlowerSdk.notifyUserLeftApp(true)
+    }
+
+    @objc private func onWillEnterForeground() {
+        FlowerSdk.notifyUserLeftApp(false)
+    }
 }
 
 extension YourViewController: FlowerAdsManagerListener {
@@ -73,18 +103,6 @@ extension YourViewController: FlowerAdsManagerListener {
     ...
 }
 
-extension YourViewController: AVPictureInPictureControllerDelegate {
-    func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        // TODO GUIDE: Notify Flower SDK about Picture-in-Picture mode changes
-        FlowerSdk.notifyPictureInPictureModeChanged(true)
-    }
-
-    func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        // TODO GUIDE: Notify Flower SDK about Picture-in-Picture mode changes
-        FlowerSdk.notifyPictureInPictureModeChanged(false)
-    }
-}
-
 extension YourViewController {
     // TODO GUIDE: When the user taps your PIP button, do not start PIP while an ad is playing
     @objc func onPipButtonTapped() {
@@ -95,8 +113,10 @@ extension YourViewController {
 ```
 
 :::note When the content is shown in `AVPlayerViewController`
-`canStartPictureInPictureAutomaticallyFromInline` (iOS 14.2 and later) only turns off automatic PIP, and guarding your own PIP button does not disable the built-in PIP button of `AVPlayerViewController`. If the content plays in an `AVPlayerViewController`, also set its `allowsPictureInPicturePlayback` to `false` while an ad is playing (in `onPlay`), and set it back to `true` in `onCompleted` and `onError`. `AVPlayerViewController` reports PIP transitions through `AVPlayerViewControllerDelegate` (`playerViewControllerWillStartPictureInPicture` and `playerViewControllerDidStopPictureInPicture`), where you call `notifyPictureInPictureModeChanged` in the same way.
+`canStartPictureInPictureAutomaticallyFromInline` (iOS 14.2 and later) only turns off automatic PIP, and guarding your own PIP button does not disable the built-in PIP button of `AVPlayerViewController`. If the content plays in an `AVPlayerViewController`, also set its `allowsPictureInPicturePlayback` to `false` while an ad is playing (in `onPlay`), and set it back to `true` in `onCompleted` and `onError`. Report the user leaving and returning from the app lifecycle in the same way, not from `AVPlayerViewControllerDelegate`.
 :::
+
+If your app uses a scene delegate, you can call `FlowerSdk.notifyUserLeftApp(true)` in `sceneDidEnterBackground(_:)` and `FlowerSdk.notifyUserLeftApp(false)` in `sceneWillEnterForeground(_:)` instead. In SwiftUI, observe `@Environment(\.scenePhase)`: call `notifyUserLeftApp(true)` on `.background` and `notifyUserLeftApp(false)` on `.active`.
 
 ## Supporting Ads in PIP Mode
 

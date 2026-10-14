@@ -11,7 +11,7 @@ The prompt generates Kotlin code for an ExoPlayer-based (Media3) ad player.
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g., `2.9.28` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g., `2.9.29` | Flower SDK version provided to your project |
 | `ENV` | `local` \| `dev` \| `prod` | Value passed to `FlowerSdk.setEnv()` |
 
 ```plain

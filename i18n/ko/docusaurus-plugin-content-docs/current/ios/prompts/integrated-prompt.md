@@ -250,10 +250,10 @@ For FlowerPlayer (FlowerAVPlayer):
   onError (called off the main thread): hop to the main thread and restart the channel -
   player.flowerAdView.adsManager.stop(), player.replaceCurrentItem(with: nil) (this also
   clears the ad config), then start it again the same way: replaceCurrentItem(with:adConfig:)
-  with a new AVPlayerItem of the original stream URL + play(). A restart leaves the channel
-  pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it. So the restart's
-  FlowerLinearTvAdConfig has no prerollAdTagUrl (withPreroll: false in STEP 3-2) and the
-  channel loads right away. If onError arrives before the
+  with a new AVPlayerItem of the original stream URL + play(), with the same
+  FlowerLinearTvAdConfig as the first start, including prerollAdTagUrl (call playLinearTv()
+  from STEP 3-2 again). The SDK skips the pre-roll of the channel entered last, so the viewer
+  does not see it again and the channel loads right away. If onError arrives before the
   channel item was loaded (player.currentItem == nil, i.e. a pre-roll playback error), restart
   in a NEW FlowerAVPlayer: FlowerAVPlayer does not load the channel after a pre-roll error and
   keeps its internal pre-roll listener registered. Keep a simple retry limit (e.g. at most 3
@@ -284,11 +284,12 @@ For MediaPlayerHook:
   onError (called off the main thread): hop to the main thread and restart the channel -
   flowerAdView.adsManager.stop() (this also ends the SDK proxy the current URL points at),
   release the content item (removeAllItems / replaceCurrentItem(with: nil)), then start it
-  again the same way: a new changeChannelUrl(...) -> a new AVPlayerItem -> play(). A restart
-  leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-  So the restart passes prerollAdTagUrl: nil (withPreroll: false in STEP 3-2), has no pre-roll
-  wait (no temporary pre-roll listener), loads the new URL right away and keeps the main
-  listener registered. Keep a simple retry limit (e.g. at most 3 restarts in a row).
+  again the same way: a new changeChannelUrl(...) with exactly the same parameters, including
+  prerollAdTagUrl -> a new AVPlayerItem -> play() (call playLinearTv() from STEP 3-2 again;
+  with a pre-roll URL, hold the returned URL until onCompleted as on the first start). The SDK
+  skips the pre-roll of the channel entered last and calls onCompleted right after
+  changeChannelUrl(...) returns, so the held URL starts right away and the viewer does not see
+  the pre-roll again. Keep a simple retry limit (e.g. at most 3 restarts in a row).
 
   SwiftUI:
   flowerAdView.adsManager.addListener(adsManagerListener: listener)
@@ -422,12 +423,13 @@ STEP 3-2 — Request Ads / Start Playback
 If AD_TYPE is "linear-tv" AND APPROACH is "flower-player":
 
   Use values from your config data — do NOT hardcode URLs or parameters.
-  withPreroll: true when a channel starts (first start or channel change), false on a restart
-  after onError.
+  Put this in playLinearTv() and use it for the first start, a channel change and a restart
+  after onError, always with the same values (the SDK skips the pre-roll of the channel
+  entered last).
 
   let adConfig = FlowerLinearTvAdConfig(
       adTagUrl: config.adTagUrl,
-      prerollAdTagUrl: withPreroll ? config.prerollAdTagUrl : nil,
+      prerollAdTagUrl: config.prerollAdTagUrl,
       channelId: config.channelId,
       extraParams: config.extraParams,
       adTagHeaders: config.adTagHeaders ?? [:],
@@ -447,11 +449,11 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
       func getPlayer() -> Any? { fn() }
   }
 
-  withPreroll: true when a channel starts (first start or channel change), false on a restart
-  after onError.
+  Put this in playLinearTv() and use it for the first start, a channel change and a restart
+  after onError, always with the same parameters, including prerollAdTagUrl.
 
   let hook = MediaPlayerHookImpl { self.player }
-  let prerollAdTagUrl = withPreroll ? config.prerollAdTagUrl : nil
+  let prerollAdTagUrl = config.prerollAdTagUrl
   let changedUrl = flowerAdView.adsManager.changeChannelUrl(
       videoUrl: config.contentUrl,
       adTagUrl: config.adTagUrl,
@@ -463,7 +465,7 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
       prerollAdTagUrl: prerollAdTagUrl
   )
   if prerollAdTagUrl == nil {
-      // No pre-roll (or a restart after onError): load the URL right away.
+      // No pre-roll: load the URL right away.
       loadChannel(changedUrl)
   } else {
       // Channel pre-roll: the SDK plays it once, before the channel, in its own ad player.
@@ -500,8 +502,12 @@ If AD_TYPE is "linear-tv" AND APPROACH is "media-player-hook":
     thread. The SDK ends the pre-roll with onCompleted, also when there is no pre-roll ad, the
     request failed or the pre-roll could not be played. Its onError does NOT restart the
     channel: the channel has not started yet.
-  - A restart after onError (withPreroll: false) has no pre-roll wait: it loads right away and
-    keeps the main listener registered.
+  - A restart after onError goes through the same path. The SDK remembers the channel
+    (channelId) entered last; when changeChannelUrl(...) is called with that same channelId, it
+    skips the pre-roll even though prerollAdTagUrl is passed and calls onCompleted right after
+    changeChannelUrl(...) returns, so the temporary listener loads the URL right away. stop()
+    does not clear the remembered channel; requestVodAd and requestAd do. A -> B -> A plays A's
+    pre-roll again. Do not add a flag that drops prerollAdTagUrl on a restart.
   - Before the next changeChannelUrl(...) (channel change) and before every stop() (restart,
     cleanup), if prerollListener is still set, remove it from adsManager, set prerollListener
     and pendingChannelUrl to nil, and add mainListener back (cleanup removes it right after).
@@ -653,18 +659,24 @@ STEP 4-2 — Picture-in-Picture Support (Optional)
 
 Available in Flower iOS SDK version 2.2.0+.
 
-UIKit — implement AVPlayerViewControllerDelegate:
+Report the user leaving the app (home screen, another app, or the video moved to a PiP window)
+with FlowerSdk.notifyUserLeftApp(true), and coming back with FlowerSdk.notifyUserLeftApp(false).
+Report it from the app lifecycle, whether or not the app enters PiP: while an ad plays the
+content must not go into PiP, so PiP delegate callbacks never fire during an ad.
+FlowerSdk.notifyPictureInPictureModeChanged(_:) is deprecated (replaced by notifyUserLeftApp).
 
-  playerViewController.delegate = self
+UIKit — observe the app lifecycle in the playback view controller:
 
-  extension PlaybackViewController: AVPlayerViewControllerDelegate {
-      func playerViewControllerWillStartPictureInPicture(_ playerViewController: AVPlayerViewController) {
-          FlowerSdk.notifyPictureInPictureModeChanged(true)
-      }
-      func playerViewControllerDidStopPictureInPicture(_ playerViewController: AVPlayerViewController) {
-          FlowerSdk.notifyPictureInPictureModeChanged(false)
-      }
-  }
+  NotificationCenter.default.addObserver(self, selector: #selector(onDidEnterBackground),
+      name: UIApplication.didEnterBackgroundNotification, object: nil)
+  NotificationCenter.default.addObserver(self, selector: #selector(onWillEnterForeground),
+      name: UIApplication.willEnterForegroundNotification, object: nil)
+
+  @objc private func onDidEnterBackground() { FlowerSdk.notifyUserLeftApp(true) }
+  @objc private func onWillEnterForeground() { FlowerSdk.notifyUserLeftApp(false) }
+
+  (With a scene delegate, sceneDidEnterBackground(_:) -> true and
+  sceneWillEnterForeground(_:) -> false work the same way.)
 
   Enable PiP on player view controller:
   playerViewController.allowsPictureInPicturePlayback = true
@@ -678,9 +690,20 @@ UIKit — implement AVPlayerViewControllerDelegate:
   playerViewController.canStartPictureInPictureAutomaticallyFromInline to false, and set
   them back to true in onCompleted and onError (on the main thread).
 
-SwiftUI — FlowerVideoPlayer (a SwiftUI VideoPlayer) does not report PiP transitions, and the
-SDK never detects PiP by itself. If the app supports PiP, host an AVPlayerViewController
-(UIViewControllerRepresentable) and notify the SDK from its delegate as above.
+SwiftUI — observe scenePhase in the playback view:
+
+  @Environment(\.scenePhase) private var scenePhase
+  .onChange(of: scenePhase) { phase in
+      switch phase {
+      case .background: FlowerSdk.notifyUserLeftApp(true)
+      case .active: FlowerSdk.notifyUserLeftApp(false)
+      default: break
+      }
+  }
+
+  FlowerVideoPlayer (a SwiftUI VideoPlayer) has no PiP controls of its own. If the app supports
+  PiP, host an AVPlayerViewController (UIViewControllerRepresentable) and block its PiP while
+  an ad plays as above.
 
 ========================================
 STEP 4-3 — Audio Session Configuration (Linear TV)
@@ -732,6 +755,7 @@ Step 4:
 - iOS SDK does NOT require an explicit destroy/release call in applicationWillTerminate.
 - For FlowerAVPlayer, replaceCurrentItem(with: nil) releases all resources.
 - For AVQueuePlayer, call removeAllItems() to release.
-- Notify PiP transitions (FlowerSdk.notifyPictureInPictureModeChanged) in every approach that
-  allows PiP, including FlowerAVPlayer. The SDK does not detect PiP by itself.
+- Notify the user leaving and returning (FlowerSdk.notifyUserLeftApp(true/false)) from the app
+  lifecycle in every approach, including FlowerAVPlayer, whether or not the app enters PiP.
+  The SDK does not detect it by itself.
 ```

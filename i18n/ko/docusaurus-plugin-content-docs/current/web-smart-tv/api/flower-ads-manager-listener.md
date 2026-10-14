@@ -76,7 +76,7 @@ VOD에서 VMAP/VAST 요청 실패나 타임아웃, 광고가 없는 Ad Break는 
 
 권장 처리 방법:
 
-*   **Linear TV / FAST:** `stop()`으로 광고 매니저를 정지하고 플레이어를 해제한 뒤, 새 `changeChannelUrl(...)` 호출로 채널을 다시 시작합니다. 재시작할 때는 채널 프리롤을 제외합니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 보았기 때문입니다. `prerollAdTagUrl`에 `null`을 전달하고(FlowerHls는 광고 설정에서 `prerollAdTagUrl`을 뺍니다) 반환된 URL을 바로 재생하세요. [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control)를 참고하세요.
+*   **Linear TV / FAST:** `stop()`으로 광고 매니저를 정지하고 플레이어를 해제한 뒤, 새 `changeChannelUrl(...)` 호출로 채널을 다시 시작합니다. `prerollAdTagUrl`을 포함해 처음 시작할 때와 똑같은 매개변수를 전달하고(FlowerHls는 같은 광고 설정), 반환된 URL도 같은 방식으로 처리하세요. SDK는 마지막으로 진입한 채널(`channelId`)의 프리롤을 건너뛰고 바로 `onCompleted()`를 호출하므로, 시청자가 프리롤을 다시 보지 않습니다. [플레이어 수동 제어](../ad-insertion/linear-tv-fast/manual-player-control)를 참고하세요.
 *   **VOD:** Ad Break가 실패하면 SDK는 `onError`를 호출하기 전에 콘텐츠를 되돌려 놓습니다. 미드롤이었다면 콘텐츠는 이미 중단 지점에서 `rewindDuration`만큼 앞선 위치부터 다시 재생 중입니다. 광고 오류에 대해 콘텐츠를 정지, 탐색(seek), 재로드하지 마세요. 프리롤 오류이면 콘텐츠를 로드하고 시작합니다. 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며 순서는 정해져 있지 않습니다. `playback unrecoverable`이면 콘텐츠를 다시 로드하거나 오류를 표시하세요. [VOD 프리롤, Mid-roll, Post-roll 광고 적용](../ad-insertion/vod/vod-ad-implementation)을 참고하세요.
 
 ### onAdBreakSkipped

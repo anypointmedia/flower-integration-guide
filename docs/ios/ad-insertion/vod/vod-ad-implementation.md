@@ -50,10 +50,6 @@ When an ad break fails, the SDK brings the content back **before** it calls `onE
 
 `onCompleted` may also be called for the failed break, before or after `onError`. Make the two handlers safe to run for the same break, for example by checking `isContentPrepared` as below.
 
-:::note Known issue
-When an ad's media URL cannot be reached inside a break with several ads, the ad player currently does not report it as an error and the break stalls. A fix is in progress.
-:::
-
 #### _SwiftUI_
 ```swift
 // TODO GUIDE: Implement FlowerAdsManagerListener

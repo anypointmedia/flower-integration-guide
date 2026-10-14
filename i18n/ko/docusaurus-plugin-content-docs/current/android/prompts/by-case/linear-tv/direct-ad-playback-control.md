@@ -11,7 +11,7 @@ sidebar_label: 앱의 광고 플레이어로 Linear TV 광고
 
 | 매개변수 | 값 | 설명 |
 |-----------|--------|-------------|
-| `SDK_VERSION` | 예: `2.9.28` | 프로젝트에 제공된 Flower SDK 버전 |
+| `SDK_VERSION` | 예: `2.9.29` | 프로젝트에 제공된 Flower SDK 버전 |
 | `ENV` | `local` \| `dev` \| `prod` | `FlowerSdk.setEnv()`에 전달하는 값 |
 
 ```plain

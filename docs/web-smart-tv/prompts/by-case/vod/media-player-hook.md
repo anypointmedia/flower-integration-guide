@@ -9,7 +9,7 @@ Use this prompt to add pre-roll, mid-roll and post-roll ads to VOD content playe
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g. `2.3.17` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g. `2.3.18` | Flower SDK version provided to your project |
 | `PLAYER` | `hls.js` \| `bitmovin` \| `dash.js` \| `shaka` | The player library your app uses for VOD |
 
 ```plain

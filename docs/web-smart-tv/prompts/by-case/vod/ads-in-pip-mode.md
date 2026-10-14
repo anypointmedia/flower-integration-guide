@@ -9,7 +9,7 @@ Use this prompt when VOD ads must keep playing while the app is in PIP mode, by 
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|
-| `SDK_VERSION` | e.g. `2.3.17` | Flower SDK version provided to your project |
+| `SDK_VERSION` | e.g. `2.3.18` | Flower SDK version provided to your project |
 | `PLAYER` | `hls.js` \| `bitmovin` | The player library your app uses for VOD |
 
 ```plain
@@ -25,7 +25,8 @@ GOAL
 - Request VOD ads, start the content after the pre-roll, play every break on onPrepare.
 - Make all player event handlers (ended, manifest/source loaded, analytics, quality or
   subtitle UI) react only to the content source, never to an ad source.
-- Notify the SDK of PIP enter/exit.
+- Notify the SDK when the user leaves the app (another tab or app, the TV app in the
+  background, or the video in PIP) and comes back.
 
 ========================================
 PARAMETERS
@@ -55,7 +56,8 @@ HOW THE SDK BEHAVES IN THIS CASE
    The SDK calls onCompleted() also when there is no pre-roll, no ad, or a request failure.
 6. The player is shared with the ads: pausing it pauses the ad. adsManager.pause()/resume()
    pause and resume this same player.
-7. Mid-rolls and the post-roll are requested and played in PIP mode too. While in PIP the
+7. Mid-rolls and the post-roll are requested and played in PIP mode too. While the user is
+   away from the app (reported with FlowerSdk.notifyUserLeftApp(true), including PIP), the
    ad UI (CTA, skip) is hidden; the ad itself keeps playing.
 8. If the VMAP has no post-roll, no listener callback follows notifyContentEnded().
    After a post-roll the SDK hands the content back at its end, so the content's 'ended'
@@ -163,11 +165,19 @@ STEP 7 — Request ads
       // Do NOT load the content here.
   }
 
-STEP 8 — PIP notifications (ads may play in PIP; do not block PIP during ads)
+STEP 8 — Report the user leaving the app and coming back (ads may play in PIP; do not
+         block PIP during ads)
 
-  videoElement.addEventListener('enterpictureinpicture', () => FlowerSdk.notifyPictureInPictureModeChanged(true));
-  videoElement.addEventListener('leavepictureinpicture', () => FlowerSdk.notifyPictureInPictureModeChanged(false));
-  (Bitmovin: attach these to player.getVideoElement().)
+  function reportUserLeftApp() {
+      const hasLeftApp = document.visibilityState === 'hidden'
+          || document.pictureInPictureElement === videoElement;
+      FlowerSdk.notifyUserLeftApp(hasLeftApp);
+  }
+  document.addEventListener('visibilitychange', reportUserLeftApp);
+  videoElement.addEventListener('enterpictureinpicture', reportUserLeftApp);
+  videoElement.addEventListener('leavepictureinpicture', reportUserLeftApp);
+  (Bitmovin: attach the PIP listeners to player.getVideoElement().)
+  FlowerSdk.notifyPictureInPictureModeChanged() is deprecated; use notifyUserLeftApp().
 
 STEP 9 — Cleanup
 
@@ -187,7 +197,7 @@ DO:
 - Set setIgnoreAdBreakInPIPMode(false) before the first requestVodAd().
 - Compare the current source with the content URL in every source/end handler.
 - Use hls.once(...) for one-shot load handlers.
-- Notify PIP enter AND exit.
+- Notify the user leaving the app AND coming back.
 
 DO NOT:
 - Pause, seek, or reload the player in onPrepare(), onPlay(), onCompleted(), onError().

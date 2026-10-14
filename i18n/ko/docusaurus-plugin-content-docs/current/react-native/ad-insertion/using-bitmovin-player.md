@@ -113,7 +113,7 @@ useEffect(() => {
 보관 단계를 우회하려고 `playbackConfig.isAutoplayEnabled`를 켜지 마세요. 프리롤 아래에서 채널이 재생됩니다.
 :::
 
-`onReady` 재생 로직과 프리롤을 넣지 않는 `error` 재시작을 포함한 전체 컴포넌트는 [Bitmovin 플레이어로 Linear TV / FAST 연동 프롬프트](../prompts/by-case/linear-tv/bitmovin.md)에 있습니다.
+`onReady` 재생 로직과, 첫 시작의 호출을 그대로 반복하는 `error` 재시작(SDK가 마지막으로 진입한 채널의 프리롤을 건너뜀)을 포함한 전체 컴포넌트는 [Bitmovin 플레이어로 Linear TV / FAST 연동 프롬프트](../prompts/by-case/linear-tv/bitmovin.md)에 있습니다.
 
 ## Expo 모듈
 

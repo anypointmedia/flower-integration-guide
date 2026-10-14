@@ -4,11 +4,11 @@ sidebar_position: 4
 
 # PIP Mode Support
 
-Ads are not played in PIP (Picture-in-Picture) mode by default, and the SDK does not detect PIP mode by itself. Two functions control this, both imported from the package root:
+Ads are not played in PIP (Picture-in-Picture) mode by default, and the SDK does not detect by itself that the user has left the app. Two functions control this, both imported from the package root:
 
 ```ts
 import {
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
   setIgnoreAdBreakInPIPMode,
 } from '@anypoint/flower-sdk-react-native';
 ```
@@ -17,17 +17,21 @@ Both apply to the whole app, not to one `nativeId`.
 
 ## Methods
 
-### notifyPictureInPictureModeChanged
+### notifyUserLeftApp
 
 ```ts
-function notifyPictureInPictureModeChanged(isInPictureInPictureMode: boolean): Promise<void>;
+function notifyUserLeftApp(hasLeftApp: boolean): Promise<void>;
 ```
 
-Tells the SDK the app went into (`true`) or came back from (`false`) PIP mode.
+Tells the SDK the user left the app (`true`) — to the home screen, to another app, or with the video moved to a PIP window — or came back to it (`false`). Report it whether or not the app enters PIP.
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| isInPictureInPictureMode | boolean | `true` when entering PIP mode, `false` when exiting it |
+| hasLeftApp | boolean | `true` when the user leaves the app, `false` when the user comes back |
+
+:::note
+`notifyPictureInPictureModeChanged(isInPictureInPictureMode)` is deprecated and replaced by `notifyUserLeftApp`. It still works and passes the same value to `notifyUserLeftApp`.
+:::
 
 ### setIgnoreAdBreakInPIPMode
 
@@ -39,30 +43,33 @@ Selects how ads are played. The default is `true`. Call it before requesting ads
 
 | **Value** | **Ad player** | **Ads in PIP mode** |
 | ---| ---| --- |
-| `true` (default) | VOD and inline breaks play in the SDK's own ad player, in the overlay over your `<Video>`. | Not supported. An ad playing when the app enters PIP is paused, and mid-roll or post-roll breaks are not requested while in PIP. |
+| `true` (default) | VOD and inline breaks play in the SDK's own ad player, in the overlay over your `<Video>`. | Not supported. An ad playing when the user leaves the app is paused, and mid-roll or post-roll breaks are not requested until the user comes back. |
 | `false` | VOD breaks play inside your `<Video>`'s own player (`react-native-video` on Android and iOS, Bitmovin on Android): the ads are put in front of the content, and the content comes back afterwards. Inline breaks, and VOD breaks with Bitmovin on iOS, still play in the SDK's own ad player. | Supported for VOD breaks on the app's player. Ads keep playing in PIP mode. |
 
 :::caution
-Report both moments, entering and exiting PIP, through `notifyPictureInPictureModeChanged`. The SDK does not detect PIP mode by itself. The only exception is `playerType: 'bitmovin'` on Android, where the SDK receives Bitmovin's own PIP events.
+Report both moments, the user leaving the app and coming back, through `notifyUserLeftApp`, whether or not the app enters PIP. The SDK does not detect either by itself, with any `playerType`.
 :::
 
 ## Ads in PIP Mode (Default)
 
-Ads are not supported in PIP mode by default. Therefore, if an ad is playing, the app must notify the SDK of PIP mode changes through `notifyPictureInPictureModeChanged`. Only then is the ad paused when the app enters PIP, and resumed when the user returns to the app. In addition, while an ad is playing, the app must not switch the content player into PIP, even if the app goes into PIP mode, because PIP mode could otherwise be used to bypass the ad.
+Ads are not supported in PIP mode by default. While an ad is playing, the app must not switch the content player into PIP, because PIP mode could otherwise be used to bypass the ad. So when the user leaves the app during an ad, the app does not enter PIP at all — and the SDK learns that the user has left only if the app tells it. Therefore, the app must report every time the user leaves the app and comes back through `notifyUserLeftApp`, whether or not it enters PIP. Only then is the ad paused when the user leaves, and resumed when the user returns to the app.
 
-*   When the app calls `notifyPictureInPictureModeChanged(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
-*   When the app calls `notifyPictureInPictureModeChanged(false)`, the ad resumes from where it stopped and plays to completion.
-*   While the app is in PIP mode, mid-roll and post-roll breaks are not requested.
-*   Linear TV ads spliced into the stream are not affected by this option. They keep playing in PIP mode, and only the ad UI is hidden. A channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
+*   When the app calls `notifyUserLeftApp(true)` while an ad is playing, the SDK pauses the ad and hides the ad UI. While the ad is paused, its progress does not advance and no quartile tracking events are sent.
+*   When the app calls `notifyUserLeftApp(false)`, the ad resumes from where it stopped and plays to completion.
+*   Until the user comes back, mid-roll and post-roll breaks are not requested.
+*   Linear TV ads spliced into the stream are not affected by this option. They keep playing while the user is away, and only the ad UI is hidden. A channel pre-roll (`prerollAdTagUrl`) is paused and resumed in the same way as VOD ads.
 
 Which window goes into PIP is decided by the OS and the app, not by the SDK: on iOS, the player layer the PIP controller is attached to — the content player; on Android, the whole Activity. While an ad is playing, do not let the content `<Video>` enter PIP.
 
+React Native's `AppState` reports the user leaving (`background`) and coming back (`active`), with or without PIP. Ignore `inactive`, a transient state such as the app switcher being opened.
+
 ```tsx
 import React, {useEffect, useState} from 'react';
+import {AppState} from 'react-native';
 import Video from 'react-native-video';
 import {
   addAdEventListenerFor,
-  notifyPictureInPictureModeChanged,
+  notifyUserLeftApp,
 } from '@anypoint/flower-sdk-react-native';
 
 export function VodPlayer({nativeId, contentUrl}: {nativeId: string; contentUrl: string}) {
@@ -79,22 +86,30 @@ export function VodPlayer({nativeId, contentUrl}: {nativeId: string; contentUrl:
     return () => subscription.remove();
   }, [nativeId]);
 
+  // Report the user leaving and coming back, whether or not the app enters PIP.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'background') {
+        notifyUserLeftApp(true).catch(() => {});
+      } else if (state === 'active') {
+        notifyUserLeftApp(false).catch(() => {});
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   return (
     <Video
       nativeID={nativeId}
       source={{uri: contentUrl}}
       // Keep the content out of PIP while an ad plays.
       enterPictureInPictureOnLeave={!adPlaying}
-      // Report both entering and exiting PIP.
-      onPictureInPictureStatusChanged={({isActive}) =>
-        notifyPictureInPictureModeChanged(isActive).catch(() => {})
-      }
     />
   );
 }
 ```
 
-If your app enters PIP by other means (for example its own native code on Android), call `notifyPictureInPictureModeChanged` from there in the same way.
+`notifyUserLeftApp` is app-wide, so a single `AppState` subscription is enough for the whole app; it does not have to live in the player component.
 
 ## Supporting Ads in PIP Mode
 

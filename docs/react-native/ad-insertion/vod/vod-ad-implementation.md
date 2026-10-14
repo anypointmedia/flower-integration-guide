@@ -194,10 +194,6 @@ Track the end with a ref set from `onEnd`, as in the example above, before calli
 
 A failed break may also report `completed`, before or after the `error`. Keep both branches safe to run for the same break — as `startContent()` is above. With `setIgnoreAdBreakInPIPMode(false)` the ad player and the content player adapter share the player, so one ad failure can surface as two `error` events.
 
-:::note Known issue on iOS
-When an ad's media URL cannot be reached inside a break with several ads, the iOS ad player currently does not report it as an error and the break stalls. A fix is in progress.
-:::
-
 ## Pre-roll, Mid-roll and Post-roll
 
 The break positions come from the ad response, placed against the `durationMs` you supply — so the value must be the real total duration of the content, in milliseconds.

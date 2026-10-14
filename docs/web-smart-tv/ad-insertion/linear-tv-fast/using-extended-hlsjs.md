@@ -101,8 +101,9 @@ const adsManagerListener = {
         hls.removeAdListener(adsManagerListener);
         hls.destroy();
         initHls();      // new FlowerHls + attachContainer(), same as the first start
-        // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-        playLinearTv({ withPreroll: false }); // setAdConfig() without prerollAdTagUrl -> addAdListener() -> loadSource()
+        // Same ad config as the first start, prerollAdTagUrl included:
+        // the SDK skips the pre-roll of the channel entered last.
+        playLinearTv(); // setAdConfig() -> addAdListener() -> loadSource()
     },
 
     onAdBreakSkipped(reason) {
@@ -116,7 +117,7 @@ hls.addAdListener(adsManagerListener);
 :::info Recovering from `onError()`
 When `onError()` is called, stop the ads manager, release the player, and start the channel again. With FlowerHls, `hls.destroy()` does the first two steps: it destroys the HLS.js instances and calls `stop()` on the ads manager of that FlowerHls. Create a new FlowerHls and load the channel again, because a destroyed FlowerHls cannot be reused.
 
-A restart leaves the channel pre-roll out (`prerollAdTagUrl` omitted): the viewer has already seen it. Pass `setAdConfig()` the same values as the first start but without `prerollAdTagUrl`, so the channel stream plays right away. The first start of a channel and a switch to another channel use the pre-roll as configured.
+Pass `setAdConfig()` exactly the same values as the first start, including `prerollAdTagUrl`. The viewer does not see the pre-roll again: FlowerHls requests the pre-roll through `changeChannelUrl()`, and the SDK skips the pre-roll when the channel (`channelId`) is the one it entered last, even on a new FlowerHls instance, so the channel stream plays right away. The first start of a channel and a switch to another channel use the pre-roll as configured.
 
 Remove the listener before `destroy()`. `stop()` ends any ad break in progress and can still call `onCompleted()` for that break afterwards; once the listener is removed from the old instance, that late call does not reach it.
 :::
@@ -129,8 +130,9 @@ FlowerHls handles the pre-roll itself. `loadSource()` loads the stream and reque
 
 - Listeners registered with `addAdListener()` also receive `onPrepare()`, `onPlay()`, and `onCompleted()` for the pre-roll.
 - When there is no pre-roll ad, the ad request fails, or the pre-roll fails to play, the SDK calls `onCompleted()` (not `onError()`) and the stream resumes.
-- A restart after `onError()` leaves the pre-roll out, as described above. A channel change (`setAdConfig()` and `loadSource()` for the next channel) stops a pre-roll still in progress and requests the new channel's pre-roll.
-- With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the app enters PIP and resumed when it returns. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
+- The SDK remembers the channel (`channelId`) entered last. Loading that same channel again skips its pre-roll, even with `prerollAdTagUrl` set, and the SDK calls `onCompleted()` as when there is no pre-roll ad. So a restart after `onError()` keeps `prerollAdTagUrl`, as described above. `destroy()` and `stop()` do not clear the remembered channel; `requestVodAd()` and `requestAd()` do.
+- A channel change (`setAdConfig()` and `loadSource()` for the next channel) stops a pre-roll still in progress and requests the new channel's pre-roll. Coming back after another channel (A → B → A) plays A's pre-roll again.
+- With the default `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`, the pre-roll is paused when the user leaves the app and resumed when the user comes back. See [PIP Mode Support](../../getting-started/pip-mode-support.md).
 
 ## Linear Channel Ad Request Example
 
@@ -153,8 +155,8 @@ function initHls() {
     });
 }
 
-// withPreroll: true for the first start of a channel, false for a restart after onError()
-function playLinearTv({ withPreroll = true } = {}) {
+// Used for the first start of a channel, a channel change, and a restart after onError()
+function playLinearTv() {
     const videoUrl = 'https://video_url';
 
     // TODO GUIDE: Configure linear tv ad
@@ -166,8 +168,10 @@ function playLinearTv({ withPreroll = true } = {}) {
     // extraParams: (Optional) values you can provide for targeting
     // adTagHeaders: (Optional) values included in headers for ad request
     // channelStreamHeaders: (Optional) values included in headers for channel stream request
+    // A restart passes prerollAdTagUrl too: the SDK skips the pre-roll of the channel entered last.
     const adConfig = {
         adTagUrl: 'https://ad_request',
+        prerollAdTagUrl: 'https://preroll_ad_request',
         channelId: '1',
         extraParams: {
             title: 'My Summer Vacation',
@@ -181,10 +185,6 @@ function playLinearTv({ withPreroll = true } = {}) {
             'custom-stream-header': 'custom-stream-header-value'
         }
     };
-    // A restart leaves the channel pre-roll out (prerollAdTagUrl omitted): the viewer has already seen it.
-    if (withPreroll) {
-        adConfig.prerollAdTagUrl = 'https://preroll_ad_request';
-    }
 
     // TODO GUIDE: FlowerAdConfig should be delivered before calling loadSource()
     hls.setAdConfig(adConfig);
@@ -209,7 +209,7 @@ function playLinearTv({ withPreroll = true } = {}) {
             hls.removeAdListener(adsManagerListener);
             hls.destroy();
             initHls();
-            playLinearTv({ withPreroll: false });  // restart without the channel pre-roll
+            playLinearTv();  // same as the first start; the SDK skips the pre-roll of this channel
         },
         onAdBreakSkipped(reason) {
             // OPTIONAL GUIDE: Implement custom actions for when the ad playback is skipped

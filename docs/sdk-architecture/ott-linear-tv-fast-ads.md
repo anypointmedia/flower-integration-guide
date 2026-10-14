@@ -72,8 +72,8 @@ flowchart TD
 - **No ad or failure**: if the pre-roll tag returns no ad, or the request fails, the SDK fires `onCompleted` and the channel starts as usual. With `changeChannelUrl`, a pre-roll whose playback fails also ends with `onCompleted`, not `onError`. Some player integrations report a playback failure differently; see the Linear TV guide of your platform.
 - **When the app starts playback**: when the app calls `changeChannelUrl` itself, it holds the returned URL and sets it on the player at `onCompleted`, so the main content does not flash on screen before the pre-roll. When the SDK's player integration manages the channel (for example an SDK-provided player), the player holds the channel itself. Follow the Linear TV guide of your platform.
 - **Channel switch**: every `changeChannelUrl` call stops the current session first, including a pre-roll in progress, and then requests the pre-roll of the new call. Pass the new channel's `prerollAdTagUrl` to play its pre-roll.
-- **Restart after `onError`**: a restart leaves the pre-roll out (`prerollAdTagUrl` omitted), because the viewer has already seen it.
-- **PIP mode**: by default, a pre-roll pauses when the app enters PIP and resumes when it returns, in the same way as VOD ads. Main stream replacement ads keep playing in PIP.
+- **Restart after `onError`**: the app repeats the first call unchanged, `prerollAdTagUrl` included. The SDK remembers the channel entered last and skips the pre-roll when the same channel is entered again, firing `onCompleted` as for a pre-roll with no ad. `stop()` and SDK initialization keep the remembered channel; a VOD or inline ad request clears it.
+- **User leaving the app**: by default, a pre-roll pauses when the app reports that the user left the app (`notifyUserLeftApp(true)`) and resumes when the user returns, in the same way as VOD ads. Main stream replacement ads keep playing.
 
 ## Lifecycle
 

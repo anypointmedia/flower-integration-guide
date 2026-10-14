@@ -144,13 +144,17 @@ const styles = StyleSheet.create({
 채널에서 `error` 이벤트가 발생했다는 것은 SDK가 스트림에 광고를 계속 유지할 수 없게 되었다는 뜻입니다 — 예를 들어 플레이리스트 조작에 실패해 플레이어가 깨진 스트림에 머무를 수 있습니다. 스트림 자체가 멈췄고 네이티브 SDK가 이를 복구하지 않을 때도 장애 1건당 한 번 전달되며, 이때 메시지는 `playback unrecoverable`로 시작합니다(iOS의 `playerType: 'bitmovin'`에서는 보고되지 않음). 채널을 처음부터 다시 시작해 복구하세요. 위 예제의 `restartChannel`이 이 작업을 합니다:
 
 1. `await stop(nativeId)`로 채널의 광고 매니저를 중지합니다. `release()`와 달리 광고 오버레이와 이벤트 구독은 그대로 유지되므로, 재시작 시 이를 재사용합니다.
-2. `prerollAdTagUrl`을 제외하고 처음과 같은 파라미터로 `changeChannelUrl(nativeId, ...)`을 다시 호출합니다. **새** 프록시 URL이 반환됩니다. 재시작할 때는 채널 프리롤을 넣지 않습니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 봤기 때문입니다.
-3. 그 URL을 `<Video>`의 소스로 설정합니다. 플레이어는 재생성되지 않고 재사용됩니다. `onLoad`가 다시 발생하지만 `handedOver` 가드가 두 번째 인계를 막습니다.
+2. `prerollAdTagUrl`을 포함해 처음과 완전히 같은 파라미터로 `changeChannelUrl(nativeId, ...)`을 다시 호출합니다. **새** 프록시 URL이 반환됩니다.
+3. 첫 시작과 같은 방식으로 그 URL을 `<Video>`의 소스로 설정합니다. 플레이어는 재생성되지 않고 재사용됩니다. `onLoad`가 다시 발생하지만 `handedOver` 가드가 두 번째 인계를 막습니다.
 
 `stop()`은 진행 중인 브레이크도 종료하며, 그 브레이크는 `error` 이후는 물론 `stop()`이 resolve된 뒤에도 `completed`를 보고할 수 있습니다. `completed` 분기는 여러 번 호출되어도 문제없도록(광고 UI 상태 정리만) 작성해 재시작을 방해하지 않게 하세요. `MAX_RESTARTS`는 시작할 때마다 실패하는 채널이 무한히 재시작되지 않도록 하는 간단한 상한입니다. 카운터는 채널 전환 시 등 앱에 맞는 방식으로 초기화하세요.
 
 :::note
-[채널 프리롤](#프리롤-광고)에는 이 처리가 필요 없습니다. 실패한 프리롤은 `error`가 아니라 `completed`로 끝납니다. SDK가 프리롤을 마치고 채널을 직접 재개하므로, 아래의 `completed` 처리로 이미 충분합니다. `prerollAdTagUrl`로 처음 시작한 채널이라도 재시작할 때는 채널 프리롤을 넣지 않습니다(`prerollAdTagUrl` 생략). 시청자가 이미 프리롤을 봤기 때문입니다. 따라서 재시작에서는 프록시 URL을 보관하지 않고, 중단된 브레이크가 일찍 보고할 수 있는 `completed`를 기다리지 않고 바로 재생합니다. [프리롤 예제](#프리롤-광고)의 `withPreroll` 플래그가 이를 처리합니다.
+[채널 프리롤](#프리롤-광고)에는 이 처리가 필요 없습니다. 실패한 프리롤은 `error`가 아니라 `completed`로 끝납니다. SDK가 프리롤을 마치고 채널을 직접 재개하므로, 아래의 `completed` 처리로 이미 충분합니다. `prerollAdTagUrl`로 처음 시작한 채널을 재시작하면 `prerollAdTagUrl`을 전달하더라도 시청자에게 프리롤이 다시 표시되지 않습니다. SDK는 마지막으로 진입한 채널(`channelId`)을 기억하고, 같은 채널에 다시 진입하면 프리롤을 건너뜁니다. 이때 SDK는 광고가 없는 프리롤과 같은 방식으로 `changeChannelUrl()`이 resolve된 직후 `completed`를 보내므로, 재시작에서도 첫 시작과 똑같이 프록시 URL을 `completed`까지 보관하면 됩니다.
+:::
+
+:::info
+SDK는 VOD 또는 인라인 광고를 요청할 때(`requestVodAd()`, `requestAd()`)만 그 채널을 잊으며, `stop()`이나 `initialize()`에서는 잊지 않습니다. 채널 A → B → A로 이동하면 B가 마지막으로 진입한 채널이므로 A의 프리롤이 다시 재생됩니다. 마지막으로 진입한 채널에 다시 진입하면 — 재시작이든, 같은 `channelId`로 하는 다른 호출이든 — 그 사이에 VOD 또는 인라인 광고 요청이 없는 한 프리롤을 건너뜁니다. SDK는 `nativeId`별이 아니라 앱 전체에서 이 채널을 하나만 기억합니다.
 :::
 
 ## 타게팅과 헤더
@@ -217,39 +221,29 @@ useEffect(() => {
   return () => subscription.remove();
 }, [nativeId]);
 
-// withPreroll: 첫 시작(handOver)에서는 true, 'error' 후 재시작에서는 false입니다.
-const startChannel = useCallback(
-  async (withPreroll: boolean) => {
-    // 재시작할 때는 채널 프리롤을 넣지 않습니다(prerollAdTagUrl 생략). 시청자가 이미 프리롤을 봤기 때문입니다.
-    const preroll = withPreroll ? prerollAdTagUrl : undefined;
-    const proxyUrl = await changeChannelUrl(nativeId, {
-      videoUrl,
-      adTagUrl,
-      channelId,
-      prerollAdTagUrl: preroll,
-    });
-    if (preroll) {
-      // 즉시 적용하지 않고 보관합니다 — 프리롤이 먼저 재생됩니다.
-      proxyUrlRef.current = proxyUrl;
-    } else {
-      // 재시작에는 프리롤이 없으므로 기다릴 것이 없습니다. 새 프록시 URL을 바로 재생합니다.
-      proxyUrlRef.current = null;
-      setSourceUri(proxyUrl);
-    }
-  },
-  [nativeId, videoUrl, adTagUrl, channelId, prerollAdTagUrl],
-);
+// 첫 시작(handOver)과 'error' 후 재시작에서 같은 호출을 사용합니다.
+const startChannel = useCallback(async () => {
+  const proxyUrl = await changeChannelUrl(nativeId, {
+    videoUrl,
+    adTagUrl,
+    channelId,
+    prerollAdTagUrl,
+  });
+  // 즉시 적용하지 않고 보관합니다 — 프리롤이 먼저 재생됩니다. 재시작에서는 SDK가
+  // 마지막으로 진입한 채널의 프리롤을 건너뛰고 바로 completed를 보냅니다.
+  proxyUrlRef.current = proxyUrl;
+}, [nativeId, videoUrl, adTagUrl, channelId, prerollAdTagUrl]);
 ```
 
-첫 시작에서는 `startChannel(true)`를 호출하고, `restartChannel`은 `stop()` 후 `startChannel(false)`를 호출합니다. 재시작 상한은 [위 예제](#구현)와 같이 유지합니다.
+첫 시작과 `restartChannel` 모두 `startChannel()`을 호출하며, 재시작에서는 `stop()` 후에 호출합니다. 재시작 상한은 [위 예제](#구현)와 같이 유지합니다.
 
 ### 채널 전환
 
-`changeChannelUrl()`을 호출할 때마다 새 세션이 시작됩니다. SDK는 먼저 현재 세션을 중지하고 — 아직 재생 중인 프리롤도 포함됩니다 — 새 호출에 담긴 채널의 프리롤을 요청합니다. 따라서 자체 `prerollAdTagUrl`이 있는 다른 채널로 전환하는 것은 다시 첫 시작과 같습니다. 새 프록시 URL을 `completed`까지 보관하세요. 프리롤 없이 전환하려면 `prerollAdTagUrl`을 생략하고 새 프록시 URL을 바로 재생하세요. 의도적으로 프리롤을 넣지 않는 호출은 `error` 이후의 재시작뿐입니다 — [오류 복구](#오류-복구)를 참고하세요.
+`changeChannelUrl()`을 호출할 때마다 새 세션이 시작됩니다. SDK는 먼저 현재 세션을 중지하고 — 아직 재생 중인 프리롤도 포함됩니다 — 새 호출에 담긴 채널의 프리롤을 요청합니다. 따라서 자체 `prerollAdTagUrl`이 있는 다른 채널로 전환하는 것은 다시 첫 시작과 같습니다. 새 프록시 URL을 `completed`까지 보관하세요. 프리롤 없이 전환하려면 `prerollAdTagUrl`을 생략하고 새 프록시 URL을 바로 재생하세요. 유일한 예외는 마지막으로 진입한 채널입니다. `error` 이후의 재시작처럼 그 채널로 `changeChannelUrl()`을 다시 호출하면 `prerollAdTagUrl`이 있어도 프리롤을 건너뛰고 바로 `completed`가 전달됩니다 — [오류 복구](#오류-복구)를 참고하세요.
 
 ### PIP 모드
 
-기본 모드(`setIgnoreAdBreakInPIPMode(true)`)에서 채널 프리롤은 앱이 PIP에 진입하면 일시정지되고 앱으로 돌아오면 재개됩니다. VOD 광고와 같은 방식이며, 스트림에 삽입된 광고는 계속 재생됩니다. 앱이 두 시점을 모두 `notifyPictureInPictureModeChanged()`로 알려야만 동작합니다. [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
+기본 모드(`setIgnoreAdBreakInPIPMode(true)`)에서 채널 프리롤은 사용자가 앱을 떠나면 일시정지되고 사용자가 돌아오면 재개됩니다. VOD 광고와 같은 방식이며, 스트림에 삽입된 광고는 계속 재생됩니다. 앱이 PIP 진입 여부와 관계없이 두 시점을 모두 `notifyUserLeftApp()`으로 알려야만 동작합니다. [PIP 모드 지원](../../getting-started/pip-mode-support.md)을 참고하세요.
 
 ### Bitmovin 플레이어
 
