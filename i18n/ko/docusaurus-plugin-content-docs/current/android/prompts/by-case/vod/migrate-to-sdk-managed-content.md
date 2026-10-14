@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 sidebar_label: SDK 관리 본편 제어로 전환
 ---
 

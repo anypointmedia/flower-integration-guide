@@ -19,6 +19,7 @@ sidebar_position: 0
 | Linear TV 앱에서 AirPlay, Chromecast, 스마트 TV로 캐스팅도 하는 경우 | [화면 캐스팅](./by-case/linear-tv/screen-casting.md) |
 | 프리롤, Mid-roll, Post-roll 광고가 있는 VOD이며, `AVPlayer`를 `FlowerAVPlayer`로 교체할 수 있는 경우(`requestTimeout`, `minPrepareDuration`, `rewindDuration` 설정 포함) | [FlowerAVPlayer를 사용한 VOD](./by-case/vod/flower-avplayer.md) |
 | 프리롤, Mid-roll, Post-roll 광고가 있는 VOD를 앱의 `AVPlayer` 또는 `AVQueuePlayer`로 재생하는 경우(기본 광고 모드) | [MediaPlayerHook을 사용한 VOD](./by-case/vod/media-player-hook.md) |
+| PIP를 지원하는 VOD 앱이며, PIP 모드에서는 광고를 보여주지 않는 경우(기본): `notifyUserLeftApp`으로 앱을 떠남/돌아옴을 알리고 광고 재생 중 PIP를 막음 | [광고 없는 VOD PIP 모드(기본)](./by-case/vod/no-ads-in-pip-mode.md) |
 | PIP 모드에서도 VOD 광고가 계속 재생되어야 해서 광고를 앱의 플레이어 안에서 재생하는 경우 | [PIP 모드에서의 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
 | 이미 VOD 광고를 표시하고 있으며, 광고 전후로 앱이 직접 재생을 일시정지, 재개, 탐색하거나 지연시키는 경우 | [SDK가 관리하는 본편 재생으로 전환](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | 본편 플레이어 없이 화면 영역에 또는 전체 화면으로 단독 동영상 광고를 표시하는 경우 | [인라인 및 전면 광고](./by-case/advanced/inline-interstitial.md) |

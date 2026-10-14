@@ -80,6 +80,8 @@ const adsManagerListener = {
 };
 ```
 
+For an LLM prompt that applies this to a VOD app, see [VOD — PIP Without Ads (Default)](../prompts/by-case/vod/no-ads-in-pip-mode.md).
+
 ## Supporting Ads in PIP Mode
 
 Conversely, to support ads in PIP mode as well for more ad inventory (`setIgnoreAdBreakInPIPMode(false)`), the app needs to pay attention to how it handles player events.

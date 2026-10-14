@@ -80,6 +80,8 @@ const adsManagerListener = {
 };
 ```
 
+이 내용을 VOD 앱에 적용하는 LLM 프롬프트는 [VOD — 광고 없는 PIP 모드(기본)](../prompts/by-case/vod/no-ads-in-pip-mode.md)를 참고하세요.
+
 ## PIP 모드에서 광고 지원하기
 
 반대로 더 많은 광고 인벤토리를 위해 PIP 모드에서도 광고를 지원하려면(`setIgnoreAdBreakInPIPMode(false)`) 앱에서 이벤트 처리에 신경 써야 합니다.

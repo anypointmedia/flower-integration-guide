@@ -16,6 +16,7 @@ Each prompt under **Prompts by Case** covers one integration case only. It state
 | Linear channel / FAST stream played with your own HLS.js, Bitmovin, dash.js or Shaka Player instance | [Linear TV / FAST with Manual Player Control](./by-case/linear-tv/media-player-hook.md) |
 | VOD with pre-roll, mid-roll and post-roll ads, played with HLS.js, Bitmovin, dash.js or Shaka Player (default ad mode) | [VOD Ads with Your Own Player](./by-case/vod/media-player-hook.md) |
 | VOD ads must keep playing in PIP mode, so they play inside your HLS.js or Bitmovin player | [VOD Ads Played in the App's Player](./by-case/vod/ads-in-pip-mode.md) |
+| VOD with the default ad mode where the content video can go into PIP, and ads are not shown in PIP: report the user leaving and coming back, and keep the content video out of PIP during ads | [VOD — PIP Without Ads (Default)](./by-case/vod/no-ads-in-pip-mode.md) |
 | Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Update an Existing VOD Integration](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone video ad in a page area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |
 | Report the user leaving the app (another tab or app, the TV app in the background, or Picture-in-Picture) and coming back, and keep the video out of PIP during ads | [PIP Mode Support](./by-case/common/pip-mode-support.md) |

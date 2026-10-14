@@ -1,11 +1,11 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 sidebar_label: PIP 모드에서의 VOD 광고
 ---
 
 # PIP 모드에서도 계속 재생되는 VOD 광고
 
-더 많은 광고 인벤토리를 위해 앱이 PIP 모드인 동안에도 VOD 광고가 계속 재생되어야 하는 경우 이 프롬프트를 사용하세요. `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`로 설정하면 SDK가 앱의 Media3 ExoPlayer, ExoPlayer2, Bitmovin Player 안에서 VOD 광고를 재생하므로, 앱의 플레이어 이벤트 처리가 playlist의 광고 아이템을 고려해야 합니다. LLM이 옵션을 설정하고, 광고 리스너를 조정하고, 본편 종료 및 미디어 아이템 처리를 광고를 고려하도록 수정합니다. 배경 설명: [VOD PIP 모드 지원](../../../ad-insertion/vod/pip-mode-support.md).
+더 많은 광고 인벤토리를 위해 앱이 PIP 모드인 동안에도 VOD 광고가 계속 재생되어야 하는 경우 이 프롬프트를 사용하세요. `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`로 설정하면 SDK가 앱의 Media3 ExoPlayer, ExoPlayer2, Bitmovin Player 안에서 VOD 광고를 재생하므로, 앱의 플레이어 이벤트 처리가 playlist의 광고 아이템을 고려해야 합니다. LLM이 옵션을 설정하고, 광고 리스너를 조정하고, 본편 종료 및 미디어 아이템 처리를 광고를 고려하도록 수정합니다. 배경 설명: [VOD PIP 모드 지원](../../../ad-insertion/vod/pip-mode-support.md). PIP 모드에서 광고를 표시하지 않는 경우(기본)에는 [광고 없는 VOD PIP 모드(기본)](./no-ads-in-pip-mode.md)를 사용하세요.
 
 이 프롬프트는 Kotlin 코드를 생성하며, [앱의 플레이어로 VOD 광고](./media-player-hook.md)의 MediaPlayerHook 연동(또는 제공한 코드)을 전제로 합니다.
 

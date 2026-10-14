@@ -1,11 +1,11 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 sidebar_label: VOD Ads in PIP Mode
 ---
 
 # VOD Ads That Keep Playing in PIP Mode
 
-Use this prompt when VOD ads must keep playing while the app is in PIP mode, for more ad inventory. With `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`, the SDK plays VOD ads inside the app's own Media3 ExoPlayer, ExoPlayer2, or Bitmovin Player, so the app's player-event handling has to cope with ad items in the playlist. The LLM sets the option, adjusts the ad listener, and makes content-end and media-item handling ad-aware. Background: [VOD PIP Mode Support](../../../ad-insertion/vod/pip-mode-support.md).
+Use this prompt when VOD ads must keep playing while the app is in PIP mode, for more ad inventory. With `FlowerSdk.setIgnoreAdBreakInPIPMode(false)`, the SDK plays VOD ads inside the app's own Media3 ExoPlayer, ExoPlayer2, or Bitmovin Player, so the app's player-event handling has to cope with ad items in the playlist. The LLM sets the option, adjusts the ad listener, and makes content-end and media-item handling ad-aware. Background: [VOD PIP Mode Support](../../../ad-insertion/vod/pip-mode-support.md). If ads should not be shown in PIP mode (the default), use [VOD PIP Without Ads (Default)](./no-ads-in-pip-mode.md) instead.
 
 The prompt generates Kotlin code and assumes the MediaPlayerHook integration from [VOD Ads with Your Own Player](./media-player-hook.md) (or the code you provide).
 

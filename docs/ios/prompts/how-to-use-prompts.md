@@ -19,6 +19,7 @@ Each prompt under **Prompts by Case** covers one integration case only. It state
 | Your linear TV app also casts to AirPlay, Chromecast or a Smart TV | [Screen Casting](./by-case/linear-tv/screen-casting.md) |
 | VOD with pre-roll, mid-roll and post-roll ads, and you can replace `AVPlayer` with `FlowerAVPlayer` (also to set `requestTimeout`, `minPrepareDuration`, `rewindDuration`) | [VOD with FlowerAVPlayer](./by-case/vod/flower-avplayer.md) |
 | VOD with pre-roll, mid-roll and post-roll ads, played with your own `AVPlayer` or `AVQueuePlayer` (default ad mode) | [VOD with MediaPlayerHook](./by-case/vod/media-player-hook.md) |
+| VOD app with PIP, where ads are not shown in PIP mode (default): report leaving/returning with `notifyUserLeftApp` and block PIP while an ad plays | [VOD PIP Without Ads (Default)](./by-case/vod/no-ads-in-pip-mode.md) |
 | VOD ads must keep playing in PIP mode, so they play inside your player | [VOD Ads in PIP Mode](./by-case/vod/ads-in-pip-mode.md) |
 | Your app already shows VOD ads, and pauses, resumes, seeks or delays playback itself around ads | [Migrate to SDK-Managed Content](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone video ad in a screen area or covering the screen, without a content player | [Inline and Interstitial Ads](./by-case/advanced/inline-interstitial.md) |

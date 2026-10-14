@@ -23,6 +23,7 @@ Pick the row that matches your app. Each prompt generates Kotlin code.
 | Live channel with a cast feature (Chromecast, AirPlay, Smart TV) | [Screen Casting to TV](../by-case/linear-tv/screen-casting.md) |
 | VOD, simplest setup: wrap the player in a Flower Player with `FlowerVodAdConfig` | [VOD with Flower Player](../by-case/vod/flower-player.md) |
 | VOD, keep your own player and request ads with `requestVodAd()` (default ad mode) | [VOD with Your Own Player](../by-case/vod/media-player-hook.md) |
+| VOD with PIP, ads not shown in PIP mode (default, `setIgnoreAdBreakInPIPMode(true)`): report leaving / returning with `notifyUserLeftApp`, no PIP while an ad plays | [VOD PIP Without Ads (Default)](../by-case/vod/no-ads-in-pip-mode.md) |
 | VOD ads must keep playing in PIP mode (`setIgnoreAdBreakInPIPMode(false)`) | [VOD Ads in PIP Mode](../by-case/vod/ads-in-pip-mode.md) |
 | Existing VOD integration that pauses/resumes the content or delays `play()` itself, upgrading the SDK | [Migrate to SDK-Managed Content](../by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone inline or interstitial video ad (`requestAd()`) | [Inline / Interstitial Ads](../by-case/advanced/inline-interstitial.md) |

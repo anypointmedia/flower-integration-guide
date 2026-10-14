@@ -5,7 +5,7 @@ sidebar_label: Ads in PIP Mode
 
 # VOD Ads That Keep Playing in PIP Mode
 
-Use this prompt when VOD ads must keep playing while the app is in PIP (Picture-in-Picture) mode, which means switching to `setIgnoreAdBreakInPIPMode(false)` so breaks play inside the app's own player. Start from a working VOD integration ([react-native-video](./react-native-video.md) or [Bitmovin](./bitmovin.md)); the LLM adapts it to this mode and checks whether the app can use it at all. Background: [PIP Mode Support](../../../getting-started/pip-mode-support.md#supporting-ads-in-pip-mode).
+Use this prompt when VOD ads must keep playing while the app is in PIP (Picture-in-Picture) mode, which means switching to `setIgnoreAdBreakInPIPMode(false)` so breaks play inside the app's own player. Start from a working VOD integration ([react-native-video](./react-native-video.md) or [Bitmovin](./bitmovin.md)); the LLM adapts it to this mode and checks whether the app can use it at all. To keep the default mode, where ads are not shown in PIP, use [VOD — PIP Without Ads (Default)](./no-ads-in-pip-mode.md). Background: [PIP Mode Support](../../../getting-started/pip-mode-support.md#supporting-ads-in-pip-mode).
 
 | Parameter | Values | Description |
 |-----------|--------|-------------|

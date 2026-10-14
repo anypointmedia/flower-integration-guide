@@ -16,6 +16,7 @@ Each case prompt is self-contained: it covers one content type with one player, 
 | Live channel or FAST stream, Bitmovin player | [Linear TV / FAST with the Bitmovin Player](./by-case/linear-tv/bitmovin.md) |
 | VOD with pre/mid/post-roll, `react-native-video` | [VOD with react-native-video](./by-case/vod/react-native-video.md) |
 | VOD with pre/mid/post-roll, Bitmovin player | [VOD with the Bitmovin Player](./by-case/vod/bitmovin.md) |
+| VOD app that supports PIP, ads not shown in PIP mode (default, `setIgnoreAdBreakInPIPMode(true)`) | [VOD — PIP Without Ads (Default)](./by-case/vod/no-ads-in-pip-mode.md) |
 | VOD ads must keep playing in PIP mode (`setIgnoreAdBreakInPIPMode(false)`) | [VOD Ads That Keep Playing in PIP Mode](./by-case/vod/ads-in-pip-mode.md) |
 | Existing VOD integration that pauses/resumes the content around breaks (1.0.x) | [Migrate a VOD Integration to SDK-Managed Content](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | Standalone break at a point your app chooses, incl. full-screen interstitials | [Inline / Interstitial Ads](./by-case/advanced/inline-interstitial.md) |

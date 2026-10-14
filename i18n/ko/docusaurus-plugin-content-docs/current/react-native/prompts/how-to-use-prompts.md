@@ -16,6 +16,7 @@ sidebar_position: 0
 | 실시간 채널 또는 FAST 스트림, Bitmovin 플레이어 | [Bitmovin 플레이어로 Linear TV / FAST 연동](./by-case/linear-tv/bitmovin.md) |
 | Pre/Mid/Post-roll이 있는 VOD, `react-native-video` | [react-native-video로 VOD 연동](./by-case/vod/react-native-video.md) |
 | Pre/Mid/Post-roll이 있는 VOD, Bitmovin 플레이어 | [Bitmovin 플레이어로 VOD 연동](./by-case/vod/bitmovin.md) |
+| PIP를 지원하는 VOD 앱, PIP 모드에서 광고 미노출 (기본, `setIgnoreAdBreakInPIPMode(true)`) | [VOD — 광고 없는 PIP 모드(기본)](./by-case/vod/no-ads-in-pip-mode.md) |
 | PIP 모드에서도 VOD 광고가 계속 재생되어야 하는 경우 (`setIgnoreAdBreakInPIPMode(false)`) | [PIP 모드에서도 재생되는 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
 | 브레이크 전후로 콘텐츠를 일시정지/재개하는 기존 VOD 연동 (1.0.x) | [VOD 연동을 SDK 관리 방식으로 전환](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | 앱이 정한 시점에 재생하는 독립 브레이크 (전체 화면 전면 광고 포함) | [인라인 / 전면 광고](./by-case/advanced/inline-interstitial.md) |

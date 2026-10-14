@@ -23,6 +23,7 @@ sidebar_position: 0
 | 송출 기능(Chromecast, AirPlay, 스마트 TV)이 있는 라이브 채널 | [외부 화면 송출](../by-case/linear-tv/screen-casting.md) |
 | VOD, 가장 간단한 구성: `FlowerVodAdConfig`와 함께 플레이어를 Flower Player로 감쌈 | [Flower Player로 VOD 광고](../by-case/vod/flower-player.md) |
 | VOD, 기존 플레이어를 유지하고 `requestVodAd()`로 광고 요청(기본 광고 모드) | [앱의 플레이어로 VOD 광고](../by-case/vod/media-player-hook.md) |
+| VOD에서 PIP 지원, PIP 모드에서는 광고를 표시하지 않음(기본, `setIgnoreAdBreakInPIPMode(true)`): `notifyUserLeftApp`으로 앱 이탈/복귀를 알리고, 광고 재생 중에는 PIP 진입 안 함 | [광고 없는 VOD PIP 모드(기본)](../by-case/vod/no-ads-in-pip-mode.md) |
 | PIP 모드에서도 VOD 광고가 계속 재생되어야 함(`setIgnoreAdBreakInPIPMode(false)`) | [PIP 모드에서의 VOD 광고](../by-case/vod/ads-in-pip-mode.md) |
 | 본편을 직접 일시정지/재개하거나 `play()`를 지연하는 기존 VOD 연동에서 SDK 업그레이드 | [SDK 관리 본편 제어로 전환](../by-case/vod/migrate-to-sdk-managed-content.md) |
 | 단독 인라인 또는 전면 동영상 광고(`requestAd()`) | [인라인 / 전면 광고](../by-case/advanced/inline-interstitial.md) |

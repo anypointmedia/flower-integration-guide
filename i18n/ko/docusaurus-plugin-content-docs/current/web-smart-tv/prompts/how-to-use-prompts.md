@@ -16,6 +16,7 @@ sidebar_position: 0
 | Linear 채널 / FAST 스트림을 앱의 HLS.js, Bitmovin, dash.js, Shaka Player 인스턴스로 재생하는 경우 | [플레이어 직접 제어를 이용한 Linear TV / FAST](./by-case/linear-tv/media-player-hook.md) |
 | HLS.js, Bitmovin, dash.js, Shaka Player로 재생하는 VOD에 프리롤, Mid-roll, Post-roll 광고를 넣는 경우 (기본 광고 모드) | [앱의 플레이어를 이용한 VOD 광고](./by-case/vod/media-player-hook.md) |
 | PIP 모드에서도 VOD 광고가 계속 재생되어야 하여, 광고를 앱의 HLS.js 또는 Bitmovin 플레이어 안에서 재생하는 경우 | [앱의 플레이어 안에서 재생되는 VOD 광고](./by-case/vod/ads-in-pip-mode.md) |
+| 기본 광고 모드에서 본편 video를 PIP로 전환할 수 있고 PIP 모드에서는 광고를 표시하지 않는 VOD: 사용자가 앱을 떠나고 돌아오는 것을 알리고, 광고 재생 중에는 본편 video가 PIP로 전환되지 않게 하는 경우 | [VOD — 광고 없는 PIP 모드(기본)](./by-case/vod/no-ads-in-pip-mode.md) |
 | 이미 VOD 광고를 연동했으며, 광고 전후로 앱이 직접 일시정지, 재개, 탐색(seek)하거나 재생을 지연하는 경우 | [기존 VOD 연동 업데이트](./by-case/vod/migrate-to-sdk-managed-content.md) |
 | 본편 플레이어 없이 페이지 영역 또는 전체 화면에 독립적인 동영상 광고를 노출하는 경우 | [인라인 광고와 전면 광고](./by-case/advanced/inline-interstitial.md) |
 | 사용자가 앱을 떠나고(다른 탭이나 앱으로 전환, TV 앱이 백그라운드로 이동, PIP(Picture-in-Picture)) 돌아오는 것을 SDK에 알리고, 광고 재생 중에는 동영상이 PIP로 전환되지 않게 하는 경우 | [PIP 모드 지원](./by-case/common/pip-mode-support.md) |

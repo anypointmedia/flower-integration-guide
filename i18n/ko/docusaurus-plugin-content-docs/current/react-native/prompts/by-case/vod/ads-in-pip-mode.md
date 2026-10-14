@@ -5,7 +5,7 @@ sidebar_label: PIP 모드 광고
 
 # PIP 모드에서도 재생되는 VOD 광고
 
-앱이 PIP(Picture-in-Picture) 모드에 있는 동안에도 VOD 광고가 계속 재생되어야 할 때 이 프롬프트를 사용하세요. 이를 위해 `setIgnoreAdBreakInPIPMode(false)`로 전환하여 브레이크를 앱의 플레이어 안에서 재생합니다. 동작하는 VOD 연동([react-native-video](./react-native-video.md) 또는 [Bitmovin](./bitmovin.md))에서 시작하세요. LLM은 앱이 이 모드를 사용할 수 있는지 먼저 확인한 뒤 기존 연동을 이 모드에 맞게 수정합니다. 배경 설명: [PIP 모드 지원](../../../getting-started/pip-mode-support.md#pip-모드에서-광고-지원하기).
+앱이 PIP(Picture-in-Picture) 모드에 있는 동안에도 VOD 광고가 계속 재생되어야 할 때 이 프롬프트를 사용하세요. 이를 위해 `setIgnoreAdBreakInPIPMode(false)`로 전환하여 브레이크를 앱의 플레이어 안에서 재생합니다. 동작하는 VOD 연동([react-native-video](./react-native-video.md) 또는 [Bitmovin](./bitmovin.md))에서 시작하세요. LLM은 앱이 이 모드를 사용할 수 있는지 먼저 확인한 뒤 기존 연동을 이 모드에 맞게 수정합니다. PIP 모드에서 광고를 노출하지 않는 기본 모드를 유지하려면 [VOD — 광고 없는 PIP 모드(기본)](./no-ads-in-pip-mode.md)를 사용하세요. 배경 설명: [PIP 모드 지원](../../../getting-started/pip-mode-support.md#pip-모드에서-광고-지원하기).
 
 | 파라미터 | 값 | 설명 |
 |-----------|--------|-------------|
