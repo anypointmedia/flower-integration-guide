@@ -51,10 +51,6 @@ Ad Break가 실패하면 SDK는 `onError`를 호출하기 **전에** 본편을 �
 
 실패한 Ad Break에 대해 `onCompleted`도 호출될 수 있으며, `onError`보다 먼저 올 수도 나중에 올 수도 있습니다. 아래 예시처럼 `isContentPrepared`를 확인하는 등, 같은 Ad Break에 두 핸들러가 모두 실행되어도 문제가 없도록 구현하세요.
 
-:::note 알려진 이슈
-여러 광고로 구성된 Ad Break 안에서 광고의 미디어 URL에 접근할 수 없는 경우, 현재 광고 플레이어가 이를 오류로 보고하지 않아 Ad Break가 멈춥니다. 수정이 진행 중입니다.
-:::
-
 #### _SwiftUI_
 ```swift
 // TODO GUIDE: Implement FlowerAdsManagerListener
