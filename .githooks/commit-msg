@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#
+# commit-msg hook — Conventional Commits 형식 로컬 검증 (커밋 시점에 차단)
+#
+# 설치: 저장소 루트에서  git config core.hooksPath .githooks   (install-git-hooks.sh 참고)
+# 주의: 로컬 편의용이며 강제력은 없음(`--no-verify`로 우회 가능).
+#       실제 강제는 CI(commit-lint workflow) + required_status_checks 룰셋이 담당.
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+msg_file="$1"
+header=$(head -n1 "$msg_file")
+
+# 머지/리버트/fixup/squash 자동 커밋은 통과
+case "$header" in
+  "Merge "*|"Revert "*|"fixup!"*|"squash!"*) exit 0;;
+esac
+
+pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+'
+
+if printf '%s' "$header" | grep -qE "$pattern"; then
+  exit 0
+fi
+
+cat >&2 <<EOF
+✗ 커밋 메시지가 Conventional Commits 형식이 아닙니다.
+  형식: <type>(<scope>)!: <subject>
+  type: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert
+  예:   feat(auth): add SSO login
+  현재: $header
+EOF
+exit 1

@@ -1,0 +1,65 @@
+name: commit-lint
+
+# Conventional Commits 형식을 강제하는 PR 검사.
+# Team 플랜에서 commit_message_pattern 룰(Enterprise 전용)을 대체한다.
+# required_status_checks 룰셋(require-commit-lint-check)이 이 'commit-lint' 체크를
+# 필수로 지정하므로, 실패하면 머지가 차단된다.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  commit-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # 검사 컨테이너가 토큰을 읽지 못하게 .git/config 에 남기지 않는다
+          persist-credentials: false
+
+      - name: Validate PR title and commit messages
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # type(scope)!: subject  — scope/breaking(!)은 선택
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+'
+          fail=0
+          # 공개 레포라 제목·커밋 첫 줄 원문은 로그에 남기지 않는다
+
+          # 1) PR 제목 (squash 머지 시 최종 커밋 메시지가 됨)
+          if printf '%s' "$PR_TITLE" | grep -qE "$pattern"; then
+            echo "✓ PR 제목 OK"
+          else
+            echo "::error::PR 제목이 Conventional Commits 형식이 아닙니다(내용은 로그에 남기지 않음)."
+            fail=1
+          fi
+
+          # 2) PR에 포함된 각 커밋의 헤더(첫 줄)
+          for sha in $(git rev-list "$BASE_SHA".."$HEAD_SHA"); do
+            header=$(git log -1 --format=%s "$sha")
+            case "$header" in
+              Merge\ *|Revert\ *|fixup!*|squash!*) echo "↷ skip: ${sha:0:8}"; continue;;
+            esac
+            if printf '%s' "$header" | grep -qE "$pattern"; then
+              echo "✓ ${sha:0:8} OK"
+            else
+              echo "::error::커밋 ${sha:0:8} 메시지 형식 위반(내용은 로그에 남기지 않음)."
+              fail=1
+            fi
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            echo ""
+            echo "형식: <type>(<scope>)!: <subject>"
+            echo "type: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
+            echo "예:   feat(auth): add SSO login"
+            exit 1
+          fi
