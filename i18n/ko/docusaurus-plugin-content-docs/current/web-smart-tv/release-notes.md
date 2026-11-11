@@ -7,6 +7,7 @@ sidebar_label: "릴리즈 노트"
 
 | **버전** | **날짜** | **변경내용** |
 | ---| ---| --- |
+| 2.3.19 | 2026.11.11 | **Feature** <ol><li>`[AD_DURATION_SEC]` URL 매크로의 치환값을 광고 브레이크 길이를 내림한 값에서 반올림한 값으로 변경(예: 59.993초 → 60)</li><li>Bitmovin Player에서 본편 일시정지 시 `play()` 후 `pause()`를 호출하던 것을 `pause()`만 호출하도록 변경. Linear TV 프리롤로 본편이 일시정지될 때 완료되지 않은 앱의 `play()` 호출은 reject되며, 이 경우 `play()`를 다시 호출하지 않도록 주의</li></ol> **BugFix** <ol><li>VOD에서 `requestVodAd`가 `TypeError`로 실패하여 광고가 재생되지 않는 오류 수정(2.3.18에서 발생)</li><li>HLS.js를 `MediaPlayerHook`으로 연동한 경우 VOD와 Linear TV에서 광고가 재생되지 않는 오류 수정(2.3.18에서 발생, FlowerHls는 해당 없음)</li><li>VOD Post-roll 시작 시 이미 끝난 본편을 일시정지하는 오류 수정</li></ol> |
 | 2.3.18 | 2026.10.14 | **New** <ol><li>`FlowerAdsManager.requestVodAd`에 선택 매개변수 `requestTimeout`, `minPrepareDuration`, `rewindDuration` 추가</li></ol> **Feature** <ol><li>VOD 광고는 SDK의 별도 video 요소에서 재생되며, Mid-roll 전후의 본편 일시정지·재개는 SDK가 처리</li><li>본편 재생을 복구할 수 없을 때 `playback unrecoverable` 메시지로 `onError`를 호출하도록 변경</li><li>채널 변경 없이 `changeChannelUrl`을 다시 호출하면 프리롤을 생략하도록 변경</li></ol> **BugFix** <ol><li>VOD Mid-roll: `rewindDuration`이 적용되지 않던 오류 수정</li><li>VAST 응답에 광고가 없을 때 `onAdBreakSkipped`(reason 1)가 호출되지 않던 오류 수정</li><li>Linear TV 프리롤 중 `stop()` 이후에 `onPrepare`가 호출되던 오류 수정</li></ol> |
 | 2.3.16 | 2026.10.05 | **Feature** <ol><li>동일 광고 브레이크 내 광고 중복 허용 옵션 추가</li></ol> **BugFix** <ol><li>HLS에서 cue-in 태그가 일찍 들어오는 경우 광고 브레이크 종료 이벤트가 늦게 전달되는 오류 수정</li></ol> |
 | 2.3.15 | 2026.09.29 | **BugFix** <ol><li>DASH DRM 스트림에서 `ContentProtection` 값이 누락되는 오류 수정</li></ol> |
