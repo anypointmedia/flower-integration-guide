@@ -61,14 +61,14 @@ The core `sdk-android-ott` artifact is always required. The `sdk-android-ott-med
 If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.2.1), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
 :::
 
-### Version Built with Google IMA SDK 3.36.0 \{#ima-3-36-0-version\}
+### Google IMA SDK Version \{#ima-sdk-version\}
 
-Starting from version 2.9.32, each release is also published as `X.X.X-IMA_3_36_0`, built with Google IMA SDK 3.36.0. If your app needs Google IMA SDK 3.36.0, use this version instead of the default one. The app requirements are the same as for the default version.
+Starting from version 2.9.32, the FLOWER SDK is built with Google IMA SDK 3.40.0, so your app must meet the requirements in the table below. Each release is also published as `X.X.X-IMA_3_36_0`, a backward-compatible version built with Google IMA SDK 3.36.0. If your app cannot meet the requirements of the default version, use this version instead.
 
-| SDK version | Google IMA SDK |
-| --- | --- |
-| `X.X.X` (default) | 3.35.1 |
-| `X.X.X-IMA_3_36_0` | 3.36.0 |
+| SDK version | Google IMA SDK | App requirements |
+| --- | --- | --- |
+| `X.X.X` (default) | 3.40.0 | minSdk 24 or higher, compileSdk 35 or higher, Android Gradle Plugin 8.6 or higher |
+| `X.X.X-IMA_3_36_0` | 3.36.0 | Same as 2.9.31 and earlier |
 
 ```plain
 dependencies {
@@ -80,7 +80,7 @@ dependencies {
 ```
 
 :::caution
-Add the same `-IMA_3_36_0` suffix to every FLOWER SDK dependency, including `sdk-android-ott-media3-*`. If the default version and the suffixed version are mixed, Gradle resolves the default version and Google IMA SDK 3.35.1 is used.
+Add the same `-IMA_3_36_0` suffix to every FLOWER SDK dependency, including `sdk-android-ott-media3-*`. If the default version and the suffixed version are mixed, Gradle resolves the default version, Google IMA SDK 3.40.0 is used and the requirements of the default version apply.
 :::
 
 ## Android Cleartext Traffic Exception Configuration
