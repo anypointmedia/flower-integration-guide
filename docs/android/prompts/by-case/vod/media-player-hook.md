@@ -68,6 +68,11 @@ IMPLEMENTATION
        maven("https://jitpack.io")
    - implementation("flower-sdk:sdk-android-ott:{{SDK_VERSION}}")
      (no Media3 companion artifact is needed for MediaPlayerHook)
+   - App module: core library desugaring (required by the SDK's AAR metadata):
+       compileOptions { isCoreLibraryDesugaringEnabled = true }
+       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+   - From 2.9.32 the default SDK version needs minSdk 24+, compileSdk 35+ and AGP 8.6+. If the
+     project cannot meet them, use {{SDK_VERSION}}-IMA_3_36_0 for EVERY flower-sdk dependency.
    - Allow cleartext HTTP ONLY for prod-reds-device-ad-distributor.ap-northeast-2.elasticbeanstalk.com
      with a network_security_config.xml <domain-config cleartextTrafficPermitted="true">.
      Skip if android:usesCleartextTraffic="true" is already set. Keep existing domain configs.

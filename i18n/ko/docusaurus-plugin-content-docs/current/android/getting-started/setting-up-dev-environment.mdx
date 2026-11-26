@@ -31,6 +31,22 @@ dependencies {
 `google()` 또는 `https://jitpack.io`가 repository 목록에 없으면 SDK의 전이 의존성을 해석하는 단계에서 빌드가 실패합니다. 프로젝트가 `settings.gradle(.kts)`의 `dependencyResolutionManagement`에서 repository를 선언하는 구조라면, 모듈 수준 `build.gradle(.kts)` 대신 해당 위치에 추가하세요.
 :::
 
+### Core Library Desugaring \{#core-library-desugaring\}
+
+FLOWER SDK는 core library desugaring이 활성화된 상태로 빌드되며, AAR 메타데이터가 앱 모듈에도 동일한 설정을 요구합니다. 설정하지 않으면 `checkDebugAarMetadata`에서 빌드가 실패합니다. Groovy DSL에서는 `coreLibraryDesugaringEnabled true`를 사용하세요.
+
+```plain
+android {
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+```
+
 ### Media3 ExoPlayer(FlowerMedia3ExoPlayer) 사용 시 추가 의존성 \{#media3-companion-artifact\}
 
 [`FlowerMedia3ExoPlayer`](../api/flower-media3-exo-player)를 통해 Media3 ExoPlayer를 사용하는 경우, 기본 `sdk-android-ott` 의존성 외에 Media3 버전에 대응하는 추가 아티팩트를 함께 의존성에 추가해야 합니다.

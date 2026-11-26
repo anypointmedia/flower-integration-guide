@@ -31,6 +31,22 @@ dependencies {
 If `google()` or `https://jitpack.io` is missing from the repository list, the build fails while resolving the SDK's transitive dependencies. If your project declares repositories in `settings.gradle(.kts)` under `dependencyResolutionManagement`, add them there instead of in the module-level `build.gradle(.kts)`.
 :::
 
+### Core Library Desugaring \{#core-library-desugaring\}
+
+The FLOWER SDK is built with core library desugaring enabled, and its AAR metadata requires your app module to enable it too. Without it, the build fails at `checkDebugAarMetadata`. In Groovy DSL, use `coreLibraryDesugaringEnabled true`.
+
+```plain
+android {
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+```
+
 ### Additional Dependency for Media3 ExoPlayer (FlowerMedia3ExoPlayer) \{#media3-companion-artifact\}
 
 If your app uses Media3 ExoPlayer via [`FlowerMedia3ExoPlayer`](../api/flower-media3-exo-player), you must add a Media3 version-specific companion artifact in addition to the core `sdk-android-ott` dependency.

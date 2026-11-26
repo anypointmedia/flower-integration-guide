@@ -80,6 +80,11 @@ IMPLEMENTATION
        implementation("flower-sdk:sdk-android-ott-media3-{{MEDIA3_VERSION}}:{{SDK_VERSION}}")
      (artifact must match the app's androidx.media3 version exactly; 1.2.1 and above. Below that,
      tell the user to contact dev-support@anypointmedia.com.)
+   - App module: core library desugaring (required by the SDK's AAR metadata):
+       compileOptions { isCoreLibraryDesugaringEnabled = true }
+       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+   - From 2.9.32 the default SDK version needs minSdk 24+, compileSdk 35+ and AGP 8.6+. If the
+     project cannot meet them, use {{SDK_VERSION}}-IMA_3_36_0 for EVERY flower-sdk dependency.
    - Allow cleartext HTTP ONLY for prod-reds-device-ad-distributor.ap-northeast-2.elasticbeanstalk.com
      (network_security_config.xml), unless usesCleartextTraffic="true" is already set.
    - Application: FlowerSdk.setEnv("{{ENV}}"); FlowerSdk.init(this) in onCreate(),
