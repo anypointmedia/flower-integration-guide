@@ -88,7 +88,7 @@ SDK는 메인 스레드가 아닌 스레드에서 리스너를 호출하므로, 
 
 | **매개변수** | **유형** | **설명** |
 | ---| ---| --- |
-| reason | Int | 광고가 건너뛰기된 이유를 나타내는 코드<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error |
+| reason | Int | 광고가 건너뛰기된 이유를 나타내는 코드<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error<br/>4: Not Initialized(`FlowerSdk.init` 직후처럼 SDK 초기화가 끝나지 않아 광고 요청을 보내지 않음) |
 
 ## 관련 API
 

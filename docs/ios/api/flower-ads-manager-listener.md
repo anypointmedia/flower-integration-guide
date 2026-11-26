@@ -88,7 +88,7 @@ The following describes the parameters:
 
 | **Parameter** | **Type** | **Description** |
 | ---| ---| --- |
-| reason | Int32 | Code that describes why the ad is skipped.<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error |
+| reason | Int32 | Code that describes why the ad is skipped.<br/>0: Unknown<br/>1: No Ad<br/>2: Timeout<br/>3: Error<br/>4: Not Initialized (the ad request was not sent because the SDK had not finished initializing, e.g. right after `FlowerSdk.doInit()`) |
 
 ## Related APIs
 
