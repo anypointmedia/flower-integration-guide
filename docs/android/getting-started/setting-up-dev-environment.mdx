@@ -61,6 +61,28 @@ The core `sdk-android-ott` artifact is always required. The `sdk-android-ott-med
 If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.2.1), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
 :::
 
+### Version Built with Google IMA SDK 3.36.0 \{#ima-3-36-0-version\}
+
+Starting from version 2.9.32, each release is also published as `X.X.X-IMA_3_36_0`, built with Google IMA SDK 3.36.0. If your app needs Google IMA SDK 3.36.0, use this version instead of the default one. The app requirements are the same as for the default version.
+
+| SDK version | Google IMA SDK |
+| --- | --- |
+| `X.X.X` (default) | 3.35.1 |
+| `X.X.X-IMA_3_36_0` | 3.36.0 |
+
+```plain
+dependencies {
+    implementation("flower-sdk:sdk-android-ott:X.X.X-IMA_3_36_0")
+
+    // Required only when using FlowerMedia3ExoPlayer.
+    implementation("flower-sdk:sdk-android-ott-media3-1.10.1:X.X.X-IMA_3_36_0")
+}
+```
+
+:::caution
+Add the same `-IMA_3_36_0` suffix to every FLOWER SDK dependency, including `sdk-android-ott-media3-*`. If the default version and the suffixed version are mixed, Gradle resolves the default version and Google IMA SDK 3.35.1 is used.
+:::
+
 ## Android Cleartext Traffic Exception Configuration
 When using the FLOWER SDK, a specific domain must be configured as a cleartext traffic exception in order for the SDK to communicate properly over HTTP.
 Starting from Android 9 (API level 28), cleartext (HTTP) traffic is blocked by default.
