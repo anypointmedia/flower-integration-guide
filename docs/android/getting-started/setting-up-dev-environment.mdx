@@ -31,6 +31,22 @@ dependencies {
 If `google()` or `https://jitpack.io` is missing from the repository list, the build fails while resolving the SDK's transitive dependencies. If your project declares repositories in `settings.gradle(.kts)` under `dependencyResolutionManagement`, add them there instead of in the module-level `build.gradle(.kts)`.
 :::
 
+### Core Library Desugaring \{#core-library-desugaring\}
+
+The FLOWER SDK is built with core library desugaring enabled, and its AAR metadata requires your app module to enable it too. Without it, the build fails at `checkDebugAarMetadata`. In Groovy DSL, use `coreLibraryDesugaringEnabled true`.
+
+```plain
+android {
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+```
+
 ### Additional Dependency for Media3 ExoPlayer (FlowerMedia3ExoPlayer) \{#media3-companion-artifact\}
 
 If your app uses Media3 ExoPlayer via [`FlowerMedia3ExoPlayer`](../api/flower-media3-exo-player), you must add a Media3 version-specific companion artifact in addition to the core `sdk-android-ott` dependency.
@@ -59,6 +75,35 @@ The core `sdk-android-ott` artifact is always required. The `sdk-android-ott-med
 
 :::info
 If your project uses an `androidx.media3` version that is not covered by the artifacts listed above (for example, versions below 1.2.1), please contact us at [dev-support@anypointmedia.com](mailto:dev-support@anypointmedia.com).
+:::
+
+### Google IMA SDK Version \{#ima-sdk-version\}
+
+Starting from version 2.9.32, the FLOWER SDK is built with Google IMA SDK 3.40.0. Each release is also published as `X.X.X-IMA_3_36_0`, a backward-compatible version built with Google IMA SDK 3.36.0. If your app cannot meet the requirements of the default version, use the backward-compatible version.
+
+| | `X.X.X` (default) | `X.X.X-IMA_3_36_0` (backward-compatible) |
+| --- | --- | --- |
+| Google IMA SDK | 3.40.0 | 3.36.0 |
+| minSdk | 24 or higher | 21 or higher |
+| compileSdk | 35 or higher | 33 or higher |
+| Android Gradle Plugin | 8.6.0 or higher | 8.0.0 or higher |
+| `androidx.core` | 1.10.0 or higher | No requirement |
+
+:::note
+When using the default version, if your app's `androidx.core` version is lower than 1.10.0, add `androidx.core:core:1.10.0` or higher to your app's dependencies. Otherwise, a release build with R8 can fail with `Missing class androidx.core.app.PendingIntentCompat`.
+:::
+
+```plain
+dependencies {
+    implementation("flower-sdk:sdk-android-ott:X.X.X-IMA_3_36_0")
+
+    // Required only when using FlowerMedia3ExoPlayer.
+    implementation("flower-sdk:sdk-android-ott-media3-1.10.1:X.X.X-IMA_3_36_0")
+}
+```
+
+:::caution
+Add the same `-IMA_3_36_0` suffix to every FLOWER SDK dependency, including `sdk-android-ott-media3-*`. If the default version and the suffixed version are mixed, Gradle resolves the default version and the requirements of the default version apply.
 :::
 
 ## Android Cleartext Traffic Exception Configuration

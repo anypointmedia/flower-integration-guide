@@ -53,6 +53,14 @@ IMPLEMENTATION
    - Repositories: google(), maven("https://maven.anypoint.tv/repository/public-release"),
      maven("https://jitpack.io")
    - implementation("flower-sdk:sdk-android-ott:{{SDK_VERSION}}")
+   - App module: core library desugaring (required by the SDK's AAR metadata):
+       compileOptions { isCoreLibraryDesugaringEnabled = true }
+       coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+   - From 2.9.32 the default SDK version needs minSdk 24+, compileSdk 35+, AGP 8.6.0+ and
+     androidx.core 1.10.0+ (add androidx.core:core:1.10.0 if lower). If the project cannot meet
+     them, use {{SDK_VERSION}}-IMA_3_36_0 (minSdk 21+, compileSdk 33+, AGP 8.0.0+; keep the suffix
+     as is if {{SDK_VERSION}} already has it) for EVERY flower-sdk dependency. If the project cannot
+     meet these either, stop and ask the user before continuing.
    - Allow cleartext HTTP ONLY for prod-reds-device-ad-distributor.ap-northeast-2.elasticbeanstalk.com
      (network_security_config.xml), unless usesCleartextTraffic="true" is already set.
    - Application: FlowerSdk.setEnv("{{ENV}}"); FlowerSdk.init(this) in onCreate(),

@@ -140,7 +140,7 @@ Anypoint Media에서 발급받은 프리롤 광고 태그 URL을 `changeChannelU
 
 `prerollAdTagUrl`이 없으면 기존 리스너를 등록한 상태에서 반환된 URL을 바로 로드해 재생합니다. 스트림 로드를 미루면 프리롤 시작 전에 채널 영상이 보이거나 광고와 채널이 동시에 로딩되는 것을 막을 수 있습니다.
 
-- **이벤트:** 임시 리스너는 `onPrepare()`, 프리롤이 시작될 때 `onPlay()`, 끝날 때 `onCompleted()`를 받습니다. 채널 프리롤에 대해서는 `onAdBreakPrepare()`, `onAdPlay()`, `onAdUserAction()`, `onAdBreakSkipped()`가 전달되지 않습니다.
+- **이벤트:** 임시 리스너는 `onPrepare()`, 프리롤이 시작될 때 `onPlay()`, 끝날 때 `onCompleted()`를 받습니다. 채널 프리롤에 대해서는 `onAdBreakPrepare()`, `onAdPlay()`, `onAdUserAction()`가 전달되지 않습니다. 광고 없이 프리롤을 건너뛰면 `onCompleted()` 전에 `onAdBreakSkipped()`가 전달됩니다.
 - **광고 없음 또는 실패:** 프리롤 응답에 광고가 없거나, 요청이 실패하거나, 재생 중 프리롤이 실패하면 SDK는 `onError()`가 아니라 `onCompleted()`를 보내므로 채널은 평소처럼 시작됩니다. 만일에 대비해 임시 리스너의 `onError()`도 같은 방식으로 처리하세요.
 - **PIP:** 기본값인 `FlowerSdk.setIgnoreAdBreakInPIPMode(true)`에서는 채널 프리롤도 VOD 광고와 마찬가지로 사용자가 앱을 떠나면 일시정지되고 돌아오면 재개됩니다. PIP 진입 여부와 관계없이 이를 `FlowerSdk.notifyUserLeftApp()`으로 알려야 합니다. [PIP 모드 지원](../../getting-started/pip-mode-support)을 참고하세요.
 - **같은 채널에 다시 진입:** 채널 변경이 없으면 프리롤을 생략합니다. 채널 변경 없이 `changeChannelUrl()`을 다시 호출하면 `prerollAdTagUrl`을 전달하더라도 프리롤을 생략하고, 광고가 없는 프리롤과 같은 방식으로 `changeChannelUrl()`이 반환된 직후 `onCompleted()`를 보냅니다. 따라서 앱은 처음 시작할 때와 똑같이 채널을 시작하면 됩니다. `stop()`은 채널 변경으로 보지 않으며, VOD 광고(`requestVodAd`)나 인라인 광고(`requestAd`)를 요청하면 채널 변경으로 봅니다. 예를 들어 A → B → A로 전환하면 A의 프리롤이 다시 재생되고, A → VOD → A도 프리롤이 다시 재생됩니다. 사용자가 플레이어 화면을 나갔다가 같은 채널로 돌아오는 경우에도 마찬가지입니다.

@@ -162,7 +162,7 @@ Dispatched when an ad break is skipped.
 | **Field** | **Type** | **Description** |
 | ---| ---| --- |
 | nativeId | string | The session the event belongs to |
-| reason | number | Code describing why the break was skipped.<br/>`0`: Unknown<br/>`1`: No Ad<br/>`2`: Timeout<br/>`3`: Error |
+| reason | number | Code describing why the break was skipped.<br/>`0`: Unknown<br/>`1`: No Ad<br/>`2`: Timeout<br/>`3`: Error<br/>`4`: Not Initialized (the ad request was not sent because the SDK had not finished initializing, e.g. right after initialization) |
 
 ## Related APIs
 

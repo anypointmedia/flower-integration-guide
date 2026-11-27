@@ -370,7 +370,7 @@ AdEvent is a discriminated union on the `event` field:
     | {event: 'adBreakSkipped'; reason: number}
   )
 
-adBreakSkipped reason codes: 0 Unknown, 1 No Ad, 2 Timeout, 3 Error.
+adBreakSkipped reason codes: 0 Unknown, 1 No Ad, 2 Timeout, 3 Error, 4 Not Initialized.
 adUserAction actions: 'learn_more', 'skip'.
 
 ========================================

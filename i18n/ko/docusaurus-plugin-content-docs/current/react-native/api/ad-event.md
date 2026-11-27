@@ -162,7 +162,7 @@ Flower SDK에서 오류가 발생했을 때 발생합니다.
 | **필드** | **타입** | **설명** |
 | ---| ---| --- |
 | nativeId | string | 이벤트가 속한 세션 |
-| reason | number | 건너뛴 사유 코드<br/>`0`: Unknown<br/>`1`: No Ad<br/>`2`: Timeout<br/>`3`: Error |
+| reason | number | 건너뛴 사유 코드<br/>`0`: Unknown<br/>`1`: No Ad<br/>`2`: Timeout<br/>`3`: Error<br/>`4`: Not Initialized(초기화 직후처럼 SDK 초기화가 끝나지 않아 광고 요청을 보내지 않음) |
 
 ## 관련 API
 
