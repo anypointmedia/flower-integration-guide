@@ -100,10 +100,13 @@ NOTE on app requirements (core library desugaring and the Google IMA SDK version
 - Inspect the project's minSdk, compileSdk and Android Gradle Plugin version. If any of
   them is lower and the user does not want to raise it, use the backward-compatible
   version built with Google IMA SDK 3.36.0 instead: {{SDK_VERSION}}-IMA_3_36_0
-  (requires minSdk 21 or higher and compileSdk 33 or higher).
+  (if {{SDK_VERSION}} already ends with -IMA_3_36_0, use it as is). It requires
+  minSdk 21 or higher, compileSdk 33 or higher and Android Gradle Plugin 8.0.0 or higher.
   Add the same -IMA_3_36_0 suffix to EVERY flower-sdk dependency, including
   sdk-android-ott-media3-*. If the suffixed and default versions are mixed, Gradle
   resolves the default version.
+- If the project cannot meet the backward-compatible version's requirements either,
+  stop and ask the user to raise them. Do not continue until the user answers.
 - Do NOT raise minSdk, compileSdk or the Android Gradle Plugin version without the
   user's consent.
 
