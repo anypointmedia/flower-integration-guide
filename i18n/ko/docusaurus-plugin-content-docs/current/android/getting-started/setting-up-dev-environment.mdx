@@ -79,12 +79,19 @@ dependencies {
 
 ### Google IMA SDK 버전 \{#ima-sdk-version\}
 
-버전 2.9.32부터 FLOWER SDK는 Google IMA SDK 3.40.0으로 빌드하므로 앱이 아래 표의 요구 사항을 충족해야 합니다. 각 릴리즈는 Google IMA SDK 3.36.0으로 빌드한 하위 호환 버전 `X.X.X-IMA_3_36_0`으로도 함께 배포합니다. 앱이 기본 버전의 요구 사항을 충족할 수 없다면 기본 버전 대신 이 버전을 사용하세요.
+버전 2.9.32부터 FLOWER SDK는 Google IMA SDK 3.40.0으로 빌드합니다. 각 릴리즈는 Google IMA SDK 3.36.0으로 빌드한 하위 호환 버전 `X.X.X-IMA_3_36_0`으로도 함께 배포합니다. 앱이 기본 버전의 요구 사항을 충족할 수 없다면 하위 호환 버전을 사용하세요.
 
-| SDK 버전 | Google IMA SDK | 앱 요구 사항 |
+| | `X.X.X` (기본) | `X.X.X-IMA_3_36_0` (하위 호환) |
 | --- | --- | --- |
-| `X.X.X` (기본) | 3.40.0 | minSdk 24 이상, compileSdk 35 이상, Android Gradle Plugin 8.6 이상 |
-| `X.X.X-IMA_3_36_0` | 3.36.0 | 2.9.31 이하와 같음 |
+| Google IMA SDK | 3.40.0 | 3.36.0 |
+| minSdk | 24 이상 | 21 이상 |
+| compileSdk | 35 이상 | 33 이상 |
+| Android Gradle Plugin | 8.6.0 이상 | 요구 사항 없음 |
+| `androidx.core` | 1.10.0 이상 | 요구 사항 없음 |
+
+:::note
+기본 버전을 사용할 때 앱의 `androidx.core` 버전이 1.10.0 미만이면 앱 의존성에 `androidx.core:core:1.10.0` 이상을 추가하세요. 추가하지 않으면 R8을 사용하는 release 빌드가 `Missing class androidx.core.app.PendingIntentCompat` 오류로 실패할 수 있습니다.
+:::
 
 ```plain
 dependencies {
@@ -96,7 +103,7 @@ dependencies {
 ```
 
 :::caution
-`sdk-android-ott-media3-*`를 포함한 모든 FLOWER SDK 의존성에 같은 `-IMA_3_36_0` 접미사를 붙이세요. 기본 버전과 접미사 버전이 섞이면 Gradle이 기본 버전을 선택하여 Google IMA SDK 3.40.0이 사용되고 기본 버전의 요구 사항이 적용됩니다.
+`sdk-android-ott-media3-*`를 포함한 모든 FLOWER SDK 의존성에 같은 `-IMA_3_36_0` 접미사를 붙이세요. 기본 버전과 접미사 버전이 섞이면 Gradle이 기본 버전을 선택하여 기본 버전의 요구 사항이 적용됩니다.
 :::
 
 ## Android Cleartext Traffic 예외 설정

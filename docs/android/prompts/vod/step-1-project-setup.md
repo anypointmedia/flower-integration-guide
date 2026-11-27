@@ -94,10 +94,13 @@ NOTE on app requirements (core library desugaring and the Google IMA SDK version
     Groovy DSL: android { compileOptions { coreLibraryDesugaringEnabled true } }
     dependencies: coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 - From 2.9.32, the default SDK version is built with Google IMA SDK 3.40.0 and requires
-  minSdk 24 or higher, compileSdk 35 or higher and Android Gradle Plugin 8.6 or higher.
+  minSdk 24 or higher, compileSdk 35 or higher and Android Gradle Plugin 8.6.0 or higher.
+  If the app's androidx.core version is lower than 1.10.0, also add
+  androidx.core:core:1.10.0 (or higher) to the app's dependencies.
 - Inspect the project's minSdk, compileSdk and Android Gradle Plugin version. If any of
   them is lower and the user does not want to raise it, use the backward-compatible
-  version built with Google IMA SDK 3.36.0 instead: {{SDK_VERSION}}-IMA_3_36_0.
+  version built with Google IMA SDK 3.36.0 instead: {{SDK_VERSION}}-IMA_3_36_0
+  (requires minSdk 21 or higher and compileSdk 33 or higher).
   Add the same -IMA_3_36_0 suffix to EVERY flower-sdk dependency, including
   sdk-android-ott-media3-*. If the suffixed and default versions are mixed, Gradle
   resolves the default version.
